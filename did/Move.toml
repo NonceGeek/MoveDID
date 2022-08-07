@@ -1,5 +1,5 @@
 [package]
-name = "addr_aggregator"
+name = "did"
 version = "0.0.1"
 
 [addresses]

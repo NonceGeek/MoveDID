@@ -53,7 +53,7 @@ module MyAddr::AddrAggregator {
       let addr_info = AddrInfo{
          addr: addr, 
          chain_name: chain_name,
-         description, description,
+         description: description,
          signature: signature
       };
       Vector::push_back(&mut addr_aggr.addr_infos, addr_info);
@@ -62,5 +62,20 @@ module MyAddr::AddrAggregator {
    // public fun update addr with sig
    // public fun update addr with description and sig
    // public fun delete addr
+
+   /* --- ↓ scripts ↓ --- */
+
+   public(script) fun init_addr_aggregator(account: signer){
+      Self::create_addr_aggregator(&account)
+   }
    
+   public(script) fun add_addr(
+      acct: &signer, 
+      addr: address, 
+      chain_name: vector<u8>, 
+      description: vector<u8>,
+      msg: Option<vector<u8>>,
+      signature: Option<vector<u8>>) acquires AddrAggregator {
+      Self::add_addr(&acct, addr, chain_name, description, msg, signature)
+   }
 }
