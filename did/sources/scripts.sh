@@ -1,4 +1,5 @@
-# deploy
+# set deployer in the config
+# TODO
 dev deploy [path to blob] -s [addr] -b
 dev deploy /Users/cjf/Documents/bc/Web3-dApp-Camp/move-dapp/my-library/release/my_library.v0.0.3.blob -s 0x07ffe973c72356c25e623e2470172a69 -b
 # call function init library
