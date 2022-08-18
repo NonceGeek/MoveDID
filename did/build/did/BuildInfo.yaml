@@ -254,15 +254,15 @@ compiled_package_info:
       name: YieldFarmingV2
     : StarcoinFramework
     ? address: "0x1168e88ffc5cec53b398b42d61885bbb"
-      name: AddrAggregatorV2
+      name: AddrAggregatorV5
     : MyAddr
     ? address: "0x1168e88ffc5cec53b398b42d61885bbb"
-      name: EndpointAggregatorV2
+      name: EndpointAggregatorV5
     : MyAddr
     ? address: "0x1168e88ffc5cec53b398b42d61885bbb"
-      name: EthSigVerifierV2
+      name: EthSigVerifierV5
     : MyAddr
-  source_digest: 07B1F66CCAEAA2C71C0E7042D82177D1631D3635D1D9BD773D23F5961244F4FA
+  source_digest: 3752AD41D0EA103A9C8D6BE010C1F8F03D4E2347C800AE2AE38FE928EA0001C2
   build_flags:
     dev_mode: false
     test_mode: false
