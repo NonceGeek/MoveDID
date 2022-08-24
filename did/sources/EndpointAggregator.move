@@ -31,9 +31,41 @@ module MyAddr::EndpointAggregatorV5 {
         };
       Vector::push_back(&mut endpoint_aggr.endpoints, endpoint_info);
    }
-   // TODO:
+
    // public fun update endpoint with description, url
+   public fun update_endpoint_with_description_and_url(
+      acct: &signer,
+      url: vector<u8>,
+      new_description: vector<u8>,
+      new_url: vector<u8>) {
+      let endpoint_aggr = borrow_global_mut<EndpointAggregator>(Signer::address_of(acct));
+      let length = Vector::length(&mut endpoint_aggr.endpoints);
+      let i = 0;
+      while (i < length) {
+         let endpoint = Vector::borrow_mut<AddrInfo>(&mut endpoint_aggr.endpoints, i);
+         if (endpoint.url == url) {
+            endpoint.url = new_url;
+            endpoint.description = new_description;
+            break
+         }
+         i = i + 1;
+      };
+   }
+
    // public fun delete endpoint
-   
+   public fun delete_endpoint(
+      acct: &signer,  
+      url: vector<u8>) {
+      let endpoint_aggr = borrow_global_mut<EndpointAggregator>(Signer::address_of(acct));
+      let length = Vector::length(&mut endpoint_aggr.endpoints);
+      let i = 0;
+      while (i < length) {
+         let endpoint = Vector::borrow<AddrInfo>(&mut endpoint_aggr.endpoints, i);
+         if (endpoint.url == url) {
+            Vector::remove(&mut endpoint_aggr.endpoints, i);
+         }
+         i = i + 1;
+      };
+   }
    /* --- scripts --- */
 }

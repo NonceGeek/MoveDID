@@ -126,6 +126,7 @@ module MyAddr::AddrAggregator {
             addr_info.description = description;
             break
          }
+         i = i + 1;
       };
    }
 
@@ -141,6 +142,7 @@ module MyAddr::AddrAggregator {
          if (addr_info.addr == addr) {
             Vector::remove(&mut addr_aggr.addr_infos, i);
          }
+         i = i + 1;
       }
    }
 }
