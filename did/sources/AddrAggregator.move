@@ -125,7 +125,7 @@ module MyAddr::AddrAggregator {
             addr_info.signature = signature;
             addr_info.description = description;
             break
-         }
+         };
          i = i + 1;
       };
    }
@@ -141,7 +141,7 @@ module MyAddr::AddrAggregator {
          let addr_info = Vector::borrow(&mut addr_aggr.addr_infos, i);
          if (addr_info.addr == addr) {
             Vector::remove(&mut addr_aggr.addr_infos, i);
-         }
+         };
          i = i + 1;
       }
    }
