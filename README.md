@@ -2,7 +2,7 @@
 This Repo is the DID Solution implementation in MOVE Lang, Demo & SDK.
 The implementation follows the [did@w3c](https://www.w3.org/TR/did-core/)
 
-# Parts
+## Parts
 
 * did
   
