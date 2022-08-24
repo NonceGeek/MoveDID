@@ -6,9 +6,7 @@ module MyAddr::AddrAggregator {
    use StarcoinFramework::BCS;
    use StarcoinFramework::Option::{Self, Option};
    use MyAddr::Utils;
-   #[test_only]
-   use StarcoinFramework::Debug;
-
+   
    struct AddrInfo has store, copy, drop {
       addr: address,
       description: vector<u8>,

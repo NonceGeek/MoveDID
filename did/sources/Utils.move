@@ -1,5 +1,7 @@
 module MyAddr::Utils {
-    use StarcoinFramework::Vector;
+   use StarcoinFramework::Vector;
+   #[test_only]
+   use StarcoinFramework::Debug;
 
     //split string by char 
    public fun split_string_by_char(v: &vector<u8>, ch: u8) :  vector<vector<u8>> {
@@ -17,6 +19,9 @@ module MyAddr::Utils {
          } else {
             Vector::push_back(&mut result, buffer);
             buffer = Vector::empty<u8>();
+            if (i == len - 1) {  // special deal
+               Vector::push_back(&mut result, copy buffer);
+            };
          };
          
          i = i+1; 
@@ -49,20 +54,17 @@ module MyAddr::Utils {
     #[test]
     public fun split_string_by_char_test(){
         let origin = b"a_b_c";
-        Debug::print(&origin);
-        let result = Utils::split_string_by_char(&mut origin, 0x5f); // _ ansci is 0x5f
+        let result = split_string_by_char(&mut origin, 0x5f); // _ ansci is 0x5f
         Debug::print(&result);
         assert!(Vector::length(&mut result) == 3, 101);
 
         let origin = b"a_b_";
-        Debug::print(&origin);
-        let result = Utils::split_string_by_char(&mut origin, 0x5f); // _ ansci is 0x5f
+        let result = split_string_by_char(&mut origin, 0x5f); // _ ansci is 0x5f
         Debug::print(&result);
-        assert!(Vector::length(&mut result) == 2, 101);
+        assert!(Vector::length(&mut result) == 3, 101);
 
         let origin = b"a";
-        Debug::print(&origin);
-        let result = Utils::split_string_by_char(&mut origin, 0x5f); // _ ansci is 0x5f
+        let result = split_string_by_char(&mut origin, 0x5f); // _ ansci is 0x5f
         Debug::print(&result);
         assert!(Vector::length(&mut result) == 1, 101);
     }
