@@ -6,11 +6,12 @@ The implementation follows the [did@w3c](https://www.w3.org/TR/did-core/)
 
 * did
   
+
 the did solution in MOVE Lang.
 
-* nft as vc
+* sbt as vc
 
-An VC impl by NFT
+An VC impl by SBT
 
 * did handler
 
