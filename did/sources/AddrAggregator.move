@@ -105,6 +105,7 @@ module MyAddr::AddrAggregator {
             addr_info.signature = signature;
             break
          }
+         i = i + 1;
       };
    }
 
