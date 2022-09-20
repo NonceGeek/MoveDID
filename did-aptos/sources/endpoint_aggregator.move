@@ -1,4 +1,4 @@
-module my_addr::endpoint_aggregator_v5 {
+module my_addr::endpoint_aggregator {
    use aptos_framework::signer;
    use std::vector;
 
@@ -67,5 +67,4 @@ module my_addr::endpoint_aggregator_v5 {
          i = i + 1;
       };
    }
-   /* --- scripts --- */
 }
