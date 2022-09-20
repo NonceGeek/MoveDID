@@ -1,0 +1,12 @@
+[package]
+name = "did"
+version = "0.0.1"
+
+[addresses]
+my_addr = "0x9520f02c7701a13924603daf354fc391"
+std = "0x1"
+aptos_framework = "0x1"
+
+[dependencies]
+MoveStdlib = { local = "../../aptos-core/aptos-move/framework/move-stdlib" }
+AptosFramework = { local = "../../aptos-core/aptos-move/framework/aptos-framework"}
