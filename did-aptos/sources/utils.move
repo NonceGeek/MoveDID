@@ -17,29 +17,5 @@ module my_addr::utils {
         };
         
         result
-    }
-
-
-
-
-
-   // vector<u8> transfter to timestamp 
-   public fun vec_to_timestamp(timestamp_vec: vector<u8>): u64{
-         let prev_time  = 0;
-         let prev_time_length = vector::length(&timestamp_vec);
-         if (prev_time_length != 10) {
-            abort 1002
-         };
-         let i=0;
-         while (i < prev_time_length) {
-            let char = vector::borrow(&mut timestamp_vec, i);
-            if (*char >= 48 && *char <= 57) {
-               prev_time = prev_time*10 + ((*char - 48) as u64);
-            };
-            i = i+1;
-         };
-         prev_time
-   }
-
- 
+    } 
 }
