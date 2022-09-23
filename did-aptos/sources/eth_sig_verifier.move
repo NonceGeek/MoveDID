@@ -19,6 +19,7 @@ module my_addr::eth_sig_verifier {
         while (i < 32) {
             let v  = vector::borrow(&data, i);
             vector::push_back(&mut result, *v);
+            i=i+1
         };
       
         result
