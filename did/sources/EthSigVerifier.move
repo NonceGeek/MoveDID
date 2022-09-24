@@ -9,7 +9,7 @@ module MyAddr::EthSigVerifierV5 {
       // --- ecrecover(hash: vector<u8>, signature: vector<u8>)      // cond2 = (addr1 == addr2)
       // 0x02 assert(addr == ecrecover)
 
-      let receover_address_opt:Option<EVMAddress>  = Signature::ecrecover(message, signature);
+      let receover_address_opt:Option<EVMAddress>  = Signature::ecrecover(message, signature); //Todo: receover_address_opt maybe empty 
       let expect_address =  EVMAddress::new(addr);
       &Option::destroy_some<EVMAddress>(receover_address_opt) == &expect_address
    }

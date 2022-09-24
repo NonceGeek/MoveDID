@@ -51,6 +51,24 @@ module MyAddr::Utils {
          prev_time
    }
 
+   public fun u64_to_vec_u8(val : u64) : vector<u8> {
+        let result = Vector::empty<u8>();
+        
+        while(val > 0) {
+            let d  = val / 256;
+            if (d > 0) {
+                Vector::push_back(&mut result, (d as u8));
+            } else {
+                let m = val % 256;
+                Vector::push_back(&mut result, (m as u8));
+                break
+            };
+            val = val / 256;
+        };
+        
+        result
+    } 
+
     #[test]
     public fun split_string_by_char_test(){
         let origin = b"a_b_c";
