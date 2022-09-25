@@ -3,9 +3,7 @@ module MyAddr::AddrAggregator {
    use StarcoinFramework::Signer;
    use StarcoinFramework::Timestamp;
    use StarcoinFramework::Block;
-   // use StarcoinFramework::Signature;
-   // use StarcoinFramework::BCS;
-   // use StarcoinFramework::Option::{Self, Option};
+   use StarcoinFramework::Hash;
    use MyAddr::Utils;
    use MyAddr::EthSigVerifierV5;
    
@@ -92,8 +90,8 @@ module MyAddr::AddrAggregator {
             };
 
             // verify the signature for the msg 
-            // let addr_byte =BCS::to_bytes<address>(&addr);
-            if (!EthSigVerifierV5::verify_eth_sig(copy signature, addr, *&addr_info.msg)) {
+            let msg_hash = Hash::keccak_256(*&addr_info.msg); //kecacak256 hash 
+            if (!EthSigVerifierV5::verify_eth_sig(copy signature, addr, msg_hash)) {
                abort 1002
             };
             

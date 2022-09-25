@@ -38,7 +38,7 @@ module MyAddr::Utils {
          let prev_time  = 0;
          let prev_time_length = Vector::length(&timestamp_vec);
          if (prev_time_length != 10) {
-            abort 1002
+            abort 2001
          };
          let i=0;
          while (i < prev_time_length) {
