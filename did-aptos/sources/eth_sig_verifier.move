@@ -5,12 +5,12 @@ module my_addr::eth_sig_verifier {
     use std::vector;
 
     fun pubkey_to_address(pk_bytes : vector<u8>) : vector<u8>{
-
-        if (vector::length(&pk_bytes) != 33) {
+        if (vector::length(&pk_bytes) != 33 || (vector::length(&pk_bytes)-2) % 32 != 0) {
+            // common_pubkey_length: length(pk_bytes + 0x00) must be 33.
+            // multi_pubkey_length: length(pk_bytes - k - 0x01) % 32 must be 0.
             abort 1003
         };
-       
-    //   let data[]
+
         vector::remove(&mut pk_bytes, 0); //
         let data = aptos_hash::keccak256(pk_bytes);
         let result = vector::empty<u8>();
@@ -21,7 +21,7 @@ module my_addr::eth_sig_verifier {
             vector::push_back(&mut result, *v);
             i=i+1
         };
-      
+
         result
     }
 
