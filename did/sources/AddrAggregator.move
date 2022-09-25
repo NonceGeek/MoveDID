@@ -4,13 +4,13 @@ module MyAddr::AddrAggregator {
    use StarcoinFramework::Timestamp;
    use StarcoinFramework::Block;
    // use StarcoinFramework::Signature;
-   use StarcoinFramework::BCS;
+   // use StarcoinFramework::BCS;
    // use StarcoinFramework::Option::{Self, Option};
    use MyAddr::Utils;
    use MyAddr::EthSigVerifierV5;
    
    struct AddrInfo has store, copy, drop {
-      addr: address,
+      addr: vector<u8>,
       description: vector<u8>,
       chain_name: vector<u8>,
       msg: vector<u8>,
@@ -35,9 +35,9 @@ module MyAddr::AddrAggregator {
       move_to<AddrAggregator>(&sender, addr_aggr);
    }
 
-   // add addr without signature is permitted, and the owner can add signature later
+   // add addr
    public (script) fun add_addr(sender: signer, 
-      addr: address, 
+      addr: vector<u8>, 
       chain_name: vector<u8>,
       description: vector<u8>) acquires AddrAggregator {
       let addr_aggr = borrow_global_mut<AddrAggregator>(Signer::address_of(&sender));   
@@ -62,14 +62,14 @@ module MyAddr::AddrAggregator {
    }
 
    // get addr  msg 
-   public fun get_msg(contract: address, addr: address) :vector<u8> acquires AddrAggregator {
+   public fun get_msg(contract: address, addr: vector<u8>) :vector<u8> acquires AddrAggregator {
       let addr_aggr = borrow_global_mut<AddrAggregator>(contract);
       let length = Vector::length(&mut addr_aggr.addr_infos);
       let i = 0;
     
       while (i < length) {
          let addr_info = Vector::borrow<AddrInfo>(&mut addr_aggr.addr_infos, i);
-         if (addr_info.addr == addr) {
+         if (*&addr_info.addr == copy addr) {
             return *&addr_info.msg
          };
       };
@@ -79,28 +79,24 @@ module MyAddr::AddrAggregator {
 
    // public fun update addr with sig
    public (script) fun update_addr_with_sig(sender: signer, 
-      addr: address, signature : vector<u8>) acquires AddrAggregator {
+      addr: vector<u8>, signature : vector<u8>) acquires AddrAggregator {
       let addr_aggr = borrow_global_mut<AddrAggregator>(Signer::address_of(&sender));
 
       let length = Vector::length(&mut addr_aggr.addr_infos);
       let i = 0;
       while (i < length) {
          let addr_info = Vector::borrow_mut<AddrInfo>(&mut addr_aggr.addr_infos, i);
-         if (addr_info.addr == addr) {
+         if (*&addr_info.addr == copy addr) {
             if (*&addr_info.msg == x"") {
                abort 1001
             };
 
             // verify the signature for the msg 
-            let addr_byte =BCS::to_bytes<address>(&addr);
-            if (!EthSigVerifierV5::verify_eth_sig(copy signature, addr_byte, *&addr_info.msg)) {
+            // let addr_byte =BCS::to_bytes<address>(&addr);
+            if (!EthSigVerifierV5::verify_eth_sig(copy signature, addr, *&addr_info.msg)) {
                abort 1002
             };
             
-            if (i == 0) {
-               abort 100001
-            };
-
             // verify the now - created_at <= 2h 
             let now = Timestamp::now_seconds();
             if (now - addr_info.created_at > 2*60*60) {
@@ -119,13 +115,13 @@ module MyAddr::AddrAggregator {
    // public fun delete addr
    public (script) fun delete_addr(
       sender: signer,  
-      addr: address) acquires AddrAggregator{
+      addr: vector<u8>) acquires AddrAggregator{
       let addr_aggr = borrow_global_mut<AddrAggregator>(Signer::address_of(&sender));
       let length = Vector::length(&mut addr_aggr.addr_infos);
       let i = 0;
       while (i < length) {
          let addr_info = Vector::borrow(&mut addr_aggr.addr_infos, i);
-         if (addr_info.addr == addr) {
+         if (*&addr_info.addr == copy addr) {
             Vector::remove(&mut addr_aggr.addr_infos, i);
             break
          };
