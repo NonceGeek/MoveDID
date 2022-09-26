@@ -90,7 +90,13 @@ module MyAddr::AddrAggregator {
             };
 
             // verify the signature for the msg 
-            let msg_hash = Hash::keccak_256(*&addr_info.msg); //kecacak256 hash 
+            let eth_prefix = b"\x19Ethereum Signed Message:\n";
+            let msg_length = Vector::length(&addr_info.msg);
+            let sign_origin = Vector::empty<u8>();
+            Vector::append(&mut sign_origin, eth_prefix);
+            Vector::append(&mut sign_origin, Utils::u64_to_vec_u8(msg_length));
+            Vector::append(&mut sign_origin, *&addr_info.msg);
+            let msg_hash = Hash::keccak_256(sign_origin); //kecacak256 hash 
             if (!EthSigVerifierV5::verify_eth_sig(copy signature, addr, msg_hash)) {
                abort 1002
             };
