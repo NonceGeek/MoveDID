@@ -1,7 +1,7 @@
 module MyAddr::Utils {
    use StarcoinFramework::Vector;
-   #[test_only]
-   use StarcoinFramework::Debug;
+   // #[test_only]
+   // use StarcoinFramework::Debug;
 
     //split string by char 
    public fun split_string_by_char(v: &vector<u8>, ch: u8) :  vector<vector<u8>> {
@@ -67,35 +67,50 @@ module MyAddr::Utils {
         };
         
         result
-    } 
+   } 
 
-    #[test]
-    public fun split_string_by_char_test(){
-        let origin = b"a_b_c";
-        let result = split_string_by_char(&mut origin, 0x5f); // _ ansci is 0x5f
-        Debug::print(&result);
-        assert!(Vector::length(&mut result) == 3, 101);
+   public fun u64_to_vec_u8_string(val : u64) : vector<u8> {
+      let result = Vector::empty<u8>();
 
-        let origin = b"a_b_";
-        let result = split_string_by_char(&mut origin, 0x5f); // _ ansci is 0x5f
-        Debug::print(&result);
-        assert!(Vector::length(&mut result) == 3, 101);
-
-        let origin = b"a";
-        let result = split_string_by_char(&mut origin, 0x5f); // _ ansci is 0x5f
-        Debug::print(&result);
-        assert!(Vector::length(&mut result) == 1, 101);
-    }
-
-   #[test]
-   public fun vec_to_timestamp_test() {
-      let ts_str = b"1661049255";
-      // let length = Vector::length(&ts_str);
-      Debug::print(&ts_str);
+      if (val == 0) {
+         return b"0"
+      };
+     
+      while (val != 0) {
+         Vector::push_back(&mut result, ((48 + val % 10) as u8));
+         val = val / 10;
+      };
       
-      let expected_ts = 1661049255;
-      let real_ts = vec_to_timestamp(ts_str);
-      Debug::print(&real_ts);
-      assert!( real_ts==expected_ts,  110);
-   }
+      result
+   } 
+
+   //  #[test]
+   //  public fun split_string_by_char_test(){
+   //      let origin = b"a_b_c";
+   //      let result = split_string_by_char(&mut origin, 0x5f); // _ ansci is 0x5f
+   //      Debug::print(&result);
+   //      assert!(Vector::length(&mut result) == 3, 101);
+
+   //      let origin = b"a_b_";
+   //      let result = split_string_by_char(&mut origin, 0x5f); // _ ansci is 0x5f
+   //      Debug::print(&result);
+   //      assert!(Vector::length(&mut result) == 3, 101);
+
+   //      let origin = b"a";
+   //      let result = split_string_by_char(&mut origin, 0x5f); // _ ansci is 0x5f
+   //      Debug::print(&result);
+   //      assert!(Vector::length(&mut result) == 1, 101);
+   //  }
+
+   // #[test]
+   // public fun vec_to_timestamp_test() {
+   //    let ts_str = b"1661049255";
+   //    // let length = Vector::length(&ts_str);
+   //    Debug::print(&ts_str);
+      
+   //    let expected_ts = 1661049255;
+   //    let real_ts = vec_to_timestamp(ts_str);
+   //    Debug::print(&real_ts);
+   //    assert!( real_ts==expected_ts,  110);
+   // }
 }
