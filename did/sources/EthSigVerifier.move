@@ -1,4 +1,4 @@
-module MyAddr::EthSigVerifierV5 {
+module MyAddr::EthSigVerifier {
    use StarcoinFramework::Signature; 
    use StarcoinFramework::EVMAddress::{Self, EVMAddress};
    use StarcoinFramework::Option::{Self, Option};
