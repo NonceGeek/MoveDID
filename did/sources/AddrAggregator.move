@@ -42,7 +42,10 @@ module MyAddr::AddrAggregator {
       let id = addr_aggr.max_id + 1;
       
       let height = Block::get_current_block_number();
-      let msg = Utils::u64_to_vec_u8(height);
+      let msg = Utils::u64_to_vec_u8_string(height);
+      let msg_suffix = b".nonce_geek";
+      Vector::append(&mut msg, msg_suffix);
+
       let now = Timestamp::now_seconds();
          
       let addr_info = AddrInfo{
@@ -94,7 +97,7 @@ module MyAddr::AddrAggregator {
             let msg_length = Vector::length(&addr_info.msg);
             let sign_origin = Vector::empty<u8>();
             Vector::append(&mut sign_origin, eth_prefix);
-            Vector::append(&mut sign_origin, Utils::u64_to_vec_u8(msg_length));
+            Vector::append(&mut sign_origin, Utils::u64_to_vec_u8_string(msg_length));
             Vector::append(&mut sign_origin, *&addr_info.msg);
             let msg_hash = Hash::keccak_256(sign_origin); //kecacak256 hash 
             if (!EthSigVerifierV5::verify_eth_sig(copy signature, addr, msg_hash)) {

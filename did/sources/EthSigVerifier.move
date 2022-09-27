@@ -1,11 +1,15 @@
 module MyAddr::EthSigVerifierV5 {
-   use StarcoinFramework::Signature;
+   use StarcoinFramework::Signature; 
    use StarcoinFramework::EVMAddress::{Self, EVMAddress};
    use StarcoinFramework::Option::{Self, Option};
    #[test_only]
    use StarcoinFramework::Debug;
    #[test_only]
    use StarcoinFramework::Hash;
+   #[test_only]
+   use MyAddr::Utils;
+   #[test_only]
+   use StarcoinFramework::Vector; 
 
 
    public fun verify_eth_sig(signature: vector<u8>, addr: vector<u8>, msg_hash: vector<u8>) : bool{
@@ -24,10 +28,18 @@ module MyAddr::EthSigVerifierV5 {
       // let msg_hash = x"b453bd4e271eed985cbab8231da609c4ce0a9cf1f763b6c1594e76315510e0f1";
       // let address_bytes = x"29c76e6ad8f28bb1004902578fb108c507be341b";
 
-      let v = x"04";
-      let msg_hash = Hash::keccak_256(v);
+      let msg = b"0a.nonce_geek";
+      let eth_prefix = b"\x19Ethereum Signed Message:\n";
+      let msg_length = Vector::length(&msg);
+      let sign_origin = Vector::empty<u8>();
+      
+      Vector::append(&mut sign_origin, eth_prefix);
+      Vector::append(&mut sign_origin, Utils::u64_to_vec_u8_string(msg_length));
+      Vector::append(&mut sign_origin, msg);
+      let msg_hash = Hash::keccak_256(copy sign_origin); 
+      Debug::print(&sign_origin);
       Debug::print(&msg_hash);
-      let signature = x"e02fcfd6e2f9d7a1aa6b12cef95bb6e5013b14dc584e080034b09f902fd87d8b4e46d83462ae957f8db86f50aac61dde24261befd1c11780adc8e0d5ee4e34971c";
+      let signature = x"6f90301664e3cfda973d4d56067289110a08feb0eca78cc1598a8b992ba9d80f2f77bfe7673c16ec49b81955cf6e1d900aa6fc371bc075a98e8d588fe165c2e61b";
       let address_bytes = x"14791697260e4c9a71f18484c9f997b308e59325";
       
       assert!(verify_eth_sig(signature, address_bytes, msg_hash), 101);
