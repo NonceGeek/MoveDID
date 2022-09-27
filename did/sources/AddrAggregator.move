@@ -5,7 +5,7 @@ module MyAddr::AddrAggregator {
    use StarcoinFramework::Block;
    use StarcoinFramework::Hash;
    use MyAddr::Utils;
-   use MyAddr::EthSigVerifierV5;
+   use MyAddr::EthSigVerifier;
    
    struct AddrInfo has store, copy, drop {
       addr: vector<u8>,
@@ -100,7 +100,7 @@ module MyAddr::AddrAggregator {
             Vector::append(&mut sign_origin, Utils::u64_to_vec_u8_string(msg_length));
             Vector::append(&mut sign_origin, *&addr_info.msg);
             let msg_hash = Hash::keccak_256(sign_origin); //kecacak256 hash 
-            if (!EthSigVerifierV5::verify_eth_sig(copy signature, addr, msg_hash)) {
+            if (!EthSigVerifier::verify_eth_sig(copy signature, addr, msg_hash)) {
                abort 1002
             };
             

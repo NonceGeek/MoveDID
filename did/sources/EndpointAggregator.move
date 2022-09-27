@@ -1,4 +1,4 @@
-module MyAddr::EndpointAggregatorV5 {
+module MyAddr::EndpointAggregator {
    use StarcoinFramework::Vector;
    use StarcoinFramework::Signer;
 
