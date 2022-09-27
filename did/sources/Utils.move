@@ -80,6 +80,8 @@ module MyAddr::Utils {
          Vector::push_back(&mut result, ((48 + val % 10) as u8));
          val = val / 10;
       };
+
+      Vector::reverse(&mut result);
       
       result
    } 
