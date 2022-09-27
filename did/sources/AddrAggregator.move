@@ -73,6 +73,7 @@ module MyAddr::AddrAggregator {
          if (*&addr_info.addr == copy addr) {
             return *&addr_info.msg
          };
+         i = i + 1;
       };
 
       return x""
