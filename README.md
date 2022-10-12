@@ -12,10 +12,11 @@ The did solution in MOVE Lang.
   * [ ] starcoin
   * [ ] sui
 
-* sbt as vc
 
-An VC impl by SBT
+* SBT as Verifiable Credentail
+
+The VC implementation by SBT.
 
 * did handler
 
-the sdk for did & vc impl by Elixir.
+The sdk for did & vc impl by Elixir.
