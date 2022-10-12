@@ -5,7 +5,12 @@ module MyAddr::AddrAggregator {
    use StarcoinFramework::Block;
    use StarcoinFramework::Hash;
    use MyAddr::Utils;
-   use MyAddr::EthSigVerifier;
+   use MyAddr::EthSigVerifierV5;
+
+   //err enum
+   const ERR_ADDR_INFO_MSG_EMPTY: u64 = 1001;
+   const ERR_SIGNATURE_VERIFY_FAIL: u64 = 1002;
+   const ERR_TIMESTAMP_EXCEED: u64 = 1003;
    
    struct AddrInfo has store, copy, drop {
       addr: vector<u8>,
@@ -89,9 +94,7 @@ module MyAddr::AddrAggregator {
       while (i < length) {
          let addr_info = Vector::borrow_mut<AddrInfo>(&mut addr_aggr.addr_infos, i);
          if (*&addr_info.addr == copy addr) {
-            if (*&addr_info.msg == x"") {
-               abort 1001
-            };
+            assert!(*&addr_info.msg != x"", ERR_ADDR_INFO_MSG_EMPTY);
 
             // verify the signature for the msg 
             let eth_prefix = b"\x19Ethereum Signed Message:\n";
@@ -101,15 +104,11 @@ module MyAddr::AddrAggregator {
             Vector::append(&mut sign_origin, Utils::u64_to_vec_u8_string(msg_length));
             Vector::append(&mut sign_origin, *&addr_info.msg);
             let msg_hash = Hash::keccak_256(sign_origin); //kecacak256 hash 
-            if (!EthSigVerifier::verify_eth_sig(copy signature, addr, msg_hash)) {
-               abort 1002
-            };
+            assert!(EthSigVerifierV5::verify_eth_sig(copy signature, addr, msg_hash), ERR_SIGNATURE_VERIFY_FAIL);
             
             // verify the now - created_at <= 2h 
             let now = Timestamp::now_seconds();
-            if (now - addr_info.created_at > 2*60*60) {
-               abort 1003
-            };
+            assert!(now - addr_info.created_at <= 2*60*60, ERR_TIMESTAMP_EXCEED);
 
             // update signature, updated_at 
             addr_info.signature = signature;
