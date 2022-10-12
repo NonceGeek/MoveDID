@@ -4,7 +4,7 @@ The implementation follows the [did@w3c](https://www.w3.org/TR/did-core/)
 
 ## Parts
 
-* did contracts
+* did contracts:
   The did contracts in MOVE Lang.
 
   * [ ] aptos
