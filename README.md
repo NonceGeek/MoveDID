@@ -5,6 +5,7 @@ The implementation follows the [did@w3c](https://www.w3.org/TR/did-core/)
 ## Parts
 
 * did
+
 The did solution in MOVE Lang.
   * [ ] aptos
   * [ ] starcoin
