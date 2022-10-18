@@ -21,8 +21,8 @@ The implementation follows the [did@w3c](https://www.w3.org/TR/did-core/)
 
 * did sdks
 
-  The sdks for did & vc impl by Elixir/Javascript
+  The sdks for did & vc impl by Elixir/Javascript.
   
 * did dApp example
   
-  The dApp example show how the contract works
+  The dApp example show how the contract works.
