@@ -1,4 +1,8 @@
-# DID Solution in Move
+# MoveDID
+see docs in:
+
+> https://did.noncegeek.com
+
 DID protocol compatible with Aptos/Sui/Starcoin, including Contracts,Demo & SDK.
 The implementation follows the [did@w3c](https://www.w3.org/TR/did-core/)
 
