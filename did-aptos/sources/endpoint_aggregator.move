@@ -1,10 +1,11 @@
 module my_addr::endpoint_aggregator {
    use aptos_framework::signer;
    use std::vector;
+   use std::string::{String};
 
    struct Endpoint has store, copy, drop {
-      url: vector<u8>,
-      description: vector<u8>
+      url: String,
+      description: String
    }
 
    struct EndpointAggregator has key {
@@ -12,7 +13,7 @@ module my_addr::endpoint_aggregator {
       endpoints: vector<Endpoint>
    }
 
-   public fun create_endpoint_aggregator(acct: &signer){
+   public entry fun create_endpoint_aggregator(acct: &signer){
       let endpoint_aggr =  EndpointAggregator{
          key_addr: signer::address_of(acct),
          endpoints: vector::empty<Endpoint>()
@@ -20,10 +21,10 @@ module my_addr::endpoint_aggregator {
       move_to<EndpointAggregator>(acct, endpoint_aggr);
    }
 
-   public fun add_endpoint(
+   public entry fun add_endpoint(
       acct: &signer, 
-      url: vector<u8>, 
-      description: vector<u8>) acquires EndpointAggregator{
+      url: String, 
+      description: String) acquires EndpointAggregator{
         let endpoint_aggr = borrow_global_mut<EndpointAggregator>(signer::address_of(acct));
         let endpoint_info = Endpoint{
             url: url, 
@@ -32,18 +33,18 @@ module my_addr::endpoint_aggregator {
       vector::push_back(&mut endpoint_aggr.endpoints, endpoint_info);
    }
 
-   // public fun update endpoint with description, url
-   public fun update_endpoint_with_description_and_url(
+   // public entry fun update endpoint with description, url
+   public entry fun update_endpoint_with_description_and_url(
       acct: &signer,
-      url: vector<u8>,
-      new_description: vector<u8>,
-      new_url: vector<u8>) acquires EndpointAggregator {
+      url: String,
+      new_description: String,
+      new_url: String) acquires EndpointAggregator {
       let endpoint_aggr = borrow_global_mut<EndpointAggregator>(signer::address_of(acct));
       let length = vector::length(&mut endpoint_aggr.endpoints);
       let i = 0;
       while (i < length) {
          let endpoint = vector::borrow_mut<Endpoint>(&mut endpoint_aggr.endpoints, i);
-         if (*&endpoint.url == *&url) {
+         if (endpoint.url == url) {
             endpoint.url = new_url;
             endpoint.description = new_description;
             break
@@ -52,17 +53,18 @@ module my_addr::endpoint_aggregator {
       };
    }
 
-   // public fun delete endpoint
-   public fun delete_endpoint(
+   // public entry fun delete endpoint
+   public entry fun delete_endpoint(
       acct: &signer,  
-      url: vector<u8>) acquires EndpointAggregator {
+      url: String) acquires EndpointAggregator {
       let endpoint_aggr = borrow_global_mut<EndpointAggregator>(signer::address_of(acct));
       let length = vector::length(&mut endpoint_aggr.endpoints);
       let i = 0;
       while (i < length) {
          let endpoint = vector::borrow(&mut endpoint_aggr.endpoints, i);
-         if (*&endpoint.url == *&url) {
+         if (endpoint.url == url) {
             vector::remove(&mut endpoint_aggr.endpoints, i);
+            break
          };
          i = i + 1;
       };

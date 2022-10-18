@@ -78,7 +78,7 @@ module my_addr::addr_aggregator {
       let now = timestamp::now_seconds();
          
       let addr_info = AddrInfo{
-         addr: addr, 
+         addr: addr,
          chain_name: chain_name,
          description: description,
          signature: b"",
