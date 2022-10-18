@@ -1,0 +1,9 @@
+[package]
+name = "LootLikedNFT"
+version = "0.0.1"
+
+[addresses]
+loot_liked_nft = "_"
+
+[dependencies]
+AptosFramework = { local = "../../framework/aptos-framework" }
