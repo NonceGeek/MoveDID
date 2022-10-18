@@ -1,18 +1,20 @@
 # DID Solution in Move
-This Repo is the DID Solution implementation in MOVE Lang, Demo & SDK.
+DID protocol compatible with Aptos/Sui/Starcoin, including Contracts,Demo & SDK.
 The implementation follows the [did@w3c](https://www.w3.org/TR/did-core/)
 
 ## Parts
 
-* did
-  
+* did contracts:
+  The did contracts in MOVE Lang.
 
-the did solution in MOVE Lang.
+  * [ ] aptos
+  * [ ] starcoin
+  * [ ] sui
 
-* sbt as vc
+* SBT as Verifiable Credential
 
-An VC impl by SBT
+  The VC implementation by SBT.
 
 * did handler
 
-the sdk for did & vc impl by Elixir.
+  The sdk for did & vc impl by Elixir.
