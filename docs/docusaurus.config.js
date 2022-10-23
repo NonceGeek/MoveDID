@@ -18,7 +18,7 @@ const config = {
   baseUrl: "/",
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "throw",
-  favicon: "img/favicon.ico",
+  favicon: "img/move-did.png",
   organizationName: "noncegeek", // Usually your GitHub org/user name.
   projectName: "move-did", // Usually your repo name.
 
@@ -77,8 +77,8 @@ const config = {
       navbar: {
         logo: {
           alt: "Aptos Labs Logo",
-          src: "img/aptos_word.svg",
-          srcDark: "img/aptos_word_dark.svg",
+          src: "img/move-did.png",
+          srcDark: "img/move-did-dark.png",
         },
         items: [
           {
@@ -89,8 +89,13 @@ const config = {
           {
             position: "left",
             type: "doc",
-            docId: "aptos-white-paper/index",
+            docId: "move-did-white-paper/index",
             label: "Move DID White Paper",
+          },
+          {
+            href: "https://awesome-move.gigalixirapp.com/",
+            label: "Awesome Free Move Tools",
+            position: "left",
           },
         ],
       },
@@ -103,7 +108,7 @@ const config = {
               {
                 html: `
                   <a class="social-link" href="https://aptoslabs.com" target="_blank" rel="noopener noreferrer" title="Git">
-                     <img class="logo" src="/img/aptos_word_dark.svg" alt="Aptos Logo" />
+                     <img class="logo" src="/img/move-did-dark.png" alt="Move-DID Logo" />
                   </a>
                 `,
               },
@@ -132,7 +137,7 @@ const config = {
                 html: `
                   <p class="right">
                     <nav class="social-links">
-                        <a class="social-link" href="https://github.com/aptoslabs" target="_blank" rel="noopener noreferrer" title="Git">
+                        <a class="social-link" href="https://github.com/noncegeek/MoveDID" target="_blank" rel="noopener noreferrer" title="Git">
                          <img class="icon" src="/img/socials/git.svg" alt="Git Icon" />
                         </a>
                         <a class="social-link" href="https://discord.gg/aptoslabs" target="_blank" rel="noopener noreferrer" title="Discord">
@@ -169,104 +174,6 @@ const config = {
       },
     }),
   plugins: [
-    [
-      "@docusaurus/plugin-client-redirects",
-      {
-        redirects: [
-          {
-            to: "/nodes/full-node/public-fullnode",
-            from: "/nodes/full-node/fullnode-for-devnet",
-          },
-          {
-            to: "/nodes/full-node/public-fullnode",
-            from: "/tutorials/run-a-fullnode",
-          },
-          {
-            to: "/nodes/aptos-deployments",
-            from: "/tutorials/local-testnet-devnet-and-incentivized-testnet",
-          },
-          {
-            to: "/nodes/full-node/run-a-fullnode-on-gcp",
-            from: "/tutorials/run-a-fullnode-on-gcp",
-          },
-          {
-            to: "/nodes/validator-node/validators",
-            from: [
-              "/tutorials/validator-node/run-validator-node-using-gcp",
-              "/tutorials/validator-node/run-validator-node-using-aws",
-              "/tutorials/validator-node/run-validator-node-using-azure",
-              "/tutorials/validator-node/run-validator-node-using-docker",
-              "/tutorials/validator-node/run-validator-node-using-source",
-            ],
-          },
-          {
-            to: "/concepts/aptos-concepts",
-            from: [
-              "/basics/basics-txns-states",
-              "/basics/basics-accounts",
-              "/basics/basics-events",
-              "/basics/basics-gas-txn-fee",
-              "/basics/basics-merkle-proof",
-              "/basics/basics-fullnodes",
-              "/basics/basics-validator-nodes",
-              "/basics/basics-node-networks-sync",
-            ],
-          },
-          {
-            to: "/nodes/local-testnet/run-a-local-testnet",
-            from: "/nodes/run-a-local-testnet",
-          },
-          {
-            to: "/concepts/staking",
-            from: "/nodes/staking",
-          },
-          {
-            to: "/tutorials/your-first-nft",
-            from: "/tutorials/your-first-nft-sdk",
-          },
-          {
-            to: "/tutorials/your-first-transaction",
-            from: "/tutorials/your-first-transaction-sdk",
-          },
-          {
-            to: "/tutorials/first-move-module",
-            from: "/tutorials/first-move-module-cli",
-          },
-          {
-            to: "/sdks/ts-sdk/index",
-            from: "/sdks/typescript-sdk",
-          },
-          {
-            to: "/guides/getting-started",
-            from: "/aptos-developer-resources",
-          },
-          {
-            to: "/concepts/basics-txns-states",
-            from: "/concepts/basics-merkle-proof",
-          },
-          {
-            to: "/nodes/validator-node/operator/connect-to-aptos-network",
-            from: "/nodes/ait/connect-to-testnet",
-          },
-          {
-            to: "/nodes/validator-node/operator/node-requirements",
-            from: "/nodes/ait/node-requirements",
-          },
-          {
-            to: "/nodes/validator-node/operator/node-liveness-criteria",
-            from: "/nodes/ait/node-liveness-criteria",
-          },
-          {
-            to: "/issues-and-workarounds",
-            from: "/nodes/full-node/troubleshooting-fullnode-setup",
-          },
-          {
-            to: "/guides/state-sync",
-            from: "/concepts/state-sync",
-          },
-        ],
-      },
-    ],
   ],
 };
 
