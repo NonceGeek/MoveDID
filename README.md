@@ -19,6 +19,10 @@ The implementation follows the [did@w3c](https://www.w3.org/TR/did-core/)
 
   The VC implementation by SBT.
 
-* did handler
+* did sdks
 
-  The sdk for did & vc impl by Elixir.
+  The sdks for did & vc impl by Elixir/Javascript.
+  
+* did dApp example
+  
+  The dApp example show how the contract works.
