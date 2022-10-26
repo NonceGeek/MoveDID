@@ -1,0 +1,13 @@
+[package]
+name = "my_addr"
+version = "0.0.1"
+
+[addresses]
+my_addr = "0x0"
+Std = "0x01"
+
+[dependencies]
+#MoveStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", subdir="aptos-move/framework/move-stdlib/", rev="aptos-cli-v0.3.4" }
+#Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework", rev = "8e033f9fd7cfd55d73cd4827926a4d43b7008c1d" }
+#Sui = { local = "/Users/sky/workplace/block/sui/sui/crates/sui-framework" }
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework", rev = "devnet" }
