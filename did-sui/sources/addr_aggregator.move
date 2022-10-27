@@ -42,6 +42,16 @@ module my_addr::addr_aggregator {
 
    // init
    public entry fun create_addr_aggregator(ctx: &mut TxContext) {
+<<<<<<< HEAD
+=======
+      // let addr_aggr =  AddrAggregator{
+      //    key_addr: signer::address_of(acct),
+      //    addr_infos: vector::empty<AddrInfo>(),
+      //    max_id : 0
+      // };
+      // move_to<AddrAggregator>(acct, addr_aggr);
+
+>>>>>>> 797fc23fadea0bd28d27c1ba35ad1e7023a4adba
       transfer::share_object(AddrAggregator {
          id: object::new(ctx),
          key_addr: tx_context::sender(ctx),
