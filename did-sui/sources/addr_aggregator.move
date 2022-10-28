@@ -4,6 +4,7 @@ module my_addr::addr_aggregator {
    use sui::tx_context::{Self, TxContext};
    use std::string::{Self, String};
    use std::vector;
+   use my_addr::utils;
 
    //addr type enum
    const ADDR_TYPE_ETH: u64 = 1;
@@ -21,7 +22,7 @@ module my_addr::addr_aggregator {
    const ERR_INVALID_ED25519_ADDR: u64 = 2002;   //ed25519
 
    struct AddrInfo has store, copy, drop {
-      // id : UID,
+      aid : u64,
       addr: String,
       description: String,
       chain_name: String,
@@ -42,13 +43,6 @@ module my_addr::addr_aggregator {
 
    // init
    public entry fun create_addr_aggregator(ctx: &mut TxContext) {
-      // let addr_aggr =  AddrAggregator{
-      //    key_addr: signer::address_of(acct),
-      //    addr_infos: vector::empty<AddrInfo>(),
-      //    max_id : 0
-      // };
-      // move_to<AddrAggregator>(acct, addr_aggr);
-
       transfer::share_object(AddrAggregator {
          id: object::new(ctx),
          key_addr: tx_context::sender(ctx),
@@ -67,12 +61,7 @@ module my_addr::addr_aggregator {
 
 
    // add addr
-   public entry fun add_addr(
-      addr_type: u64,
-      addr: String,
-      chain_name: String,
-      description: String,
-      ctx: &mut TxContext) acquires AddrAggregator {
+   public entry fun add_addr(agg: &mut AddrAggregator, addr_type: u64, addr: String, chain_name: String, description: String) {
       assert!(addr_type == ADDR_TYPE_ETH || addr_type == ADDR_TYPE_APTOS, ERR_INVALID_ADR_TYPE);
 
       if (addr_type == ADDR_TYPE_ETH) {
@@ -81,26 +70,28 @@ module my_addr::addr_aggregator {
          assert!(string::length(&addr) == 64, ERR_INVALID_ED25519_ADDR)
       );
 
-      let addr_info = AddrInfo{
-
-      };
-
-      let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
-      let id = addr_aggr.max_id + 1;
-
       // gen msg
-      let height = block::get_current_block_height();
+      let height = 100;
       let msg = utils::u64_to_vec_u8_string(height);
       let msg_suffix = b".nonce_geek";
       vector::append(&mut msg, msg_suffix);
 
-      let now = timestamp::now_seconds();
+      let addr_info = AddrInfo{
+         addr,
+         chain_name,
+         description,
+         signature: b"",
+         msg: string::utf8(msg),
+         created_at: 0,
+         updated_at: 0,
+         aid:0,
+         addr_type,
+      };
 
-
-      vector::push_back(&mut addr_aggr.addr_infos, addr_info);
-      addr_aggr.max_id = addr_aggr.max_id + 1;
+      vector::push_back(&mut agg.addr_infos, addr_info);
+      agg.max_id = agg.max_id + 1;
    }
-//
+
 //    public fun get_msg(contract: address, addr: String) :String acquires AddrAggregator {
 //       let addr_aggr = borrow_global_mut<AddrAggregator>(contract);
 //       let length = vector::length(&mut addr_aggr.addr_infos);
