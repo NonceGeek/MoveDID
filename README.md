@@ -31,6 +31,8 @@ The implementation follows the [did@w3c](https://www.w3.org/TR/did-core/)
 
 ### Aptos
 
+> Aptos CLI version >=1.0.0
+
 see the latest guide in:
 
 > https://aptos.dev/cli-tools/aptos-cli-tool/use-aptos-cli
@@ -44,7 +46,7 @@ aptos node run-local-testnet --with-faucet
 * step 0x02: create an account
 
 ```
-aptos init --profile local --rest-url http://localhost:8080 --faucet-url
+aptos init --profile local --rest-url http://localhost:8080 --faucet-url http://localhost:8081
 export PROFILE=local
 ```
 
@@ -68,4 +70,6 @@ aptos move compile --package-dir [path]/MoveDID/did-aptos --named-addresses my_a
 
 * step 0x05: deploy
 
-// TODO
+```
+aptos move publish --package-dir [path]/MoveDID/did-aptos --named-addresses my_addr=$PROFILE --profile $PROFILE
+```
