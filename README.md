@@ -81,3 +81,21 @@ aptos move compile --package-dir [path]/MoveDID/did-aptos --named-addresses my_a
 ```
 aptos move publish --package-dir [path]/MoveDID/did-aptos --named-addresses my_addr=$PROFILE --profile $PROFILE
 ```
+
+* step 0x06: init addr_aggr
+
+```
+aptos move run --function-id 1f9aa0aa17a3c8b02546df9353cdbee47f14bcaf25f5524492a17a8ab8c906ee::addr_aggregator::create_addr_aggregator --profile $PROFILE
+```
+
+* step 0x07: init endpoint_aggr
+
+```
+aptos move run --function-id 1f9aa0aa17a3c8b02546df9353cdbee47f14bcaf25f5524492a17a8ab8c906ee::addr_aggregator::create_endpoint_aggregator --profile $PROFILE
+```
+
+* step 0x08: add addr
+
+```
+aptos move run --function-id 1f9aa0aa17a3c8b02546df9353cdbee47f14bcaf25f5524492a17a8ab8c906ee::addr_aggregator::add_addr --args u64:1 --args String:a5928A4b811b6F850e633Dfb9f9c4B50247565a9 --args String:Ethereum --args String:Test --profile
+```
