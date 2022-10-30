@@ -6,6 +6,10 @@ see docs in:
 DID protocol compatible with Aptos/Sui/Starcoin, including Contracts,Demo & SDK.
 The implementation follows the [did@w3c](https://www.w3.org/TR/did-core/)
 
+see example in:
+
+> https://github.com/NonceGeek/move_sdk_ex_liveview_example
+
 ## Dev Modules on Move Chains
 
 * Aptos:
