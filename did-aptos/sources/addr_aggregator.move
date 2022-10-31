@@ -4,19 +4,28 @@ module my_addr::addr_aggregator {
    use std::string::{Self, String};
    use my_addr::addr_info_util::{Self, AddrInfo};
 
+   // define addr aggregator type
+   const ADDR_AGGREGATOR_TYPE_HUMAN  : u64 = 0;
+   const ADDR_AGGREGATOR_TYPE_ORG : u64 = 1;
+   const ADDR_AGGREGATOR_TYPE_ROBOT : u64 = 2;
+
    const ERR_ADDR_ALREADY_EXSIT: u64 = 100;
 
    struct AddrAggregator has key {
       key_addr: address,
       addr_infos: vector<AddrInfo>,
+      type: u64,
+      description: String,
       max_id : u64,
    }
 
    // init
-   public entry fun create_addr_aggregator(acct: &signer){
+   public entry fun create_addr_aggregator(acct: &signer, type: u64, description:String){
       let addr_aggr =  AddrAggregator{
          key_addr: signer::address_of(acct),
          addr_infos: vector::empty<AddrInfo>(),
+         type,
+         description,
          max_id : 0
       };
       move_to<AddrAggregator>(acct, addr_aggr);
@@ -26,7 +35,7 @@ module my_addr::addr_aggregator {
    public entry fun add_addr(acct: &signer, 
       addr_type: u64,
       addr: String, 
-      chain_name: String,
+      chains: vector<String>,
       description: String) acquires AddrAggregator {
       //addr_type check
       addr_info_util::check_addr_type(addr_type, addr);
@@ -37,7 +46,7 @@ module my_addr::addr_aggregator {
       assert!(!exist_addr(&mut addr_aggr.addr_infos, addr), ERR_ADDR_ALREADY_EXSIT);
 
       let id = addr_aggr.max_id + 1;
-      let addr_info = addr_info_util::init_addr_info(id, addr_type, addr, chain_name, description);
+      let addr_info = addr_info_util::init_addr_info(id, addr_type, addr, &chains, description);
       vector::push_back(&mut addr_aggr.addr_infos, addr_info);
       addr_aggr.max_id = addr_aggr.max_id + 1;
    }

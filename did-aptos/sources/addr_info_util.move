@@ -9,8 +9,8 @@ module my_addr::addr_info_util {
     use aptos_std::ed25519;
 
     //addr type enum
-    const ADDR_TYPE_ETH: u64 = 1;  //secp256k1
-    const ADDR_TYPE_APTOS: u64 = 2; //ed25519
+    const ADDR_TYPE_SECP256K1: u64 = 1;  //secp256k1
+    const ADDR_TYPE_ED25519: u64 = 2; //ed25519
 
     //err enum
     const ERR_ADDR_INFO_MSG_EMPTY: u64 = 1001;
@@ -24,7 +24,7 @@ module my_addr::addr_info_util {
     struct AddrInfo has store, copy, drop {
         addr: String,
         description: String,
-        chain_name: String,
+        chains: vector<String>,
         msg: String,
         signature: vector<u8>,
         created_at: u64,
@@ -36,7 +36,7 @@ module my_addr::addr_info_util {
     public fun init_addr_info(id : u64,
          addr_type: u64,
          addr: String,
-         chain_name: String,
+         chains: &vector<String>,
          description: String) : AddrInfo{
         // gen msg
         let height = block::get_current_block_height();
@@ -48,7 +48,7 @@ module my_addr::addr_info_util {
 
         AddrInfo{
             addr,
-            chain_name,
+            chains: *chains,
             description,
             signature: b"",
             msg: string::utf8(msg),
@@ -60,9 +60,9 @@ module my_addr::addr_info_util {
     }
 
     public fun check_addr_type(addr_type: u64, addr: String) {
-        assert!(addr_type == ADDR_TYPE_ETH || addr_type == ADDR_TYPE_APTOS, ERR_INVALID_ADR_TYPE);
+        assert!(addr_type == ADDR_TYPE_SECP256K1 || addr_type == ADDR_TYPE_ED25519, ERR_INVALID_ADR_TYPE);
 
-        if (addr_type == ADDR_TYPE_ETH) {
+        if (addr_type == ADDR_TYPE_SECP256K1) {
             assert!(string::length(&addr) == 40, ERR_INVALID_SECP256K1_ADDR)
         } else (
             assert!(string::length(&addr) == 64, ERR_INVALID_ED25519_ADDR)
@@ -86,7 +86,7 @@ module my_addr::addr_info_util {
 
         let sig_bytes = utils::string_to_vector_u8(signature);
         let addr_byte = utils::string_to_vector_u8(&addr_info.addr);
-        assert!(addr_info.addr_type == ADDR_TYPE_ETH, ERR_INVALID_ADR_TYPE);
+        assert!(addr_info.addr_type == ADDR_TYPE_SECP256K1, ERR_INVALID_ADR_TYPE);
 
         // verify the signature for the msg
         let eth_prefix = b"\x19Ethereum Signed Message:\n";
@@ -113,7 +113,7 @@ module my_addr::addr_info_util {
         let sig_bytes = utils::string_to_vector_u8(signature);
         let pubkey_bytes = utils::string_to_vector_u8(pubkey);
 
-        assert!(addr_info.addr_type == ADDR_TYPE_APTOS, ERR_INVALID_ADR_TYPE);
+        assert!(addr_info.addr_type == ADDR_TYPE_ED25519, ERR_INVALID_ADR_TYPE);
 
         // verify the signature for the msg
         let pk = ed25519::new_validated_public_key_from_bytes(pubkey_bytes);
