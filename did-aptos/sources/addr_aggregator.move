@@ -3,6 +3,8 @@ module my_addr::addr_aggregator {
    use std::vector;
    use std::string::{Self, String};
    use my_addr::addr_info_util::{Self, AddrInfo};
+   use my_addr::addr_eth_util;
+   use my_addr::addr_aptos_util;
 
    // define addr aggregator type
    const ADDR_AGGREGATOR_TYPE_HUMAN  : u64 = 0;
@@ -83,8 +85,8 @@ module my_addr::addr_aggregator {
       return string::utf8(b"")
    }
 
-   // update secp256k1 sign
-   public entry fun update_addr_with_sig(acct: &signer,
+   // update eth addr with signature
+   public entry fun update_eth_addr(acct: &signer,
       addr: String, signature : String) acquires AddrAggregator {
       let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
       let length = vector::length(&mut addr_aggr.addr_infos);
@@ -93,15 +95,15 @@ module my_addr::addr_aggregator {
          let addr_info = vector::borrow_mut<AddrInfo>(&mut addr_aggr.addr_infos, i);
 
          if (addr_info_util::equal_addr(addr_info, addr)) {
-            addr_info_util::update_addr_info_with_sig(addr_info, &mut signature);
+            addr_eth_util::update_addr(addr_info, &mut signature);
             break
          };
          i = i + 1;
       };
    }
 
-   // update ed25519 signature
-   public entry fun update_addr_with_sig_and_pubkey(acct: &signer,
+   // update aptos addr with signature and pubkey
+   public entry fun update_aptos_addr(acct: &signer,
       addr: String, signature : String, pubkey : String) acquires AddrAggregator {
       let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
       let length = vector::length(&mut addr_aggr.addr_infos);
@@ -109,7 +111,7 @@ module my_addr::addr_aggregator {
       while (i < length) {
          let addr_info = vector::borrow_mut<AddrInfo>(&mut addr_aggr.addr_infos, i);
          if (addr_info_util::equal_addr(addr_info, addr)) {
-            addr_info_util::update_addr_info_with_sig_and_pubkey(addr_info, &mut signature, &mut pubkey);
+            addr_aptos_util::update_addr(addr_info, &mut signature, &mut pubkey);
             break
          };
          i = i + 1;
