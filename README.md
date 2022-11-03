@@ -111,7 +111,7 @@ aptos move run --function-id 1f9aa0aa17a3c8b02546df9353cdbee47f14bcaf25f5524492a
 
 example: 
 
-```aidl
+```Rust
   //addr type enum
   const ADDR_TYPE_ETH: u64 = 1;  //eth
   const ADDR_TYPE_APTOS: u64 = 2; //aptos
@@ -125,7 +125,7 @@ example:
 
 example:
 
-```aidl
+```Rust
 public entry fun update_eth_addr(acct: &signer,
       addr: String, signature : String) acquires AddrAggregator {
       ...
@@ -136,7 +136,7 @@ public entry fun update_eth_addr(acct: &signer,
 
 example: 
 
-```aidl
+```Rust
 public fun update_addr(addr_info: &mut AddrInfo, signature : &mut String) {
     ...
 }
@@ -145,7 +145,7 @@ public fun update_addr(addr_info: &mut AddrInfo, signature : &mut String) {
 0x04: continue the second step, put the third step update_addr to the specify chain's update_*_addr fun.
 
 example: 
-```aidl
+```Rust
 public entry fun update_eth_addr(acct: &signer,
       addr: String, signature : String) acquires AddrAggregator {
       ...
