@@ -104,7 +104,13 @@ aptos move run --function-id 1f9aa0aa17a3c8b02546df9353cdbee47f14bcaf25f5524492a
 aptos move run --function-id 1f9aa0aa17a3c8b02546df9353cdbee47f14bcaf25f5524492a17a8ab8c906ee::addr_aggregator::add_addr --args u64:1 --args String:a5928A4b811b6F850e633Dfb9f9c4B50247565a9 --args String:Ethereum --args String:Test --profile
 ```
 * step 0x09: update addr for add new type 
-- first: add chain addr type in addr_info_util.move; example: 
+
+## Guide of New Module Addition
+
+0x01: add chain addr type in addr_info_util.move.
+
+example: 
+
 ```aidl
   //addr type enum
   const ADDR_TYPE_ETH: u64 = 1;  //eth
@@ -115,7 +121,10 @@ aptos move run --function-id 1f9aa0aa17a3c8b02546df9353cdbee47f14bcaf25f5524492a
   public fun addr_type_aptos() : u64 {ADDR_TYPE_APTOS}
 ```
 
-- second: add entry fun in addr_aggregator.move ; example: 
+0x02: add entry fun in addr_aggregator.move.
+
+example:
+
 ```aidl
 public entry fun update_eth_addr(acct: &signer,
       addr: String, signature : String) acquires AddrAggregator {
@@ -123,14 +132,19 @@ public entry fun update_eth_addr(acct: &signer,
 }  
 ```
 
-- third: add new chain type module file; like addr_eth_util.move, addr_aptos_util.move; implement update_addr fun; example: 
+0x03: add new chain type module file, like addr_eth_util.move, addr_aptos_util.move,implement update_addr fun.
+
+example: 
+
 ```aidl
 public fun update_addr(addr_info: &mut AddrInfo, signature : &mut String) {
     ...
 }
 ```
 
-- fourth: continue the second step; put the third step update_addr to the specify chain's update_*_addr fun; example: 
+0x04: continue the second step, put the third step update_addr to the specify chain's update_*_addr fun.
+
+example: 
 ```aidl
 public entry fun update_eth_addr(acct: &signer,
       addr: String, signature : String) acquires AddrAggregator {
