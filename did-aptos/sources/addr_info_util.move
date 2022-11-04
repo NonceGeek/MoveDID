@@ -6,8 +6,8 @@ module my_addr::addr_info_util {
     use aptos_framework::timestamp;
 
     //addr type enum
-    const ADDR_TYPE_ETH: u64 = 1;  //eth
-    const ADDR_TYPE_APTOS: u64 = 2; //aptos
+    const ADDR_TYPE_ETH: u64 = 0;  //eth
+    const ADDR_TYPE_APTOS: u64 = 1; //aptos
 
     //err enum
     const ERR_ADDR_INFO_MSG_EMPTY: u64 = 1001;
