@@ -1,5 +1,5 @@
 module my_addr::endpoint_aggregator {
-   use aptos_framework::signer;
+   use std::signer;
    use std::vector;
    use std::string::{String};
 

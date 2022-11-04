@@ -3,7 +3,7 @@ name = "did"
 version = "0.0.1"
 
 [addresses]
-my_addr = "_"
+my_addr = "0x2"
 std = "0x1"
 aptos_framework = "0x1"
 

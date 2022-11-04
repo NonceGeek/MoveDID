@@ -5,8 +5,6 @@ module my_addr::addr_aptos_util {
     use aptos_framework::timestamp;
     use my_addr::addr_info_util::{Self, AddrInfo};
 
-    const ADDR_TYPE_APTOS: u64 = 2;  //aptos
-
     public fun update_addr(addr_info: &mut AddrInfo, signature : &mut String, pubkey : &mut String) {
         let addr_info_msg = addr_info_util::get_msg(addr_info);
         // check msg etmpy

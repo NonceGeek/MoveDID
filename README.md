@@ -101,7 +101,7 @@ aptos move run --function-id 1f9aa0aa17a3c8b02546df9353cdbee47f14bcaf25f5524492a
 * step 0x08: add addr
 
 ```
-aptos move run --function-id 1f9aa0aa17a3c8b02546df9353cdbee47f14bcaf25f5524492a17a8ab8c906ee::addr_aggregator::add_addr --args u64:1 --args String:a5928A4b811b6F850e633Dfb9f9c4B50247565a9 --args String:Ethereum --args String:Test --profile
+aptos move run --function-id 1f9aa0aa17a3c8b02546df9353cdbee47f14bcaf25f5524492a17a8ab8c906ee::addr_aggregator::add_addr --args u64:0 --args String:a5928A4b811b6F850e633Dfb9f9c4B50247565a9 --args String:Ethereum --args String:Test --profile
 ```
 * step 0x09: update addr for add new type 
 
@@ -113,8 +113,8 @@ example:
 
 ```Rust
   //addr type enum
-  const ADDR_TYPE_ETH: u64 = 1;  //eth
-  const ADDR_TYPE_APTOS: u64 = 2; //aptos
+  const ADDR_TYPE_ETH: u64 = 0;  //eth
+  const ADDR_TYPE_APTOS: u64 = 1; //aptos
   
   // addr type pack
   public fun addr_type_eth() : u64 {ADDR_TYPE_ETH}

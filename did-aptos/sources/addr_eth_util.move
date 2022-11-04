@@ -7,8 +7,6 @@ module my_addr::addr_eth_util {
     use aptos_std::aptos_hash;
     use my_addr::addr_info_util::{Self, AddrInfo};
 
-    const ADDR_TYPE_ETH: u64 = 1;  //eth
-
     public fun update_addr(addr_info: &mut AddrInfo, signature : &mut String) {
         let addr_info_msg = addr_info_util::get_msg(addr_info);
         // check msg etmpy
