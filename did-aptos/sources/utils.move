@@ -4,6 +4,9 @@ module my_addr::utils {
     // #[test_only]
     // use std::debug;
 
+    const ERR_INVALID_ASCII_CHAR: u64 = 3000;
+    const ERR_STRING_LENGTH_INVALID: u64 = 3001;
+
     public fun u64_to_vec_u8(val : u64) : vector<u8> {
         let result = vector::empty<u8>();
         
@@ -40,7 +43,7 @@ module my_addr::utils {
    } 
 
    public fun ascii_u8_to_number(u : u8) : u8 {
-        assert!((u >= 48 && u <=57)||(u >= 65 && u <= 70 ) || (u >= 97 && u <= 102), 3005);
+        assert!((u >= 48 && u <=57)||(u >= 65 && u <= 70 ) || (u >= 97 && u <= 102), ERR_INVALID_ASCII_CHAR);
         let byte = 0;
         if (u >= 48 && u <=57) {
             byte = u - 48;
@@ -60,9 +63,11 @@ module my_addr::utils {
         byte
    }
 
+
+
    // transfer string to vector u8 bytes
    public fun string_to_vector_u8(str : &String) : vector<u8> {
-        assert!(string::length(str) % 2 == 0, 3003);
+        assert!(string::length(str) % 2 == 0, ERR_STRING_LENGTH_INVALID);
         let vec = string::bytes(str);
 
         let result = vector::empty<u8>();
@@ -81,9 +86,13 @@ module my_addr::utils {
             vector::push_back(&mut result, u);
         };
 
-        // let result_length = vector::length(&result);
-        //  debug::print(&result_length);
-
         result
    }
+
+    // trim pos chars and transfer string to vector u8 bytes
+    public fun trim_string_to_vector_u8(str : &String, pos: u64) :  vector<u8>{
+
+        let s = string::sub_string(str, pos, string::length(str));
+        string_to_vector_u8(&s)
+    }
 }
