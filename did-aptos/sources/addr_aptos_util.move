@@ -5,7 +5,7 @@ module my_addr::addr_aptos_util {
     use aptos_framework::timestamp;
     use my_addr::addr_info_util::{Self, AddrInfo};
 
-    public fun update_addr(addr_info: &mut AddrInfo, signature : &mut String, pubkey : &mut String) {
+    public fun update_addr(addr_info: &mut AddrInfo, signature: &mut String, pubkey: &mut String) {
         let addr_info_msg = addr_info_util::get_msg(addr_info);
         // check msg etmpy
         assert!(addr_info_msg != string::utf8(b""), addr_info_util::err_addr_info_etmpty());
@@ -13,8 +13,8 @@ module my_addr::addr_aptos_util {
         //check addr type
         assert!(addr_info_util::get_addr_type(addr_info) == addr_info_util::addr_type_aptos(), addr_info_util::err_invalid_addr_type());
 
-        let sig_bytes = utils::string_to_vector_u8(signature);
-        let pubkey_bytes = utils::string_to_vector_u8(pubkey);
+        let sig_bytes = utils::trim_string_to_vector_u8(signature, 2); // trim 0x
+        let pubkey_bytes = utils::trim_string_to_vector_u8(pubkey, 2); // trim 0x
 
         // verify the signature for the msg
         let pk = ed25519::new_validated_public_key_from_bytes(pubkey_bytes);
@@ -25,7 +25,7 @@ module my_addr::addr_aptos_util {
 
         // verify the now - created_at <= 2h
         let now = timestamp::now_seconds();
-        assert!(now - addr_info_util::get_created_at(addr_info)  <= 2*60*60, addr_info_util::err_timestamp_exceed());
+        assert!(now - addr_info_util::get_created_at(addr_info) <= 2 * 60 * 60, addr_info_util::err_timestamp_exceed());
 
         // update signature, updated_at
         addr_info_util::set_sign_and_updated_at(addr_info, sig_bytes, now)
