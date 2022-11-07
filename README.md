@@ -107,7 +107,7 @@ aptos move run --function-id 1f9aa0aa17a3c8b02546df9353cdbee47f14bcaf25f5524492a
 
 ## Guide of New Module Addition
 
-0x01: add chain addr type in addr_info_util.move.
+0x01: add chain addr type in addr_info.move.
 
 example: 
 
@@ -132,7 +132,7 @@ public entry fun update_eth_addr(acct: &signer,
 }  
 ```
 
-0x03: add new chain type module file, like addr_eth_util.move, addr_aptos_util.move,implement update_addr fun.
+0x03: add new chain type module file, like addr_eth.move, addr_aptos.move,implement update_addr fun.
 
 example: 
 
@@ -152,8 +152,8 @@ public entry fun update_eth_addr(acct: &signer,
        while (i < length) {
          let addr_info = vector::borrow_mut<AddrInfo>(&mut addr_aggr.addr_infos, i);
 
-         if (addr_info_util::equal_addr(addr_info, addr)) {
-            addr_eth_util::update_addr(addr_info, &mut signature);
+         if (addr_info::equal_addr(addr_info, addr)) {
+            addr_eth::update_addr(addr_info, &mut signature);
             break
          };
          i = i + 1;

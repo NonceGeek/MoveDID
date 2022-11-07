@@ -2,9 +2,9 @@ module my_addr::addr_aggregator {
     use std::signer;
     use std::vector;
     use std::string::{Self, String};
-    use my_addr::addr_info_util::{Self, AddrInfo};
-    use my_addr::addr_eth_util;
-    use my_addr::addr_aptos_util;
+    use my_addr::addr_info::{Self, AddrInfo};
+    use my_addr::addr_eth;
+    use my_addr::addr_aptos;
 
     // define addr aggregator type
     const ADDR_AGGREGATOR_TYPE_HUMAN: u64 = 0;
@@ -40,8 +40,6 @@ module my_addr::addr_aggregator {
                               addr: String,
                               chains: vector<String>,
                               description: String) acquires AddrAggregator {
-        //check addr and addr_type
-        addr_info_util::check_addr_and_type(addr_type, addr);
 
         let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
 
@@ -49,7 +47,7 @@ module my_addr::addr_aggregator {
         assert!(!exist_addr(&mut addr_aggr.addr_infos, addr), ERR_ADDR_ALREADY_EXSIT);
 
         let id = addr_aggr.max_id + 1;
-        let addr_info = addr_info_util::init_addr_info(id, addr_type, addr, &chains, description);
+        let addr_info = addr_info::init_addr_info(id, addr_type, addr, &chains, description);
         vector::push_back(&mut addr_aggr.addr_infos, addr_info);
         addr_aggr.max_id = addr_aggr.max_id + 1;
     }
@@ -61,7 +59,7 @@ module my_addr::addr_aggregator {
 
         while (i < length) {
             let addr_info = vector::borrow_mut<AddrInfo>(addr_infos, i);
-            if (addr_info_util::equal_addr(addr_info, addr)) {
+            if (addr_info::equal_addr(addr_info, addr)) {
                 flag = true;
                 break
             };
@@ -72,7 +70,7 @@ module my_addr::addr_aggregator {
 
     public fun get_msg(contract: address, addr: String): String acquires AddrAggregator {
         //check addr 0x prefix
-        addr_info_util::check_addr_prefix(addr);
+        addr_info::check_addr_prefix(addr);
 
         let addr_aggr = borrow_global_mut<AddrAggregator>(contract);
         let length = vector::length(&mut addr_aggr.addr_infos);
@@ -80,8 +78,8 @@ module my_addr::addr_aggregator {
 
         while (i < length) {
             let addr_info = vector::borrow_mut<AddrInfo>(&mut addr_aggr.addr_infos, i);
-            if (addr_info_util::equal_addr(addr_info, addr)) {
-                return addr_info_util::get_msg(addr_info)
+            if (addr_info::equal_addr(addr_info, addr)) {
+                return addr_info::get_msg(addr_info)
             };
             i = i + 1;
         };
@@ -93,7 +91,7 @@ module my_addr::addr_aggregator {
     public entry fun update_eth_addr(acct: &signer,
                                      addr: String, signature: String) acquires AddrAggregator {
         //check addr 0x prefix
-        addr_info_util::check_addr_prefix(addr);
+        addr_info::check_addr_prefix(addr);
 
         let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
         let length = vector::length(&mut addr_aggr.addr_infos);
@@ -101,8 +99,8 @@ module my_addr::addr_aggregator {
         while (i < length) {
             let addr_info = vector::borrow_mut<AddrInfo>(&mut addr_aggr.addr_infos, i);
 
-            if (addr_info_util::equal_addr(addr_info, addr)) {
-                addr_eth_util::update_addr(addr_info, &mut signature);
+            if (addr_info::equal_addr(addr_info, addr)) {
+                addr_eth::update_addr(addr_info, &mut signature);
                 break
             };
             i = i + 1;
@@ -113,15 +111,15 @@ module my_addr::addr_aggregator {
     public entry fun update_aptos_addr(acct: &signer,
                                        addr: String, signature: String, pubkey: String) acquires AddrAggregator {
         //check addr 0x prefix
-        addr_info_util::check_addr_prefix(addr);
+        addr_info::check_addr_prefix(addr);
 
         let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
         let length = vector::length(&mut addr_aggr.addr_infos);
         let i = 0;
         while (i < length) {
             let addr_info = vector::borrow_mut<AddrInfo>(&mut addr_aggr.addr_infos, i);
-            if (addr_info_util::equal_addr(addr_info, addr)) {
-                addr_aptos_util::update_addr(addr_info, &mut signature, &mut pubkey);
+            if (addr_info::equal_addr(addr_info, addr)) {
+                addr_aptos::update_addr(addr_info, &mut signature, &mut pubkey);
                 break
             };
             i = i + 1;
@@ -133,14 +131,14 @@ module my_addr::addr_aggregator {
         acct: signer,
         addr: String) acquires AddrAggregator {
         //check addr 0x prefix
-        addr_info_util::check_addr_prefix(addr);
+        addr_info::check_addr_prefix(addr);
 
         let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(&acct));
         let length = vector::length(&mut addr_aggr.addr_infos);
         let i = 0;
         while (i < length) {
             let addr_info = vector::borrow(&mut addr_aggr.addr_infos, i);
-            if (addr_info_util::equal_addr(addr_info, addr)) {
+            if (addr_info::equal_addr(addr_info, addr)) {
                 vector::remove(&mut addr_aggr.addr_infos, i);
                 break
             };

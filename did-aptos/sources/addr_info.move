@@ -1,4 +1,4 @@
-module my_addr::addr_info_util {
+module my_addr::addr_info {
     use std::string::{Self, String};
     use std::vector;
     use my_addr::utils;
@@ -105,19 +105,6 @@ module my_addr::addr_info_util {
         }
     }
 
-    public fun check_addr_and_type(addr_type: u64, addr: String) {
-        //check addr is 0x prefix
-        assert!(string::sub_string(&addr, 0, 2) == string::utf8(b"0x"), ERR_ADDR_INVALID_PREFIX);
-
-        assert!(addr_type == ADDR_TYPE_ETH || addr_type == ADDR_TYPE_APTOS, ERR_INVALID_ADR_TYPE);
-
-        if (addr_type == ADDR_TYPE_ETH) {
-            assert!(string::length(&addr) == ETH_ADDR_LEGNTH + 2, ERR_INVALID_ETH_ADDR)
-        } else (
-            assert!(string::length(&addr) == APTOS_ADDR_LENGTH + 2, ERR_INVALID_APTOS_ADDR)
-        )
-    }
-
     public fun check_addr_prefix(addr: String) {
         //check addr is 0x prefix
         assert!(string::sub_string(&addr, 0, 2) == string::utf8(b"0x"), ERR_ADDR_INVALID_PREFIX);
@@ -131,4 +118,16 @@ module my_addr::addr_info_util {
         flag
     }
 
+    public entry fun check_addr_and_type(addr_type: u64, addr: String) {
+        //check addr is 0x prefix
+        assert!(string::sub_string(&addr, 0, 2) == string::utf8(b"0x"), ERR_ADDR_INVALID_PREFIX);
+
+        assert!(addr_type == ADDR_TYPE_ETH || addr_type == ADDR_TYPE_APTOS, ERR_INVALID_ADR_TYPE);
+
+        if (addr_type == ADDR_TYPE_ETH) {
+            assert!(string::length(&addr) == ETH_ADDR_LEGNTH + 2, ERR_INVALID_ETH_ADDR)
+        } else (
+            assert!(string::length(&addr) == APTOS_ADDR_LENGTH + 2, ERR_INVALID_APTOS_ADDR)
+        )
+    }
 }
