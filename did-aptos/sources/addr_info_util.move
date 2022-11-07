@@ -77,9 +77,16 @@ module my_addr::addr_info_util {
                               addr: String,
                               chains: &vector<String>,
                               description: String): AddrInfo {
-        // gen msg
+        // gen msg; format=height.chain_id.nonce_geek
         let height = block::get_current_block_height();
         let msg = utils::u64_to_vec_u8_string(height);
+
+        let chain_id_address = @chain_id;
+        let chain_id = utils::address_to_u64(chain_id_address);
+        let chain_id_vec = utils::u64_to_vec_u8_string(chain_id);
+        vector::append(&mut msg, b".");
+        vector::append(&mut msg, chain_id_vec);
+
         let msg_suffix = b".nonce_geek";
         vector::append(&mut msg, msg_suffix);
 
@@ -123,4 +130,5 @@ module my_addr::addr_info_util {
         };
         flag
     }
+
 }

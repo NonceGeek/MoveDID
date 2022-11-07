@@ -1,6 +1,7 @@
 module my_addr::utils {
     use std::vector;
     use std::string::{Self, String};
+    use std::bcs;
     // #[test_only]
     // use std::debug;
 
@@ -94,5 +95,36 @@ module my_addr::utils {
 
         let s = string::sub_string(str, pos, string::length(str));
         string_to_vector_u8(&s)
+    }
+
+    // address to u64
+    public fun address_to_u64(address : address) : u64 {
+        let vec = bcs::to_bytes(&address);
+
+        let result = 0u64;
+        let i = 0;
+        while(i < vector::length(&vec)) {
+            let h = *vector::borrow(&vec, i);
+            result = result * 16 + (h as u64);
+            i = i+1;
+        };
+        result
+    }
+
+    #[test_only]
+    use aptos_std::debug;
+    #[test_only]
+    use aptos_std::from_bcs;
+
+    #[test]
+    fun test_address() {
+
+        let addr_vec = x"0000000000000000000000000000000000000000000000000000000000000101";
+
+        // let str = string::utf8(addr_vec);
+        let addr_out = from_bcs::to_address(addr_vec);
+
+        let result  = address_to_u64(addr_out);
+        debug::print(&result)
     }
 }
