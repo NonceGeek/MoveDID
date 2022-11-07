@@ -1,7 +1,11 @@
 # MoveDID
-see docs in:
 
-> https://did.noncegeek.com
+Profiles:
+
+> Docs:
+> https://docs.movedid.build
+> Twitter:
+> https://twitter.com/Move_DID
 
 DID protocol compatible with Aptos/Sui/Starcoin, including Contracts,Demo & SDK.
 The implementation follows the [did@w3c](https://www.w3.org/TR/did-core/)
