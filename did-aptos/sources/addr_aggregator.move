@@ -68,25 +68,6 @@ module my_addr::addr_aggregator {
         flag
     }
 
-    public fun get_msg(contract: address, addr: String): String acquires AddrAggregator {
-        //check addr 0x prefix
-        addr_info::check_addr_prefix(addr);
-
-        let addr_aggr = borrow_global_mut<AddrAggregator>(contract);
-        let length = vector::length(&mut addr_aggr.addr_infos);
-        let i = 0;
-
-        while (i < length) {
-            let addr_info = vector::borrow_mut<AddrInfo>(&mut addr_aggr.addr_infos, i);
-            if (addr_info::equal_addr(addr_info, addr)) {
-                return addr_info::get_msg(addr_info)
-            };
-            i = i + 1;
-        };
-
-        return string::utf8(b"")
-    }
-
     // update eth addr with signature
     public entry fun update_eth_addr(acct: &signer,
                                      addr: String, signature: String) acquires AddrAggregator {

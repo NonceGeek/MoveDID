@@ -92,11 +92,6 @@ const config = {
             docId: "move-did-white-paper/index",
             label: "Move DID White Paper",
           },
-          {
-            href: "https://awesome-move.gigalixirapp.com/",
-            label: "Awesome Free Move Tools",
-            position: "left",
-          },
         ],
       },
       footer: {
@@ -130,7 +125,6 @@ const config = {
             ],
           },
           {
-            // TODO
             title: null,
             items: [
               {
@@ -140,17 +134,8 @@ const config = {
                         <a class="social-link" href="https://github.com/noncegeek/MoveDID" target="_blank" rel="noopener noreferrer" title="Git">
                          <img class="icon" src="/img/socials/git.svg" alt="Git Icon" />
                         </a>
-                        <a class="social-link" href="https://discord.gg/aptoslabs" target="_blank" rel="noopener noreferrer" title="Discord">
-                          <img class="icon" src="/img/socials/discord.svg" alt="Discord Icon" />
-                        </a>
-                        <a class="social-link" href="https://twitter.com/aptoslabs/" target="_blank" rel="noopener noreferrer" title="Twitter">
+                        <a class="social-link" href="https://twitter.com/Move_DID/" target="_blank" rel="noopener noreferrer" title="Twitter">
                           <img class="icon" src="/img/socials/twitter.svg" alt="Twitter Icon" />
-                        </a>
-                        <a class="social-link" href="https://aptoslabs.medium.com/" target="_blank" rel="noopener noreferrer" title="Medium">
-                          <img class="icon" src="/img/socials/medium.svg" alt="Medium Icon" />
-                        </a>
-                        <a class="social-link" href="https://www.linkedin.com/company/aptoslabs/" target="_blank" rel="noopener noreferrer" title="LinkedIn">
-                          <img class="icon" src="/img/socials/linkedin.svg" alt="LinkedIn Icon" />
                         </a>
                     </nav>
                   </p>
