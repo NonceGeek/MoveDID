@@ -1,7 +1,6 @@
 module my_addr::addr_aggregator {
     use std::signer;
     use std::vector;
-    use std::string::{Self, String};
     use my_addr::addr_info::{Self, AddrInfo};
     use my_addr::addr_eth;
     use my_addr::addr_aptos;

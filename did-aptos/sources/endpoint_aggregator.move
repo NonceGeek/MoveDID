@@ -6,7 +6,6 @@ module my_addr::endpoint_aggregator {
     struct Endpoint has store, copy, drop {
         url: String,
         description: String,
-        msg: String,
         verification_url: String
     }
 
@@ -27,14 +26,12 @@ module my_addr::endpoint_aggregator {
         acct: &signer,
         url: String,
         description: String,
-        msg: String,
         verification_url: String
     ) acquires EndpointAggregator {
         let endpoint_aggr = borrow_global_mut<EndpointAggregator>(signer::address_of(acct));
         let endpoint_info = Endpoint {
             url: url,
             description: description,
-            msg: msg,
             verification_url: verification_url
         };
         vector::push_back(&mut endpoint_aggr.endpoints, endpoint_info);
@@ -46,7 +43,6 @@ module my_addr::endpoint_aggregator {
         url: String,
         new_description: String,
         new_url: String,
-        new_msg: String,
         new_verification_url: String
     ) acquires EndpointAggregator {
         let endpoint_aggr = borrow_global_mut<EndpointAggregator>(signer::address_of(acct));
@@ -57,7 +53,6 @@ module my_addr::endpoint_aggregator {
             if (endpoint.url == url) {
                 endpoint.url = new_url;
                 endpoint.description = new_description;
-                endpoint.msg = new_msg;
                 endpoint.verification_url = new_verification_url;
                 break
             };
