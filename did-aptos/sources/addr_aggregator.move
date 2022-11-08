@@ -1,6 +1,7 @@
 module my_addr::addr_aggregator {
     use std::signer;
     use std::vector;
+    use std::string::{String};
     use my_addr::addr_info::{Self, AddrInfo};
     use my_addr::addr_eth;
     use my_addr::addr_aptos;
@@ -10,8 +11,8 @@ module my_addr::addr_aggregator {
     const ADDR_AGGREGATOR_TYPE_ORG: u64 = 1;
     const ADDR_AGGREGATOR_TYPE_ROBOT: u64 = 2;
 
-    const ERR_ADDR_ALREADY_EXSIT: u64 = 100;
-
+    // err enum
+    const ERR_ADDR_ALREADY_EXSIT: u64 = 1000;
 
     struct AddrAggregator has key {
         key_addr: address,
@@ -39,6 +40,8 @@ module my_addr::addr_aggregator {
                               addr: String,
                               chains: vector<String>,
                               description: String) acquires AddrAggregator {
+        // check addr is 0x begin
+        addr_info::check_addr_prefix(addr);
 
         let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
 
@@ -108,12 +111,12 @@ module my_addr::addr_aggregator {
 
     // public fun delete addr
     public entry fun delete_addr(
-        acct: signer,
+        acct: &signer,
         addr: String) acquires AddrAggregator {
         //check addr 0x prefix
         addr_info::check_addr_prefix(addr);
 
-        let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(&acct));
+        let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
         let length = vector::length(&mut addr_aggr.addr_infos);
         let i = 0;
         while (i < length) {

@@ -5,13 +5,25 @@ module my_addr::addr_aptos {
     use aptos_framework::timestamp;
     use my_addr::addr_info::{Self, AddrInfo};
 
+    //aptos addr type
+    const ADDR_TYPE_APTOS: u64 = 1;
+
+    //aptos addr length
+    const APTOS_ADDR_LENGTH: u64 = 64;
+
+    // err enum
+    const ERR_INVALID_APTOS_ADDR: u64 = 2002;
+
     public fun update_addr(addr_info: &mut AddrInfo, signature: &mut String, pubkey: &mut String) {
         let addr_info_msg = addr_info::get_msg(addr_info);
         // check msg etmpy
         assert!(addr_info_msg != string::utf8(b""), addr_info::err_addr_info_etmpty());
 
+        // check addr length
+        assert!(string::length(&addr_info::get_addr(addr_info)) == APTOS_ADDR_LENGTH + 2, ERR_INVALID_APTOS_ADDR);
+
         //check addr type
-        assert!(addr_info::get_addr_type(addr_info) == addr_info::addr_type_aptos(), addr_info::err_invalid_addr_type());
+        assert!(addr_info::get_addr_type(addr_info) == ADDR_TYPE_APTOS, addr_info::err_invalid_addr_type());
 
         let sig_bytes = utils::trim_string_to_vector_u8(signature, 2); // trim 0x
         let pubkey_bytes = utils::trim_string_to_vector_u8(pubkey, 2); // trim 0x
