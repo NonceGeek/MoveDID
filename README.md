@@ -131,7 +131,7 @@ example:
   public fun addr_type_aptos() : u64 {ADDR_TYPE_APTOS}
 ```
 
-0x02: add entry fun in addr_aggregator.move.
+0x01: add entry fun in addr_aggregator.move.
 
 example:
 
@@ -142,17 +142,26 @@ public entry fun update_eth_addr(acct: &signer,
 }  
 ```
 
-0x03: add new chain type module file, like addr_eth.move, addr_aptos.move,implement update_addr fun.
+0x02: add new chain type module file, like addr_eth.move; add constant variable  and implement update_addr fun.
 
 example: 
 
 ```Rust
+//eth addr type
+const ADDR_TYPE_ETH: u64 = 0;
+
+//eth addr length
+const ETH_ADDR_LEGNTH: u64 = 40;
+
+// err enum
+const ERR_INVALID_ETH_ADDR: u64 = 2001;
+
 public fun update_addr(addr_info: &mut AddrInfo, signature : &mut String) {
     ...
 }
 ```
 
-0x04: continue the second step, put the third step update_addr to the specify chain's update_*_addr fun.
+0x03: continue the second step, put the third step update_addr to the specify chain's update_*_addr fun.
 
 example: 
 ```Rust
