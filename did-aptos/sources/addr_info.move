@@ -47,8 +47,6 @@ module my_addr::addr_info {
 
     public fun get_updated_at(addr_info: &AddrInfo): u64 { addr_info.updated_at }
 
-    public fun get_refresh_at(addr_info: &AddrInfo): u64 { addr_info.refresh_at}
-
     // // get remove 0x prefix addr
     // public fun get_origin_addr(addr_info: &AddrInfo) : String { string::sub_string(&addr_info.addr, 0, 2) }
 
@@ -88,7 +86,6 @@ module my_addr::addr_info {
             id,
             addr_type,
             expired_at,
-            refresh_at: 0,
         }
     }
 
