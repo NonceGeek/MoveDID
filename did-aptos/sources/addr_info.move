@@ -12,6 +12,7 @@ module my_addr::addr_info {
     const ERR_TIMESTAMP_EXCEED: u64 = 1003;
     const ERR_ADDR_INVALID_PREFIX: u64 = 1004;
     const ERR_INVALID_ADR_TYPE: u64 = 1005;
+    const ERR_ADDR_NO_FIRST_VERIFY: u64 = 1006;
 
     // err pack
     public fun err_addr_info_etmpty(): u64 { ERR_ADDR_INFO_MSG_EMPTY }
@@ -32,6 +33,8 @@ module my_addr::addr_info {
         updated_at: u64,
         id: u64,
         addr_type: u64,
+        expired_at: u64,
+        refresh_at: u64,
     }
 
     // get attr
@@ -42,14 +45,16 @@ module my_addr::addr_info {
     public fun get_addr_type(addr_info: &AddrInfo): u64 { addr_info.addr_type }
 
     public fun get_created_at(addr_info: &AddrInfo): u64 { addr_info.created_at }
+
+    public fun get_updated_at(addr_info: &AddrInfo): u64 { addr_info.updated_at }
+
+    public fun get_refresh_at(addr_info: &AddrInfo): u64 { addr_info.refresh_at}
+
     // // get remove 0x prefix addr
     // public fun get_origin_addr(addr_info: &AddrInfo) : String { string::sub_string(&addr_info.addr, 0, 2) }
 
-    // set attr
-    public fun set_sign_and_updated_at(addr_info: &mut AddrInfo, sig: vector<u8>, updated_at: u64) {
-        addr_info.signature = sig;
-        addr_info.updated_at = updated_at
-    }
+
+
 
     // init
     public fun init_addr_info(id: u64,
@@ -71,6 +76,7 @@ module my_addr::addr_info {
         vector::append(&mut msg, msg_suffix);
 
         let now = timestamp::now_seconds();
+        let expired_at = now + 31536000; // 1 year time expired
 
         AddrInfo {
             addr,
@@ -82,6 +88,8 @@ module my_addr::addr_info {
             updated_at: 0,
             id,
             addr_type,
+            expired_at,
+            refresh_at: 0,
         }
     }
 
@@ -98,17 +106,38 @@ module my_addr::addr_info {
         flag
     }
 
-    //
-    // public entry fun check_addr_and_type(addr_type: u64, addr: String) {
-    //     //check addr is 0x prefix
-    //     assert!(string::sub_string(&addr, 0, 2) == string::utf8(b"0x"), ERR_ADDR_INVALID_PREFIX);
-    //
-    //     // assert!(addr_type == ADDR_TYPE_ETH || addr_type == ADDR_TYPE_APTOS, ERR_INVALID_ADR_TYPE);
-    //     //
-    //     // if (addr_type == ADDR_TYPE_ETH) {
-    //     //     assert!(string::length(&addr) == ETH_ADDR_LEGNTH + 2, ERR_INVALID_ETH_ADDR)
-    //     // } else (
-    //     //     assert!(string::length(&addr) == APTOS_ADDR_LENGTH + 2, ERR_INVALID_APTOS_ADDR)
-    //     // )
-    // }
+
+    // set attr
+    public fun set_sign_and_updated_at(addr_info: &mut AddrInfo, sig: vector<u8>, updated_at: u64) {
+        addr_info.signature = sig;
+        addr_info.updated_at = updated_at
+    }
+
+    // set attr
+    public fun set_chains_and_description(addr_info: &mut AddrInfo, sig: vector<u8>, updated_at: u64, chains: vector<String>, description : String) {
+        addr_info.signature = sig;
+        addr_info.updated_at = updated_at;
+        addr_info.chains = chains;
+        addr_info.description = description;
+    }
+
+    public fun refresh_addr_msg(addr_info: &mut AddrInfo) {
+        // check addr_info's signature has verified
+        assert!(vector::length(&addr_info.signature) == 0, ERR_ADDR_NO_FIRST_VERIFY);
+
+        let height = block::get_current_block_height();
+        let msg = utils::u64_to_vec_u8_string(height);
+
+        let chain_id_address = @chain_id;
+        let chain_id = utils::address_to_u64(chain_id_address);
+        let chain_id_vec = utils::u64_to_vec_u8_string(chain_id);
+        vector::append(&mut msg, b".");
+        vector::append(&mut msg, chain_id_vec);
+
+        let msg_suffix = b".nonce_geek";
+        vector::append(&mut msg, msg_suffix);
+
+        addr_info.msg = string::utf8(msg);
+        addr_info.refresh_at = timestamp::now_seconds(); //update refresh time
+    }
 }
