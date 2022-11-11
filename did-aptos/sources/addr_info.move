@@ -34,7 +34,6 @@ module my_addr::addr_info {
         id: u64,
         addr_type: u64,
         expired_at: u64,
-        refresh_at: u64,
     }
 
     // get attr
@@ -121,10 +120,12 @@ module my_addr::addr_info {
         addr_info.description = description;
     }
 
-    public fun refresh_addr_msg(addr_info: &mut AddrInfo) {
+    // update
+    public fun update_addr_msg_with_chains_and_description(addr_info: &mut AddrInfo, chains: vector<String>, description: String) {
         // check addr_info's signature has verified
         assert!(vector::length(&addr_info.signature) == 0, ERR_ADDR_NO_FIRST_VERIFY);
 
+        // msg format : block_height.chain_id.nonce_geek.chains.description
         let height = block::get_current_block_height();
         let msg = utils::u64_to_vec_u8_string(height);
 
@@ -136,8 +137,25 @@ module my_addr::addr_info {
 
         let msg_suffix = b".nonce_geek";
         vector::append(&mut msg, msg_suffix);
+        vector::append(&mut msg, b".");
+
+        // add chains
+        let chains_length = vector::length(&chains);
+        let i = 0;
+        while(i < chains_length) {
+            let chain = vector::borrow<String>(&mut chains, i);
+            vector::append(&mut msg, *string::bytes(chain));
+            if (i != chains_length - 1) {
+                vector::append(&mut msg, b"_");
+            };
+            i = i + 1
+        };
+        vector::append(&mut msg, b".");
+
+        // add description
+        vector::append(&mut msg, *string::bytes(&description));
 
         addr_info.msg = string::utf8(msg);
-        addr_info.refresh_at = timestamp::now_seconds(); //update refresh time
+        addr_info.updated_at = timestamp::now_seconds();
     }
 }

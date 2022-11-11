@@ -13,7 +13,6 @@ module my_addr::addr_aggregator {
 
     // err enum
     const ERR_ADDR_ALREADY_EXSIT: u64 = 1000;
-    const ERR_MSG_NOT_REFRESH:u64 = 1001;
 
     struct AddrAggregator has key {
         key_addr: address,
@@ -110,8 +109,9 @@ module my_addr::addr_aggregator {
         };
     }
 
-    //refresh addr msg
-    public entry fun refresh_addr_msg(acct: &signer, addr: String) acquires AddrAggregator {
+    //update addr msg
+    public entry fun update_addr_msg_with_chains_and_description(
+        acct: &signer, addr: String, chains: vector<String>, description: String) acquires AddrAggregator {
         //check addr 0x prefix
         addr_info::check_addr_prefix(addr);
 
@@ -122,49 +122,7 @@ module my_addr::addr_aggregator {
             let addr_info = vector::borrow_mut<AddrInfo>(&mut addr_aggr.addr_infos, i);
 
             if (addr_info::equal_addr(addr_info, addr)) {
-                addr_info::refresh_addr_msg(addr_info);
-                break
-            };
-            i = i + 1;
-        };
-    }
-
-    // update eth addr with chains and description
-    public entry fun update_eth_addr_with_chains_and_description(
-        acct: &signer, addr: String, signature: String, chains: vector<String>, description: String) acquires AddrAggregator {
-        //check addr 0x prefix
-        addr_info::check_addr_prefix(addr);
-
-        let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
-        let length = vector::length(&mut addr_aggr.addr_infos);
-        let i = 0;
-        while (i < length) {
-            let addr_info = vector::borrow_mut<AddrInfo>(&mut addr_aggr.addr_infos, i);
-
-            if (addr_info::equal_addr(addr_info, addr)) {
-                assert!(addr_info::get_refresh_at(addr_info) != 0 && addr_info::get_refresh_at(addr_info) > addr_info::get_updated_at(addr_info), ERR_MSG_NOT_REFRESH);
-                addr_eth::update_addr_with_chains_and_description(addr_info, &mut signature, chains, description);
-                break
-            };
-            i = i + 1;
-        };
-    }
-
-    // update aptos addr with chains and description
-    public entry fun update_aptos_addr_with_chains_and_description(
-        acct: &signer, addr: String, signature: String, pubkey: String, chains: vector<String>, description: String) acquires AddrAggregator {
-        //check addr 0x prefix
-        addr_info::check_addr_prefix(addr);
-
-        let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
-        let length = vector::length(&mut addr_aggr.addr_infos);
-        let i = 0;
-        while (i < length) {
-            let addr_info = vector::borrow_mut<AddrInfo>(&mut addr_aggr.addr_infos, i);
-
-            if (addr_info::equal_addr(addr_info, addr)) {
-                assert!(addr_info::get_refresh_at(addr_info) != 0 && addr_info::get_refresh_at(addr_info) > addr_info::get_updated_at(addr_info), ERR_MSG_NOT_REFRESH);
-                addr_aptos::update_addr_with_chains_and_description(addr_info, &mut signature, &mut pubkey, chains, description);
+                addr_info::update_addr_msg_with_chains_and_description(addr_info, chains, description);
                 break
             };
             i = i + 1;
