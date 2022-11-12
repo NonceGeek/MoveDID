@@ -34,6 +34,7 @@ module my_addr::addr_info {
         id: u64,
         addr_type: u64,
         expired_at: u64,
+        pubkey: String,
     }
 
     // get attr
@@ -47,16 +48,14 @@ module my_addr::addr_info {
 
     public fun get_updated_at(addr_info: &AddrInfo): u64 { addr_info.updated_at }
 
-    // // get remove 0x prefix addr
-    // public fun get_origin_addr(addr_info: &AddrInfo) : String { string::sub_string(&addr_info.addr, 0, 2) }
-
-
+    public fun get_pubkey(addr_info: &AddrInfo): String { addr_info.pubkey }
 
 
     // init
     public fun init_addr_info(id: u64,
                               addr_type: u64,
                               addr: String,
+                              pubkey: String,
                               chains: &vector<String>,
                               description: String): AddrInfo {
         // gen msg; format=height.chain_id.nonce_geek
@@ -86,6 +85,7 @@ module my_addr::addr_info {
             id,
             addr_type,
             expired_at,
+            pubkey: pubkey,
         }
     }
 
