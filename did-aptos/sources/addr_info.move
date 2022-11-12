@@ -85,7 +85,7 @@ module my_addr::addr_info {
             id,
             addr_type,
             expired_at,
-            pubkey: pubkey,
+            pubkey,
         }
     }
 
