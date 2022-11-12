@@ -38,6 +38,7 @@ module my_addr::addr_aggregator {
     public entry fun add_addr(acct: &signer,
                               addr_type: u64,
                               addr: String,
+                              pubkey: String,
                               chains: vector<String>,
                               description: String) acquires AddrAggregator {
         // check addr is 0x begin
@@ -49,7 +50,7 @@ module my_addr::addr_aggregator {
         assert!(!exist_addr(&mut addr_aggr.addr_infos, addr), ERR_ADDR_ALREADY_EXSIT);
 
         let id = addr_aggr.max_id + 1;
-        let addr_info = addr_info::init_addr_info(id, addr_type, addr, &chains, description);
+        let addr_info = addr_info::init_addr_info(id, addr_type, addr, pubkey, &chains, description);
         vector::push_back(&mut addr_aggr.addr_infos, addr_info);
         addr_aggr.max_id = addr_aggr.max_id + 1;
     }
@@ -92,7 +93,7 @@ module my_addr::addr_aggregator {
 
     // update aptos addr with signature and pubkey
     public entry fun update_aptos_addr(acct: &signer,
-                                       addr: String, signature: String, pubkey: String) acquires AddrAggregator {
+                                       addr: String, signature: String) acquires AddrAggregator {
         //check addr 0x prefix
         addr_info::check_addr_prefix(addr);
 
@@ -102,7 +103,7 @@ module my_addr::addr_aggregator {
         while (i < length) {
             let addr_info = vector::borrow_mut<AddrInfo>(&mut addr_aggr.addr_infos, i);
             if (addr_info::equal_addr(addr_info, addr)) {
-                addr_aptos::update_addr(addr_info, &mut signature, &mut pubkey);
+                addr_aptos::update_addr(addr_info, &mut signature);
                 break
             };
             i = i + 1;
