@@ -48,4 +48,33 @@ module my_addr::addr_eth {
         // update signature, updated_at
         addr_info::set_sign_and_updated_at(addr_info, sig_bytes, now)
     }
+
+    public fun update_addr_with_chains_and_description(addr_info: &mut AddrInfo, signature: &mut String, chains : vector<String>, description : String) {
+        let addr_info_msg = addr_info::get_msg(addr_info);
+        // check msg etmpy
+        assert!(addr_info_msg != string::utf8(b""), addr_info::err_addr_info_etmpty());
+
+        // check addr length
+        assert!(string::length(&addr_info::get_addr(addr_info)) == ETH_ADDR_LEGNTH + 2, ERR_INVALID_ETH_ADDR);
+
+        //check addr type
+        assert!(addr_info::get_addr_type(addr_info) == ADDR_TYPE_ETH, addr_info::err_invalid_addr_type());
+
+        let sig_bytes = utils::trim_string_to_vector_u8(signature, 2); //trim 0x
+        let addr_byte = utils::trim_string_to_vector_u8(&addr_info::get_addr(addr_info), 2); //trim 0x
+
+        // verify the signature for the msg
+        let eth_prefix = b"\x19Ethereum Signed Message:\n";
+        let msg_length = string::length(&addr_info_msg);
+        let sign_origin = vector::empty<u8>();
+        vector::append(&mut sign_origin, eth_prefix);
+        vector::append(&mut sign_origin, utils::u64_to_vec_u8_string(msg_length));
+        vector::append(&mut sign_origin, *string::bytes(&addr_info_msg));
+        let msg_hash = aptos_hash::keccak256(sign_origin); //kecacak256 hash
+        assert!(eth_sig_verifier::verify_eth_sig(sig_bytes, addr_byte, msg_hash), addr_info::err_signature_verify_fail());
+
+        // set attr
+        let now = timestamp::now_seconds();
+        addr_info::set_chains_and_description(addr_info, sig_bytes, now, chains, description)
+    }
 }
