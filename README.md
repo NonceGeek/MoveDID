@@ -117,32 +117,7 @@ aptos move run --function-id 1f9aa0aa17a3c8b02546df9353cdbee47f14bcaf25f5524492a
 
 ## Guide of New Module Addition
 
-0x01: add chain addr type in addr_info.move.
-
-example: 
-
-```Rust
-  //addr type enum
-  const ADDR_TYPE_ETH: u64 = 0;  //eth
-  const ADDR_TYPE_APTOS: u64 = 1; //aptos
-  
-  // addr type pack
-  public fun addr_type_eth() : u64 {ADDR_TYPE_ETH}
-  public fun addr_type_aptos() : u64 {ADDR_TYPE_APTOS}
-```
-
-0x01: add entry fun in addr_aggregator.move.
-
-example:
-
-```Rust
-public entry fun update_eth_addr(acct: &signer,
-      addr: String, signature : String) acquires AddrAggregator {
-      ...
-}  
-```
-
-0x02: add new chain type module file, like addr_eth.move; add constant variable  and implement update_addr fun.
+0x01: add new chain type module file, like addr_eth.move; add constant variable  and implement update_addr fun.
 
 example: 
 
@@ -161,7 +136,7 @@ public fun update_addr(addr_info: &mut AddrInfo, signature : &mut String) {
 }
 ```
 
-0x03: continue the second step, put the third step update_addr to the specify chain's update_*_addr fun.
+0x02: continue the second step, put the third step update_addr to the specify chain's update_*_addr fun.
 
 example: 
 ```Rust
