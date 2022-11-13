@@ -1,6 +1,7 @@
 [package]
 name = "did"
 version = "0.0.1"
+# upgrade_policy = "compatible"
 
 [addresses]
 my_addr = "_"

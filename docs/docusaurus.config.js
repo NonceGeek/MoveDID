@@ -89,7 +89,7 @@ const config = {
           {
             position: "left",
             type: "doc",
-            docId: "move-did-white-paper/index",
+            docId: "move-did-white-paper",
             label: "Move DID White Paper",
           },
         ],
