@@ -4,6 +4,8 @@ module my_addr::endpoint_aggregator {
     use std::string::{String};
     use std::table::{Self, Table};
 
+    const ERR_ENDPOINT_PARAM_VECTOR_LENGHT_MISMATCH: u64 = 5000;
+
     struct Endpoint has store, copy, drop {
         url: String,
         description: String,
@@ -41,6 +43,30 @@ module my_addr::endpoint_aggregator {
 
         table::add(&mut endpoint_aggr.endpoints_map, name, endpoint_info);
         vector::push_back(&mut endpoint_aggr.names, name);
+    }
+
+    public entry fun batch_add_endpoint(
+        acct: &signer,
+        names: vector<String>,
+        endpoints : vector<Endpoint>
+    ) acquires EndpointAggregator {
+
+        let names_length = vector::length(&names);
+        let endpoints_length = vector::length(&endpoints);
+        assert!(names_length == endpoints_length, ERR_ENDPOINT_PARAM_VECTOR_LENGHT_MISMATCH);
+
+        let endpoint_aggr = borrow_global_mut<EndpointAggregator>(signer::address_of(acct));
+
+        let i = 0;
+        while (i < names_length) {
+            let name = vector::borrow<String>(&names, i);
+            let endpoint = vector::borrow<Endpoint>(&endpoints, i);
+
+            table::add(&mut endpoint_aggr.endpoints_map, *name, *endpoint);
+            vector::push_back(&mut endpoint_aggr.names, *name);
+
+            i = i + 1;
+        };
     }
 
     // public entry fun update endpoint with params

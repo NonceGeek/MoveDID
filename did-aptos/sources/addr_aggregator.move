@@ -14,6 +14,7 @@ module my_addr::addr_aggregator {
 
     // err enum
     const ERR_ADDR_ALREADY_EXSIT: u64 = 1000;
+    const ERR_ADDR_PARAM_VECTOR_LENGHT_MISMATCH:u64 = 1001;
 
     struct AddrAggregator has key {
         key_addr: address,
@@ -58,6 +59,30 @@ module my_addr::addr_aggregator {
         vector::push_back(&mut addr_aggr.addrs, addr);
 
         addr_aggr.max_id = addr_aggr.max_id + 1;
+    }
+
+    public entry fun batch_add_addr(
+        acct: &signer,
+        addrs: vector<String>,
+        addr_infos : vector<AddrInfo>
+    ) acquires AddrAggregator {
+
+        let addrs_length = vector::length(&addrs);
+        let addr_infos_length = vector::length(&addr_infos);
+        assert!(addrs_length == addr_infos_length, ERR_ADDR_PARAM_VECTOR_LENGHT_MISMATCH);
+
+        let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
+
+        let i = 0;
+        while (i < addrs_length) {
+            let name = vector::borrow<String>(&addrs, i);
+            let endpoint = vector::borrow<AddrInfo>(&addr_infos, i);
+
+            table::add(&mut addr_aggr.addr_infos_map, *name, *endpoint);
+            vector::push_back(&mut addr_aggr.addrs, *name);
+
+            i = i + 1;
+        };
     }
 
     fun exist_addr_by_map(addr_infos_map: &mut Table<String, AddrInfo>, addr: String) : bool {
