@@ -1,5 +1,6 @@
 module my_addr::endpoint_aggregator {
     use std::signer;
+    use std::vector;
     use std::string::{String};
     use std::table::{Self, Table};
 
@@ -11,13 +12,15 @@ module my_addr::endpoint_aggregator {
 
     struct EndpointAggregator has key {
         key_addr: address,
-        endpoints_map:Table<String, Endpoint>
+        endpoints_map:Table<String, Endpoint>,
+        names: vector<String>,
     }
 
     public entry fun create_endpoint_aggregator(acct: &signer) {
         let endpoint_aggr = EndpointAggregator {
             key_addr: signer::address_of(acct),
-            endpoints_map: table::new()
+            endpoints_map: table::new(),
+            names: vector::empty<String>(),
         };
         move_to<EndpointAggregator>(acct, endpoint_aggr);
     }
@@ -37,6 +40,7 @@ module my_addr::endpoint_aggregator {
         };
 
         table::add(&mut endpoint_aggr.endpoints_map, name, endpoint_info);
+        vector::push_back(&mut endpoint_aggr.names, name);
     }
 
     // public entry fun update endpoint with params
@@ -61,5 +65,16 @@ module my_addr::endpoint_aggregator {
         name: String) acquires EndpointAggregator {
         let endpoint_aggr = borrow_global_mut<EndpointAggregator>(signer::address_of(acct));
         table::remove(&mut endpoint_aggr.endpoints_map, name);
+
+        let length = vector::length(&endpoint_aggr.names);
+        let i = 0;
+        while (i < length) {
+            let current_name = vector::borrow<String>(&endpoint_aggr.names, i);
+            if (*current_name == name) {
+                vector::remove(&mut endpoint_aggr.names, i);
+                break
+            };
+            i = i + 1;
+        };
     }
 }
