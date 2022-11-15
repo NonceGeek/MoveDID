@@ -125,6 +125,18 @@ module my_addr::addr_aggregator {
         addr_info::update_addr_msg_with_chains_and_description(addr_info, chains, description);
     }
 
+    //update addr info for non verify
+    public entry fun update_addr_for_non_verify(
+        acct: &signer, addr: String, chains: vector<String>, description: String) acquires AddrAggregator {
+        //check addr 0x prefix
+        addr_info::check_addr_prefix(addr);
+
+        let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
+        let addr_info = table::borrow_mut(&mut addr_aggr.addr_infos_map, addr);
+
+        addr_info::update_addr_for_non_verify(addr_info, chains, description);
+    }
+
     // public fun delete addr
     public entry fun delete_addr(
         acct: &signer,

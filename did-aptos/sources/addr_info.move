@@ -13,6 +13,7 @@ module my_addr::addr_info {
     const ERR_ADDR_INVALID_PREFIX: u64 = 1004;
     const ERR_INVALID_ADR_TYPE: u64 = 1005;
     const ERR_ADDR_NO_FIRST_VERIFY: u64 = 1006;
+    const ERR_ADDR_MUST_NO_VERIFY: u64 = 1007;
 
     // err pack
     public fun err_addr_info_etmpty(): u64 { ERR_ADDR_INFO_MSG_EMPTY }
@@ -120,7 +121,7 @@ module my_addr::addr_info {
     // update
     public fun update_addr_msg_with_chains_and_description(addr_info: &mut AddrInfo, chains: vector<String>, description: String) {
         // check addr_info's signature has verified
-        assert!(vector::length(&addr_info.signature) == 0, ERR_ADDR_NO_FIRST_VERIFY);
+        assert!(vector::length(&addr_info.signature) != 0, ERR_ADDR_NO_FIRST_VERIFY);
 
         // msg format : block_height.chain_id.nonce_geek.chains.description
         let height = block::get_current_block_height();
@@ -135,7 +136,6 @@ module my_addr::addr_info {
         let msg_suffix = b".nonce_geek";
         vector::append(&mut msg, msg_suffix);
         vector::append(&mut msg, b".");
-
         // add chains
         let chains_length = vector::length(&chains);
         let i = 0;
@@ -147,12 +147,23 @@ module my_addr::addr_info {
             };
             i = i + 1
         };
-        vector::append(&mut msg, b".");
 
+        vector::append(&mut msg, b".");
         // add description
         vector::append(&mut msg, *string::bytes(&description));
 
         addr_info.msg = string::utf8(msg);
+        addr_info.chains = chains;
+        addr_info.description = description;
+        addr_info.updated_at = timestamp::now_seconds();
+    }
+
+    public fun update_addr_for_non_verify(addr_info: &mut AddrInfo, chains: vector<String>, description: String) {
+        // check addr_info's signature must no verified
+        assert!(vector::length(&addr_info.signature) == 0, ERR_ADDR_MUST_NO_VERIFY);
+
+        addr_info.chains = chains;
+        addr_info.description = description;
         addr_info.updated_at = timestamp::now_seconds();
     }
 }
