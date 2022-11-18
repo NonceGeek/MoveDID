@@ -51,6 +51,10 @@ module my_addr::addr_info {
 
     public fun get_pubkey(addr_info: &AddrInfo): String { addr_info.pubkey }
 
+    public fun get_chains(addr_info: &AddrInfo): vector<String> { addr_info.chains }
+
+    public fun get_description(addr_info: &AddrInfo): String { addr_info.description }
+
 
     // init
     public fun init_addr_info(id: u64,
@@ -111,7 +115,7 @@ module my_addr::addr_info {
     }
 
     // set attr
-    public fun set_chains_and_description(addr_info: &mut AddrInfo, sig: vector<u8>, updated_at: u64, chains: vector<String>, description : String) {
+    public fun set_chains_and_description(addr_info: &mut AddrInfo, sig: vector<u8>, updated_at: u64, chains: vector<String>, description: String) {
         addr_info.signature = sig;
         addr_info.updated_at = updated_at;
         addr_info.chains = chains;
@@ -139,7 +143,7 @@ module my_addr::addr_info {
         // add chains
         let chains_length = vector::length(&chains);
         let i = 0;
-        while(i < chains_length) {
+        while (i < chains_length) {
             let chain = vector::borrow<String>(&mut chains, i);
             vector::append(&mut msg, *string::bytes(chain));
             if (i != chains_length - 1) {

@@ -3,6 +3,8 @@ module my_addr::addr_aggregator {
     use std::string::{String};
     use std::vector;
     use std::table::{Self, Table};
+    use aptos_framework::event::{Self, EventHandle};
+    use aptos_framework::account;
     use my_addr::addr_info::{Self, AddrInfo};
     use my_addr::addr_eth;
     use my_addr::addr_aptos;
@@ -14,15 +16,42 @@ module my_addr::addr_aggregator {
 
     // err enum
     const ERR_ADDR_ALREADY_EXSIT: u64 = 1000;
-    const ERR_ADDR_PARAM_VECTOR_LENGHT_MISMATCH:u64 = 1001;
+    const ERR_ADDR_PARAM_VECTOR_LENGHT_MISMATCH: u64 = 1001;
+
 
     struct AddrAggregator has key {
         key_addr: address,
-        addr_infos_map:Table<String, AddrInfo>,
-        addrs:vector<String>,
+        addr_infos_map: Table<String, AddrInfo>,
+        addrs: vector<String>,
         type: u64,
         description: String,
         max_id: u64,
+        add_addr_event: EventHandle<AddAddrEvent>,
+        update_addr_signature_event: EventHandle<UpdateAddrSignatureEvent>,
+        update_addr_event: EventHandle<UpdateAddrEvent>,
+        delete_addr_event: EventHandle<DeleteAddrEvent>,
+    }
+
+    struct AddAddrEvent has drop, store {
+        addr_type: u64,
+        addr: String,
+        pubkey: String,
+        chains: vector<String>,
+        description: String
+    }
+
+    struct UpdateAddrSignatureEvent has drop, store {
+        addr: String
+    }
+
+    struct UpdateAddrEvent has drop, store {
+        addr: String,
+        chains: vector<String>,
+        description: String
+    }
+
+    struct DeleteAddrEvent has drop, store {
+        addr: String
     }
 
     // init
@@ -30,12 +59,22 @@ module my_addr::addr_aggregator {
         let addr_aggr = AddrAggregator {
             key_addr: signer::address_of(acct),
             addr_infos_map: table::new(),
-            addrs:vector::empty<String>(),
+            addrs: vector::empty<String>(),
             type,
             description,
-            max_id: 0
+            max_id: 0,
+            add_addr_event: account::new_event_handle<AddAddrEvent>(acct),
+            update_addr_signature_event: account::new_event_handle<UpdateAddrSignatureEvent>(acct),
+            update_addr_event: account::new_event_handle<UpdateAddrEvent>(acct),
+            delete_addr_event: account::new_event_handle<DeleteAddrEvent>(acct),
         };
         move_to<AddrAggregator>(acct, addr_aggr);
+    }
+
+    // update addr aggregator description
+    public entry fun update_addr_aggregator_description(acct: &signer, description: String) acquires AddrAggregator {
+        let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
+        addr_aggr.description = description;
     }
 
     // add addr
@@ -59,14 +98,22 @@ module my_addr::addr_aggregator {
         vector::push_back(&mut addr_aggr.addrs, addr);
 
         addr_aggr.max_id = addr_aggr.max_id + 1;
+
+        event::emit_event(&mut addr_aggr.add_addr_event, AddAddrEvent {
+            addr_type,
+            addr,
+            pubkey,
+            chains,
+            description,
+        })
     }
 
+    // batch add addr
     public entry fun batch_add_addr(
         acct: &signer,
         addrs: vector<String>,
-        addr_infos : vector<AddrInfo>
+        addr_infos: vector<AddrInfo>
     ) acquires AddrAggregator {
-
         let addrs_length = vector::length(&addrs);
         let addr_infos_length = vector::length(&addr_infos);
         assert!(addrs_length == addr_infos_length, ERR_ADDR_PARAM_VECTOR_LENGHT_MISMATCH);
@@ -76,16 +123,24 @@ module my_addr::addr_aggregator {
         let i = 0;
         while (i < addrs_length) {
             let name = vector::borrow<String>(&addrs, i);
-            let endpoint = vector::borrow<AddrInfo>(&addr_infos, i);
+            let addr_info = vector::borrow<AddrInfo>(&addr_infos, i);
 
-            table::add(&mut addr_aggr.addr_infos_map, *name, *endpoint);
+            table::add(&mut addr_aggr.addr_infos_map, *name, *addr_info);
             vector::push_back(&mut addr_aggr.addrs, *name);
+
+            event::emit_event(&mut addr_aggr.add_addr_event, AddAddrEvent {
+                addr_type: addr_info::get_addr_type(addr_info),
+                addr: addr_info::get_addr(addr_info),
+                pubkey: addr_info::get_pubkey(addr_info),
+                chains: addr_info::get_chains(addr_info),
+                description: addr_info::get_description(addr_info)
+            });
 
             i = i + 1;
         };
     }
 
-    fun exist_addr_by_map(addr_infos_map: &mut Table<String, AddrInfo>, addr: String) : bool {
+    fun exist_addr_by_map(addr_infos_map: &mut Table<String, AddrInfo>, addr: String): bool {
         table::contains(addr_infos_map, addr)
     }
 
@@ -99,6 +154,10 @@ module my_addr::addr_aggregator {
         let addr_info = table::borrow_mut(&mut addr_aggr.addr_infos_map, addr);
 
         addr_eth::update_addr(addr_info, &mut signature);
+
+        event::emit_event(&mut addr_aggr.update_addr_signature_event, UpdateAddrSignatureEvent {
+            addr
+        });
     }
 
     // update aptos addr with signature and pubkey
@@ -111,6 +170,10 @@ module my_addr::addr_aggregator {
         let addr_info = table::borrow_mut(&mut addr_aggr.addr_infos_map, addr);
 
         addr_aptos::update_addr(addr_info, &mut signature);
+
+        event::emit_event(&mut addr_aggr.update_addr_signature_event, UpdateAddrSignatureEvent {
+            addr
+        });
     }
 
     //update addr msg
@@ -123,6 +186,12 @@ module my_addr::addr_aggregator {
         let addr_info = table::borrow_mut(&mut addr_aggr.addr_infos_map, addr);
 
         addr_info::update_addr_msg_with_chains_and_description(addr_info, chains, description);
+
+        event::emit_event(&mut addr_aggr.update_addr_event, UpdateAddrEvent {
+            addr,
+            chains,
+            description
+        });
     }
 
     //update addr info for non verify
@@ -135,6 +204,12 @@ module my_addr::addr_aggregator {
         let addr_info = table::borrow_mut(&mut addr_aggr.addr_infos_map, addr);
 
         addr_info::update_addr_for_non_verify(addr_info, chains, description);
+
+        event::emit_event(&mut addr_aggr.update_addr_event, UpdateAddrEvent {
+            addr,
+            chains,
+            description
+        });
     }
 
     // public fun delete addr
@@ -153,6 +228,10 @@ module my_addr::addr_aggregator {
             let current_addr = vector::borrow<String>(&addr_aggr.addrs, i);
             if (*current_addr == addr) {
                 vector::remove(&mut addr_aggr.addrs, i);
+
+                event::emit_event(&mut addr_aggr.delete_addr_event, DeleteAddrEvent {
+                    addr
+                });
                 break
             };
             i = i + 1;

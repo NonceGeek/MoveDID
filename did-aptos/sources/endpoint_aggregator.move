@@ -3,6 +3,8 @@ module my_addr::endpoint_aggregator {
     use std::vector;
     use std::string::{String};
     use std::table::{Self, Table};
+    use aptos_framework::event::{Self, EventHandle};
+    use aptos_framework::account;
 
     const ERR_ENDPOINT_PARAM_VECTOR_LENGHT_MISMATCH: u64 = 5000;
 
@@ -14,8 +16,29 @@ module my_addr::endpoint_aggregator {
 
     struct EndpointAggregator has key {
         key_addr: address,
-        endpoints_map:Table<String, Endpoint>,
+        endpoints_map: Table<String, Endpoint>,
         names: vector<String>,
+        add_endpoint_event: EventHandle<AddrEndpointEvent>,
+        update_endpoint_event: EventHandle<UpdateEndpointEvent>,
+        delete_endpoint_event: EventHandle<DeleteEndpointEvent>,
+    }
+
+    struct AddrEndpointEvent has drop, store {
+        name: String,
+        url: String,
+        description: String,
+        verification_url: String
+    }
+
+    struct UpdateEndpointEvent has drop, store {
+        name: String,
+        url: String,
+        description: String,
+        verification_url: String
+    }
+
+    struct DeleteEndpointEvent has drop, store {
+        name: String
     }
 
     public entry fun create_endpoint_aggregator(acct: &signer) {
@@ -23,6 +46,9 @@ module my_addr::endpoint_aggregator {
             key_addr: signer::address_of(acct),
             endpoints_map: table::new(),
             names: vector::empty<String>(),
+            add_endpoint_event: account::new_event_handle<AddrEndpointEvent>(acct),
+            update_endpoint_event: account::new_event_handle<UpdateEndpointEvent>(acct),
+            delete_endpoint_event: account::new_event_handle<DeleteEndpointEvent>(acct),
         };
         move_to<EndpointAggregator>(acct, endpoint_aggr);
     }
@@ -43,14 +69,20 @@ module my_addr::endpoint_aggregator {
 
         table::add(&mut endpoint_aggr.endpoints_map, name, endpoint_info);
         vector::push_back(&mut endpoint_aggr.names, name);
+
+        event::emit_event(&mut endpoint_aggr.add_endpoint_event, AddrEndpointEvent {
+            name,
+            url,
+            description,
+            verification_url
+        })
     }
 
     public entry fun batch_add_endpoint(
         acct: &signer,
         names: vector<String>,
-        endpoints : vector<Endpoint>
+        endpoints: vector<Endpoint>
     ) acquires EndpointAggregator {
-
         let names_length = vector::length(&names);
         let endpoints_length = vector::length(&endpoints);
         assert!(names_length == endpoints_length, ERR_ENDPOINT_PARAM_VECTOR_LENGHT_MISMATCH);
@@ -64,6 +96,13 @@ module my_addr::endpoint_aggregator {
 
             table::add(&mut endpoint_aggr.endpoints_map, *name, *endpoint);
             vector::push_back(&mut endpoint_aggr.names, *name);
+
+            event::emit_event(&mut endpoint_aggr.add_endpoint_event, AddrEndpointEvent {
+                name: *name,
+                url: endpoint.url,
+                description: endpoint.description,
+                verification_url: endpoint.verification_url
+            });
 
             i = i + 1;
         };
@@ -83,6 +122,13 @@ module my_addr::endpoint_aggregator {
         endpoint.url = new_url;
         endpoint.description = new_description;
         endpoint.verification_url = new_verification_url;
+
+        event::emit_event(&mut endpoint_aggr.update_endpoint_event, UpdateEndpointEvent {
+            name,
+            url: new_url,
+            description: new_description,
+            verification_url: new_verification_url
+        })
     }
 
     // public entry fun delete endpoint
@@ -98,6 +144,11 @@ module my_addr::endpoint_aggregator {
             let current_name = vector::borrow<String>(&endpoint_aggr.names, i);
             if (*current_name == name) {
                 vector::remove(&mut endpoint_aggr.names, i);
+
+                event::emit_event(&mut endpoint_aggr.delete_endpoint_event, DeleteEndpointEvent {
+                    name
+                });
+
                 break
             };
             i = i + 1;
