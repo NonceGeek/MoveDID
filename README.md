@@ -1,39 +1,49 @@
 # MoveDID
 
-Profiles:
+DID protocol compatible with Aptos/Sui/Starcoin, including Contracts,Demo & SDK.
+The implementation follows the [did@w3c](https://www.w3.org/TR/did-core/)
+
+! Important Profiles:
 
 > Homepage:
 >
 > https://movedid.build
 >
+> Manager dApp:
+>
+> https://manager.movedid.build
+>
+> https://github.com/NonceGeek/scaffold-move
+>
 > Docs:
-> 
+>
 > https://docs.movedid.build
-> 
+>
 > Twitter:
 > https://twitter.com/Move_DID
-
-DID protocol compatible with Aptos/Sui/Starcoin, including Contracts,Demo & SDK.
-The implementation follows the [did@w3c](https://www.w3.org/TR/did-core/)
-
-see example in:
-
-> https://github.com/NonceGeek/move_sdk_ex_liveview_example
+>
+> Deck:
+>
+> https://github.com/NonceGeek/MoveDID/blob/main/MoveDID-Deck-EN.pdf
+>
+> Demo Video:
+>
+> https://youtu.be/LOuQo1XjSxE
 
 ## Dev Modules on Move Chains
 
 * Aptos:
 
-> 1f9aa0aa17a3c8b02546df9353cdbee47f14bcaf25f5524492a17a8ab8c906ee
+> 0xb923303d20c38a120669ad0ed751a105f254b049e75a350111d566009df9ba11
 > 
-> https://explorer.aptoslabs.com/account/0x1f9aa0aa17a3c8b02546df9353cdbee47f14bcaf25f5524492a17a8ab8c906ee/modules
+> https://explorer.aptoslabs.com/account/0xb923303d20c38a120669ad0ed751a105f254b049e75a350111d566009df9ba11/modules
 
 ## Parts
 
 * did contracts:
   The did contracts in MOVE Lang.
 
-  * [ ] aptos
+  * [x] aptos ( auditing... )
   * [ ] starcoin
   * [ ] sui
 
