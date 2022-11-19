@@ -24,7 +24,7 @@ The implementation follows the [did@w3c](https://www.w3.org/TR/did-core/)
 >
 > Deck:
 >
-> 
+> https://github.com/NonceGeek/MoveDID/blob/main/MoveDID-Deck-EN.pdf
 
 ## Dev Modules on Move Chains
 
