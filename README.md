@@ -8,19 +8,23 @@ The implementation follows the [did@w3c](https://www.w3.org/TR/did-core/)
 > Homepage:
 >
 > https://movedid.build
-> 
-> Manager dApp in:
-> 
-> https://github.com/NonceGeek/scaffold-move
+>
+> Manager dApp:
 >
 > https://manager.movedid.build
 >
+> https://github.com/NonceGeek/scaffold-move
+>
 > Docs:
-> 
+>
 > https://docs.movedid.build
-> 
+>
 > Twitter:
 > https://twitter.com/Move_DID
+>
+> Deck:
+>
+> 
 
 ## Dev Modules on Move Chains
 
