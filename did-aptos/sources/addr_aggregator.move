@@ -26,10 +26,10 @@ module my_addr::addr_aggregator {
         type: u64,
         description: String,
         max_id: u64,
-        add_addr_event: EventHandle<AddAddrEvent>,
-        update_addr_signature_event: EventHandle<UpdateAddrSignatureEvent>,
-        update_addr_event: EventHandle<UpdateAddrEvent>,
-        delete_addr_event: EventHandle<DeleteAddrEvent>,
+        add_addr_event_set: AddAddrEventSet,
+        update_addr_signature_event_set: UpdateAddrSignatureEventSet,
+        update_addr_event_set: UpdateAddrEventSet,
+        delete_addr_event_set: DeleteAddrEventSet,
     }
 
     struct AddAddrEvent has drop, store {
@@ -40,8 +40,16 @@ module my_addr::addr_aggregator {
         description: String
     }
 
+    struct AddAddrEventSet has store  {
+        add_addr_event: EventHandle<AddAddrEvent>,
+    }
+
     struct UpdateAddrSignatureEvent has drop, store {
         addr: String
+    }
+
+    struct UpdateAddrSignatureEventSet has store  {
+        update_addr_signature_event: EventHandle<UpdateAddrSignatureEvent>,
     }
 
     struct UpdateAddrEvent has drop, store {
@@ -50,8 +58,16 @@ module my_addr::addr_aggregator {
         description: String
     }
 
+    struct UpdateAddrEventSet has store  {
+        update_addr_event: EventHandle<UpdateAddrEvent>,
+    }
+
     struct DeleteAddrEvent has drop, store {
         addr: String
+    }
+
+    struct DeleteAddrEventSet has store {
+        delete_addr_event: EventHandle<DeleteAddrEvent>
     }
 
     // init
@@ -63,10 +79,18 @@ module my_addr::addr_aggregator {
             type,
             description,
             max_id: 0,
-            add_addr_event: account::new_event_handle<AddAddrEvent>(acct),
-            update_addr_signature_event: account::new_event_handle<UpdateAddrSignatureEvent>(acct),
-            update_addr_event: account::new_event_handle<UpdateAddrEvent>(acct),
-            delete_addr_event: account::new_event_handle<DeleteAddrEvent>(acct),
+            add_addr_event_set: AddAddrEventSet{
+                add_addr_event: account::new_event_handle<AddAddrEvent>(acct),
+            },
+            update_addr_signature_event_set: UpdateAddrSignatureEventSet{
+                update_addr_signature_event: account::new_event_handle<UpdateAddrSignatureEvent>(acct)
+            },
+            update_addr_event_set: UpdateAddrEventSet {
+                update_addr_event:account::new_event_handle<UpdateAddrEvent>(acct)
+            },
+            delete_addr_event_set: DeleteAddrEventSet {
+                delete_addr_event: account::new_event_handle<DeleteAddrEvent>(acct),
+            }
         };
         move_to<AddrAggregator>(acct, addr_aggr);
     }
@@ -99,7 +123,7 @@ module my_addr::addr_aggregator {
 
         addr_aggr.max_id = addr_aggr.max_id + 1;
 
-        event::emit_event(&mut addr_aggr.add_addr_event, AddAddrEvent {
+        event::emit_event(&mut addr_aggr.add_addr_event_set.add_addr_event, AddAddrEvent {
             addr_type,
             addr,
             pubkey,
@@ -128,7 +152,7 @@ module my_addr::addr_aggregator {
             table::add(&mut addr_aggr.addr_infos_map, *name, *addr_info);
             vector::push_back(&mut addr_aggr.addrs, *name);
 
-            event::emit_event(&mut addr_aggr.add_addr_event, AddAddrEvent {
+            event::emit_event(&mut addr_aggr.add_addr_event_set.add_addr_event, AddAddrEvent {
                 addr_type: addr_info::get_addr_type(addr_info),
                 addr: addr_info::get_addr(addr_info),
                 pubkey: addr_info::get_pubkey(addr_info),
@@ -155,7 +179,7 @@ module my_addr::addr_aggregator {
 
         addr_eth::update_addr(addr_info, &mut signature);
 
-        event::emit_event(&mut addr_aggr.update_addr_signature_event, UpdateAddrSignatureEvent {
+        event::emit_event(&mut addr_aggr.update_addr_signature_event_set.update_addr_signature_event, UpdateAddrSignatureEvent {
             addr
         });
     }
@@ -171,7 +195,7 @@ module my_addr::addr_aggregator {
 
         addr_aptos::update_addr(addr_info, &mut signature);
 
-        event::emit_event(&mut addr_aggr.update_addr_signature_event, UpdateAddrSignatureEvent {
+        event::emit_event(&mut addr_aggr.update_addr_signature_event_set.update_addr_signature_event, UpdateAddrSignatureEvent {
             addr
         });
     }
@@ -187,7 +211,7 @@ module my_addr::addr_aggregator {
 
         addr_info::update_addr_msg_with_chains_and_description(addr_info, chains, description);
 
-        event::emit_event(&mut addr_aggr.update_addr_event, UpdateAddrEvent {
+        event::emit_event(&mut addr_aggr.update_addr_event_set.update_addr_event, UpdateAddrEvent {
             addr,
             chains,
             description
@@ -205,7 +229,7 @@ module my_addr::addr_aggregator {
 
         addr_info::update_addr_for_non_verify(addr_info, chains, description);
 
-        event::emit_event(&mut addr_aggr.update_addr_event, UpdateAddrEvent {
+        event::emit_event(&mut addr_aggr.update_addr_event_set.update_addr_event, UpdateAddrEvent {
             addr,
             chains,
             description
@@ -229,7 +253,7 @@ module my_addr::addr_aggregator {
             if (*current_addr == addr) {
                 vector::remove(&mut addr_aggr.addrs, i);
 
-                event::emit_event(&mut addr_aggr.delete_addr_event, DeleteAddrEvent {
+                event::emit_event(&mut addr_aggr.delete_addr_event_set.delete_addr_event, DeleteAddrEvent {
                     addr
                 });
                 break

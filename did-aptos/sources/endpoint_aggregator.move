@@ -18,9 +18,9 @@ module my_addr::endpoint_aggregator {
         key_addr: address,
         endpoints_map: Table<String, Endpoint>,
         names: vector<String>,
-        add_endpoint_event: EventHandle<AddrEndpointEvent>,
-        update_endpoint_event: EventHandle<UpdateEndpointEvent>,
-        delete_endpoint_event: EventHandle<DeleteEndpointEvent>,
+        add_endpoint_event_set: AddEndpointEventSet,
+        update_endpoint_event_set: UpdateEndpointEventSet,
+        delete_endpoint_event_set: DeleteEndpointEventSet,
     }
 
     struct AddrEndpointEvent has drop, store {
@@ -30,6 +30,10 @@ module my_addr::endpoint_aggregator {
         verification_url: String
     }
 
+    struct AddEndpointEventSet has store {
+        add_endpoint_event: EventHandle<AddrEndpointEvent>,
+    }
+
     struct UpdateEndpointEvent has drop, store {
         name: String,
         url: String,
@@ -37,8 +41,16 @@ module my_addr::endpoint_aggregator {
         verification_url: String
     }
 
+    struct UpdateEndpointEventSet has store {
+        update_endpoint_event: EventHandle<UpdateEndpointEvent>,
+    }
+
     struct DeleteEndpointEvent has drop, store {
         name: String
+    }
+
+    struct DeleteEndpointEventSet has store {
+        delete_endpoint_event: EventHandle<DeleteEndpointEvent>,
     }
 
     public entry fun create_endpoint_aggregator(acct: &signer) {
@@ -46,9 +58,15 @@ module my_addr::endpoint_aggregator {
             key_addr: signer::address_of(acct),
             endpoints_map: table::new(),
             names: vector::empty<String>(),
-            add_endpoint_event: account::new_event_handle<AddrEndpointEvent>(acct),
-            update_endpoint_event: account::new_event_handle<UpdateEndpointEvent>(acct),
-            delete_endpoint_event: account::new_event_handle<DeleteEndpointEvent>(acct),
+            add_endpoint_event_set: AddEndpointEventSet{
+                add_endpoint_event: account::new_event_handle<AddrEndpointEvent>(acct)
+            },
+            update_endpoint_event_set: UpdateEndpointEventSet{
+                update_endpoint_event: account::new_event_handle<UpdateEndpointEvent>(acct)
+            },
+            delete_endpoint_event_set: DeleteEndpointEventSet {
+                delete_endpoint_event: account::new_event_handle<DeleteEndpointEvent>(acct)
+            }
         };
         move_to<EndpointAggregator>(acct, endpoint_aggr);
     }
@@ -70,7 +88,7 @@ module my_addr::endpoint_aggregator {
         table::add(&mut endpoint_aggr.endpoints_map, name, endpoint_info);
         vector::push_back(&mut endpoint_aggr.names, name);
 
-        event::emit_event(&mut endpoint_aggr.add_endpoint_event, AddrEndpointEvent {
+        event::emit_event(&mut endpoint_aggr.add_endpoint_event_set.add_endpoint_event, AddrEndpointEvent {
             name,
             url,
             description,
@@ -97,7 +115,7 @@ module my_addr::endpoint_aggregator {
             table::add(&mut endpoint_aggr.endpoints_map, *name, *endpoint);
             vector::push_back(&mut endpoint_aggr.names, *name);
 
-            event::emit_event(&mut endpoint_aggr.add_endpoint_event, AddrEndpointEvent {
+            event::emit_event(&mut endpoint_aggr.add_endpoint_event_set.add_endpoint_event, AddrEndpointEvent {
                 name: *name,
                 url: endpoint.url,
                 description: endpoint.description,
@@ -123,7 +141,7 @@ module my_addr::endpoint_aggregator {
         endpoint.description = new_description;
         endpoint.verification_url = new_verification_url;
 
-        event::emit_event(&mut endpoint_aggr.update_endpoint_event, UpdateEndpointEvent {
+        event::emit_event(&mut endpoint_aggr.update_endpoint_event_set.update_endpoint_event, UpdateEndpointEvent {
             name,
             url: new_url,
             description: new_description,
@@ -145,7 +163,7 @@ module my_addr::endpoint_aggregator {
             if (*current_name == name) {
                 vector::remove(&mut endpoint_aggr.names, i);
 
-                event::emit_event(&mut endpoint_aggr.delete_endpoint_event, DeleteEndpointEvent {
+                event::emit_event(&mut endpoint_aggr.delete_endpoint_event_set.delete_endpoint_event, DeleteEndpointEvent {
                     name
                 });
 
