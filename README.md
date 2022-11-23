@@ -3,7 +3,7 @@
 MoveDID is a DID protocol that compatible with Move-based blockchain networks, including Aptos, Sui, and Starcoin.The vision of MoveDID is to be the foundation for the next generation of large-scale Web3 finance and Web3 society. MoveDID could be used for 3 types of subjects: human, organization, and bot.
 The implementation follows the [did@w3c](https://www.w3.org/TR/did-core/)
 
-! Important Profiles:
+! Important Links:
 
 > Homepage:
 >
