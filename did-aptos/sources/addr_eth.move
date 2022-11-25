@@ -7,13 +7,13 @@ module my_addr::addr_eth {
     use aptos_std::aptos_hash;
     use my_addr::addr_info::{Self, AddrInfo};
 
-    //eth addr type
+    // Eth addr type
     const ADDR_TYPE_ETH: u64 = 0;
 
-    //eth addr length
+    // Eth addr length
     const ETH_ADDR_LEGNTH: u64 = 40;
 
-    // err enum
+    // Err enum
     const ERR_INVALID_ETH_ADDR: u64 = 2001;
 
 
@@ -25,7 +25,7 @@ module my_addr::addr_eth {
         // check addr length
         assert!(string::length(&addr_info::get_addr(addr_info)) == ETH_ADDR_LEGNTH + 2, ERR_INVALID_ETH_ADDR);
 
-        //check addr type
+        // check addr type
         assert!(addr_info::get_addr_type(addr_info) == ADDR_TYPE_ETH, addr_info::err_invalid_addr_type());
 
         let sig_bytes = utils::trim_string_to_vector_u8(signature, 2); //trim 0x

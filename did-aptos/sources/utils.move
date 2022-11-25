@@ -66,7 +66,7 @@ module my_addr::utils {
 
 
 
-   // transfer string to vector u8 bytes
+   // Transfer string to vector u8 bytes
    public fun string_to_vector_u8(str : &String) : vector<u8> {
         assert!(string::length(str) % 2 == 0, ERR_STRING_LENGTH_INVALID);
         let vec = string::bytes(str);
@@ -90,14 +90,14 @@ module my_addr::utils {
         result
    }
 
-    // trim pos chars and transfer string to vector u8 bytes
+    // Trim pos chars and transfer string to vector u8 bytes
     public fun trim_string_to_vector_u8(str : &String, pos: u64) :  vector<u8>{
 
         let s = string::sub_string(str, pos, string::length(str));
         string_to_vector_u8(&s)
     }
 
-    // address to u64
+    // Address to u64
     public fun address_to_u64(address : address) : u64 {
         let vec = bcs::to_bytes(&address);
 

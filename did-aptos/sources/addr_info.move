@@ -6,7 +6,7 @@ module my_addr::addr_info {
     use aptos_framework::timestamp;
 
 
-    //err enum
+    // Err enum
     const ERR_ADDR_INFO_MSG_EMPTY: u64 = 1001;
     const ERR_SIGNATURE_VERIFY_FAIL: u64 = 1002;
     const ERR_TIMESTAMP_EXCEED: u64 = 1003;
@@ -15,7 +15,7 @@ module my_addr::addr_info {
     const ERR_ADDR_NO_FIRST_VERIFY: u64 = 1006;
     const ERR_ADDR_MUST_NO_VERIFY: u64 = 1007;
 
-    // err pack
+    // Err pack
     public fun err_addr_info_etmpty(): u64 { ERR_ADDR_INFO_MSG_EMPTY }
 
     public fun err_invalid_addr_type(): u64 { ERR_INVALID_ADR_TYPE }
@@ -38,7 +38,7 @@ module my_addr::addr_info {
         pubkey: String,
     }
 
-    // get attr
+    // Get attr
     public fun get_msg(addr_info: &AddrInfo): String { addr_info.msg }
 
     public fun get_addr(addr_info: &AddrInfo): String { addr_info.addr }
@@ -56,7 +56,7 @@ module my_addr::addr_info {
     public fun get_description(addr_info: &AddrInfo): String { addr_info.description }
 
 
-    // init
+    // Init
     public fun init_addr_info(id: u64,
                               addr_type: u64,
                               addr: String,
@@ -94,7 +94,7 @@ module my_addr::addr_info {
         }
     }
 
-    //check addr is 0x prefix
+    // Check addr is 0x prefix
     public fun check_addr_prefix(addr: String) {
         assert!(string::sub_string(&addr, 0, 2) == string::utf8(b"0x"), ERR_ADDR_INVALID_PREFIX);
     }
@@ -108,21 +108,13 @@ module my_addr::addr_info {
     }
 
 
-    // set attr
+    // Set attr
     public fun set_sign_and_updated_at(addr_info: &mut AddrInfo, sig: vector<u8>, updated_at: u64) {
         addr_info.signature = sig;
-        addr_info.updated_at = updated_at
-    }
-
-    // set attr
-    public fun set_chains_and_description(addr_info: &mut AddrInfo, sig: vector<u8>, updated_at: u64, chains: vector<String>, description: String) {
-        addr_info.signature = sig;
         addr_info.updated_at = updated_at;
-        addr_info.chains = chains;
-        addr_info.description = description;
     }
 
-    // update
+    // Update
     public fun update_addr_msg_with_chains_and_description(addr_info: &mut AddrInfo, chains: vector<String>, description: String) {
         // check addr_info's signature has verified
         assert!(vector::length(&addr_info.signature) != 0, ERR_ADDR_NO_FIRST_VERIFY);

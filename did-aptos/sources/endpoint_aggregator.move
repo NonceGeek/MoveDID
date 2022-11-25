@@ -126,7 +126,7 @@ module my_addr::endpoint_aggregator {
         };
     }
 
-    // public entry fun update endpoint with params
+    // Public entry fun update endpoint with params
     public entry fun update_endpoint(
         acct: &signer,
         name: String,
@@ -149,7 +149,7 @@ module my_addr::endpoint_aggregator {
         })
     }
 
-    // public entry fun delete endpoint
+    // Public entry fun delete endpoint
     public entry fun delete_endpoint(
         acct: &signer,
         name: String) acquires EndpointAggregator {
