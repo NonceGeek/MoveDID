@@ -7,31 +7,31 @@ module my_addr::addr_eth {
     use aptos_std::aptos_hash;
     use my_addr::addr_info::{Self, AddrInfo};
 
-    //eth addr type
+    // Eth addr type.
     const ADDR_TYPE_ETH: u64 = 0;
 
-    //eth addr length
+    // Eth addr length.
     const ETH_ADDR_LEGNTH: u64 = 40;
 
-    // err enum
+    // Err enum.
     const ERR_INVALID_ETH_ADDR: u64 = 2001;
 
 
     public fun update_addr(addr_info: &mut AddrInfo, signature: &mut String) {
         let addr_info_msg = addr_info::get_msg(addr_info);
-        // check msg etmpy
+        // Check msg etmpy.
         assert!(addr_info_msg != string::utf8(b""), addr_info::err_addr_info_etmpty());
 
-        // check addr length
+        // Check addr length.
         assert!(string::length(&addr_info::get_addr(addr_info)) == ETH_ADDR_LEGNTH + 2, ERR_INVALID_ETH_ADDR);
 
-        //check addr type
+        // Check addr type.
         assert!(addr_info::get_addr_type(addr_info) == ADDR_TYPE_ETH, addr_info::err_invalid_addr_type());
 
         let sig_bytes = utils::trim_string_to_vector_u8(signature, 2); //trim 0x
         let addr_byte = utils::trim_string_to_vector_u8(&addr_info::get_addr(addr_info), 2); //trim 0x
 
-        // verify the signature for the msg
+        // Verify the signature for the msg.
         let eth_prefix = b"\x19Ethereum Signed Message:\n";
         let msg_length = string::length(&addr_info_msg);
         let sign_origin = vector::empty<u8>();
@@ -41,11 +41,11 @@ module my_addr::addr_eth {
         let msg_hash = aptos_hash::keccak256(sign_origin); //kecacak256 hash
         assert!(eth_sig_verifier::verify_eth_sig(sig_bytes, addr_byte, msg_hash), addr_info::err_signature_verify_fail());
 
-        // verify the now - created_at <= 2h
+        // Verify the now - created_at <= 2h.
         let now = timestamp::now_seconds();
         assert!(now - addr_info::get_created_at(addr_info) <= 2 * 60 * 60, addr_info::err_timestamp_exceed());
 
-        // update signature, updated_at
+        // Update signature, updated_at.
         addr_info::set_sign_and_updated_at(addr_info, sig_bytes, now)
     }
 }

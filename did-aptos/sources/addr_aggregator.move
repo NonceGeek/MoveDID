@@ -9,12 +9,12 @@ module my_addr::addr_aggregator {
     use my_addr::addr_eth;
     use my_addr::addr_aptos;
 
-    // define addr aggregator type
+    // Define addr aggregator type.
     const ADDR_AGGREGATOR_TYPE_HUMAN: u64 = 0;
     const ADDR_AGGREGATOR_TYPE_ORG: u64 = 1;
     const ADDR_AGGREGATOR_TYPE_ROBOT: u64 = 2;
 
-    // err enum
+    // Err enum.
     const ERR_ADDR_ALREADY_EXSIT: u64 = 1000;
     const ERR_ADDR_PARAM_VECTOR_LENGHT_MISMATCH: u64 = 1001;
 
@@ -70,7 +70,7 @@ module my_addr::addr_aggregator {
         delete_addr_event: EventHandle<DeleteAddrEvent>
     }
 
-    // init
+    // Init.
     public entry fun create_addr_aggregator(acct: &signer, type: u64, description: String) {
         let addr_aggr = AddrAggregator {
             key_addr: signer::address_of(acct),
@@ -95,25 +95,25 @@ module my_addr::addr_aggregator {
         move_to<AddrAggregator>(acct, addr_aggr);
     }
 
-    // update addr aggregator description
+    // Update addr aggregator description.
     public entry fun update_addr_aggregator_description(acct: &signer, description: String) acquires AddrAggregator {
         let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
         addr_aggr.description = description;
     }
 
-    // add addr
+    // Add addr.
     public entry fun add_addr(acct: &signer,
                               addr_type: u64,
                               addr: String,
                               pubkey: String,
                               chains: vector<String>,
                               description: String) acquires AddrAggregator {
-        // check addr is 0x begin
+        // Check addr is 0x begin.
         addr_info::check_addr_prefix(addr);
 
         let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
 
-        //check addr is already exist
+        // Check addr is already exist.
         assert!(!exist_addr_by_map(&mut addr_aggr.addr_infos_map, addr), ERR_ADDR_ALREADY_EXSIT);
 
         let id = addr_aggr.max_id + 1;
@@ -132,7 +132,7 @@ module my_addr::addr_aggregator {
         })
     }
 
-    // batch add addr
+    // Batch add addr.
     public entry fun batch_add_addr(
         acct: &signer,
         addrs: vector<String>,
@@ -152,6 +152,8 @@ module my_addr::addr_aggregator {
             table::add(&mut addr_aggr.addr_infos_map, *name, *addr_info);
             vector::push_back(&mut addr_aggr.addrs, *name);
 
+            addr_aggr.max_id = addr_aggr.max_id + 1;
+
             event::emit_event(&mut addr_aggr.add_addr_event_set.add_addr_event, AddAddrEvent {
                 addr_type: addr_info::get_addr_type(addr_info),
                 addr: addr_info::get_addr(addr_info),
@@ -168,10 +170,10 @@ module my_addr::addr_aggregator {
         table::contains(addr_infos_map, addr)
     }
 
-    // update eth addr with signature
+    // Update eth addr with signature.
     public entry fun update_eth_addr(acct: &signer,
                                      addr: String, signature: String) acquires AddrAggregator {
-        //check addr 0x prefix
+        // Check addr 0x prefix.
         addr_info::check_addr_prefix(addr);
 
         let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
@@ -184,10 +186,10 @@ module my_addr::addr_aggregator {
         });
     }
 
-    // update aptos addr with signature and pubkey
+    // Update aptos addr with signature and pubkey.
     public entry fun update_aptos_addr(acct: &signer,
                                        addr: String, signature: String) acquires AddrAggregator {
-        //check addr 0x prefix
+        // Check addr 0x prefix.
         addr_info::check_addr_prefix(addr);
 
         let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
@@ -200,7 +202,7 @@ module my_addr::addr_aggregator {
         });
     }
 
-    //update addr msg
+    // Update addr msg.
     public entry fun update_addr_msg_with_chains_and_description(
         acct: &signer, addr: String, chains: vector<String>, description: String) acquires AddrAggregator {
         //check addr 0x prefix
@@ -218,7 +220,7 @@ module my_addr::addr_aggregator {
         });
     }
 
-    //update addr info for non verify
+    // Update addr info for non verify.
     public entry fun update_addr_for_non_verify(
         acct: &signer, addr: String, chains: vector<String>, description: String) acquires AddrAggregator {
         //check addr 0x prefix
@@ -236,7 +238,7 @@ module my_addr::addr_aggregator {
         });
     }
 
-    // public fun delete addr
+    // Public fun delete addr.
     public entry fun delete_addr(
         acct: &signer,
         addr: String) acquires AddrAggregator {
