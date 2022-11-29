@@ -163,3 +163,4 @@ module my_addr::addr_info {
         addr_info.updated_at = timestamp::now_seconds();
     }
 }
+
