@@ -3,10 +3,10 @@ name = "MyAddr"
 version = "0.0.1"
 
 [dependencies]
-#Sui = { local = "/Users/sky/workplace/block/sui/sui/crates/sui-framework" }
-Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework", rev = "devnet" }
+Sui = { local = "/Users/sky/workplace/block/sui/sui/crates/sui-framework" }
+#Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework", rev = "devnet" }
 
 [addresses]
 my_addr =  "0x0"
-#sui =  "0000000000000000000000000000000000000002"
+sui =  "0000000000000000000000000000000000000002"
 
