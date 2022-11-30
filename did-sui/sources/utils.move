@@ -1,6 +1,7 @@
 module my_addr::utils {
     use std::vector;
     use std::string::{Self, String};
+    use sui::bcs;
     // #[test_only]
     // use std::debug;
 
@@ -86,4 +87,25 @@ module my_addr::utils {
 
         result
    }
+
+    // Trim pos chars and transfer string to vector u8 bytes.
+    public fun trim_string_to_vector_u8(str : &String, pos: u64) :  vector<u8>{
+
+        let s = string::sub_string(str, pos, string::length(str));
+        string_to_vector_u8(&s)
+    }
+
+    // Address to u64.
+    public fun address_to_u64(address : address) : u64 {
+        let vec = bcs::to_bytes(&address);
+
+        let result = 0u64;
+        let i = 0;
+        while(i < vector::length(&vec)) {
+            let h = *vector::borrow(&vec, i);
+            result = result * 16 + (h as u64);
+            i = i+1;
+        };
+        result
+    }
 }
