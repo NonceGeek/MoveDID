@@ -49,3 +49,4 @@ module my_addr::addr_eth {
         addr_info::set_sign_and_updated_at(addr_info, sig_bytes, now)
     }
 }
+
