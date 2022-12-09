@@ -77,7 +77,7 @@ spec my_addr::addr_aggregator {
         let addr_aggr = global<AddrAggregator>(signer::address_of(acct));
         let addr_info = table::spec_get(addr_aggr.addr_infos_map, addr);
         ensures len(addr_info.signature) != 0;
-        }
+    }
 
     /// The addr has 0x as it's prefix.
     /// The AddrAggregatord should under the signer.
@@ -86,7 +86,7 @@ spec my_addr::addr_aggregator {
         let addr_aggr = global<AddrAggregator>(signer::address_of(acct));
         let addr_info = table::spec_get(addr_aggr.addr_infos_map, addr);
         include addr_info::UpdateAddrForNonVerify{addr_info};
-        }
+    }
 
     /// The addr has 0x as it's prefix.
     /// The AddrAggregatord should under the signer.

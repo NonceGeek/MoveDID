@@ -4,7 +4,7 @@ version = "0.0.1"
 # upgrade_policy = "compatible"
 
 [addresses]
-my_addr = "0x4"
+my_addr = "_"
 std = "0x1"
 aptos_framework = "0x1"
 chain_id = "0x1"
