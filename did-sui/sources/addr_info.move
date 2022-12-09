@@ -2,8 +2,6 @@ module my_addr::addr_info {
     use std::string::{Self, String};
     use std::vector;
     use my_addr::utils;
-    use aptos_framework::block;
-    use aptos_framework::timestamp;
 
     // Err enum.
     const ERR_ADDR_INFO_MSG_EMPTY: u64 = 1001;
@@ -62,8 +60,10 @@ module my_addr::addr_info {
                               pubkey: String,
                               chains: &vector<String>,
                               description: String): AddrInfo {
+
         // Gen msg; format=height.chain_id.nonce_geek.
-        let height = block::get_current_block_height();
+        // let height = block::get_current_block_height();
+        let height = 0;
         let msg = utils::u64_to_vec_u8_string(height);
 
         let chain_id_address = @chain_id;
@@ -75,7 +75,8 @@ module my_addr::addr_info {
         let msg_suffix = b".nonce_geek";
         vector::append(&mut msg, msg_suffix);
 
-        let now = timestamp::now_seconds();
+        // let now = timestamp::now_seconds();
+        let now = 0;
         let expired_at = now + 31536000; // 1 year time expired
 
         AddrInfo {
@@ -119,7 +120,8 @@ module my_addr::addr_info {
         assert!(vector::length(&addr_info.signature) != 0, ERR_ADDR_NO_FIRST_VERIFY);
 
         // Msg format : block_height.chain_id.nonce_geek.chains.description.
-        let height = block::get_current_block_height();
+        // let height = block::get_current_block_height();
+        let height = 0;
         let msg = utils::u64_to_vec_u8_string(height);
 
         let chain_id_address = @chain_id;
@@ -150,7 +152,8 @@ module my_addr::addr_info {
         addr_info.msg = string::utf8(msg);
         addr_info.chains = chains;
         addr_info.description = description;
-        addr_info.updated_at = timestamp::now_seconds();
+        // addr_info.updated_at = timestamp::now_seconds();
+        addr_info.updated_at = 0;
     }
 
     public fun update_addr_for_non_verify(addr_info: &mut AddrInfo, chains: vector<String>, description: String) {
@@ -159,7 +162,7 @@ module my_addr::addr_info {
 
         addr_info.chains = chains;
         addr_info.description = description;
-        addr_info.updated_at = timestamp::now_seconds();
+        //addr_info.updated_at = timestamp::now_seconds();
+        addr_info.updated_at = 0;
     }
 }
-

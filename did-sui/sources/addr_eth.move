@@ -1,10 +1,9 @@
 module my_addr::addr_eth {
     use std::string::{Self, String};
     use std::vector;
+    use sui::ecdsa;
     use my_addr::utils;
-    use aptos_framework::timestamp;
     use my_addr::eth_sig_verifier;
-    use aptos_std::aptos_hash;
     use my_addr::addr_info::{Self, AddrInfo};
 
     // Eth addr type.
@@ -38,15 +37,16 @@ module my_addr::addr_eth {
         vector::append(&mut sign_origin, eth_prefix);
         vector::append(&mut sign_origin, utils::u64_to_vec_u8_string(msg_length));
         vector::append(&mut sign_origin, *string::bytes(&addr_info_msg));
-        let msg_hash = aptos_hash::keccak256(sign_origin); //kecacak256 hash
+        // let msg_hash = aptos_hash::keccak256(sign_origin); //kecacak256 hash
+        let msg_hash = ecdsa::keccak256(&sign_origin); //kecacak256 hash
         assert!(eth_sig_verifier::verify_eth_sig(sig_bytes, addr_byte, msg_hash), addr_info::err_signature_verify_fail());
 
         // Verify the now - created_at <= 2h.
-        let now = timestamp::now_seconds();
+        // let now = timestamp::now_seconds();
+        let now = 0;
         assert!(now - addr_info::get_created_at(addr_info) <= 2 * 60 * 60, addr_info::err_timestamp_exceed());
 
         // Update signature, updated_at.
         addr_info::set_sign_and_updated_at(addr_info, sig_bytes, now)
     }
 }
-

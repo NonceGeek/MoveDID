@@ -103,3 +103,4 @@ module my_addr::eth_sig_verifier {
         assert!(ed25519::signature_verify_strict(&sig, &pk, msg), 102);
     }
 }
+

@@ -205,7 +205,7 @@ module my_addr::addr_aggregator {
     // Update addr msg.
     public entry fun update_addr_msg_with_chains_and_description(
         acct: &signer, addr: String, chains: vector<String>, description: String) acquires AddrAggregator {
-        //check addr 0x prefix
+        // Check addr 0x prefix.
         addr_info::check_addr_prefix(addr);
 
         let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
@@ -223,7 +223,7 @@ module my_addr::addr_aggregator {
     // Update addr info for non verify.
     public entry fun update_addr_for_non_verify(
         acct: &signer, addr: String, chains: vector<String>, description: String) acquires AddrAggregator {
-        //check addr 0x prefix
+        // Check addr 0x prefix.
         addr_info::check_addr_prefix(addr);
 
         let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
@@ -238,11 +238,11 @@ module my_addr::addr_aggregator {
         });
     }
 
-    // Public fun delete addr.
+    // Delete addr.
     public entry fun delete_addr(
         acct: &signer,
         addr: String) acquires AddrAggregator {
-        //check addr 0x prefix
+        // Check addr 0x prefix.
         addr_info::check_addr_prefix(addr);
 
         let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
@@ -264,3 +264,4 @@ module my_addr::addr_aggregator {
         };
     }
 }
+

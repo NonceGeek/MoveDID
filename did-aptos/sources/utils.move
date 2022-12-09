@@ -90,7 +90,7 @@ module my_addr::utils {
         result
    }
 
-    // Trim pos chars and transfer string to vector u8 bytes
+    // Trim pos chars and transfer string to vector u8 bytes.
     public fun trim_string_to_vector_u8(str : &String, pos: u64) :  vector<u8>{
 
         let s = string::sub_string(str, pos, string::length(str));
@@ -128,3 +128,4 @@ module my_addr::utils {
         debug::print(&result)
     }
 }
+
