@@ -4,7 +4,7 @@ version = "0.0.1"
 # upgrade_policy = "compatible"
 
 [addresses]
-my_addr = "_"
+my_addr = "0x4"
 std = "0x1"
 aptos_framework = "0x1"
 chain_id = "0x1"
@@ -14,4 +14,3 @@ MoveStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", subdir="apt
 AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", subdir="aptos-move/framework/aptos-framework/", rev="aptos-cli-v1.0.0" }
 # MoveStdlib = { local = "/Users/liaohua/aptos-core/aptos-move/framework/move-stdlib" }
 # AptosFramework = { local = "/Users/liaohua/aptos-core/aptos-move/framework/aptos-framework" }
-
