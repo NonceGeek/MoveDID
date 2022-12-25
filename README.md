@@ -2,7 +2,7 @@
 
 ![](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fmovebit%2Fmaterials%2Fmain%2Fshields.json)
 
-MoveDID is a DID protocol that compatible with Move-based blockchain networks, including Aptos, Sui, and Starcoin.The vision of MoveDID is to be the foundation for the next generation of large-scale Web3 finance and Web3 society. MoveDID could be used for 3 types of subjects: human, organization, and bot.
+MoveDID is a DID protocol that implementation Aptos.The vision of MoveDID is to be the foundation for the next generation of large-scale Web3 finance and Web3 society. MoveDID could be used for 3 types of subjects: human, organization, and bot.
 The implementation follows the [did@w3c](https://www.w3.org/TR/did-core/)
 
 ! Important Links:
@@ -32,6 +32,16 @@ The implementation follows the [did@w3c](https://www.w3.org/TR/did-core/)
 >
 > https://youtu.be/LOuQo1XjSxE
 
+! Linked Repos:
+
+> scaffold-move:
+> 
+> https://github.com/NonceGeek/scaffold-move
+>
+> homepage:
+>
+> https://github.com/NonceGeek/MoveDID-Homepage
+
 ## Dev Modules on Move Chains
 
 * Aptos:
@@ -45,9 +55,7 @@ The implementation follows the [did@w3c](https://www.w3.org/TR/did-core/)
 * did contracts:
   The did contracts in MOVE Lang.
 
-  * [x] aptos ( auditing... )
-  * [ ] starcoin
-  * [ ] sui
+  * [x] aptos ( audited)
 
 * SBT as Verifiable Credential
 
