@@ -132,8 +132,8 @@ module my_addr::addr_aggregator {
         })
     }
 
-    // Batch add addr.
-    public entry fun batch_add_addr(
+    // Batch add addrs.
+    public entry fun batch_add_addrs(
         acct: &signer,
         addrs: vector<String>,
         addr_infos: vector<AddrInfo>
