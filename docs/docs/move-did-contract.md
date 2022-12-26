@@ -1,10 +1,14 @@
 ---
 title: "MoveDID Contract"
-slug: "/movedid-contract"
+slug: "/move-did-contract"
 hidden: true
 hide_table_of_contents: false
 ---
 # MoveDID Contract
+
+See Source Files in:
+
+> https://github.com/NonceGeek/MoveDID/tree/main/did-aptos
 
 ## 0x01 ABI Documentation of MoveDID
 
@@ -16,6 +20,10 @@ the `addr_aggregator` module and the `endpoint_aggregator` module.
 
 ### 1.1 Addr Aggregator
 
+Namespace: `my_addr::addr_aggregator`
+
+#### 1.1.1 Functions about Addr Aggregator
+
 * `create_addr_aggregator(acct: &signer, type: u64, description: String)`
 
   **func description:**
@@ -25,21 +33,15 @@ the `addr_aggregator` module and the `endpoint_aggregator` module.
   ```rust
   struct AddrAggregator has key {
     key_addr: address,
-    addr_infos: vector<AddrInfo>,
+    addr_infos_map: Table<String, AddrInfo>,
+    addrs: vector<String>,
     type: u64,
     description: String,
     max_id: u64,
-  }
-  struct AddrInfo has store, copy, drop {
-    addr: String,
-    description: String,
-    chains: vector<String>,
-    msg: String,
-    signature: vector<u8>,
-    created_at: u64,
-    updated_at: u64,
-    id: u64,
-    addr_type: u64,
+    add_addr_event_set: AddAddrEventSet,
+    update_addr_signature_event_set: UpdateAddrSignatureEventSet,
+    update_addr_event_set: UpdateAddrEventSet,
+    delete_addr_event_set: DeleteAddrEventSet,
   }
   ```
 
@@ -48,7 +50,15 @@ the `addr_aggregator` module and the `endpoint_aggregator` module.
   * **description:** the description of did.
   * **type:** to distinct diffrent subjects of did: `HUMAN -- 0, ORG -- 1, ROBOT --  2`.
 
-* `add_addr(acct: &signer, addr_type: u64, addr: String,chains: vector<String>, description: String)`
+* `update_addr_aggregator_description(acct: &signer, description: String)`
+
+  **params description:**
+
+  * **description:** the description of did.
+
+#### 1.1.2 Functions about Addr
+
+* `add_addr(acct: &signer, addr_type: u64, addr: String, pubkey: String, chains: vector<String>, description: String)`
 
   **func description:**
 
@@ -57,7 +67,8 @@ the `addr_aggregator` module and the `endpoint_aggregator` module.
   **params description:**
 
   * **addr_type:** `Ethereum -- 0, Aptos --1`.
-  * **addr:** the address you would like to add to did.
+  * **addr:** the address you would like to add to did, it should be begin with `0x`.
+  * **pubkey:** using in key-pairs that can not recovery pubkey from signature.
   * **chains:** where do you use this addr on? for example: `["ethereum", "polygon"]`
   * **description: **the description of the addr you added.
 
@@ -69,11 +80,23 @@ the `addr_aggregator` module and the `endpoint_aggregator` module.
 
   The address updated with sig could use in more scenes.
 
-* `update_aptos_addr(acct: &signer, addr: String, signature: String, pubkey: String)`
+* `update_aptos_addr(acct: &signer, addr: String, signature: String)`
 
   **func description:**
 
   same as `update-eth-addr`.
+
+* `update_addr_info_with_chains_and_description(acct: &signer, addr: String, chains: vector<String>, description: String)`
+
+  **func description:**
+
+  update addr info with the chains and description. 
+
+* `update_addr_info_for_non_verification(acct: &signer, addr: String, chains: vector<String>, description: String)`
+
+  **func description:**
+
+  It's able to update the addr info that is non verification, such as the token receiver address.
 
 * `delete_addr(acct: &signer, addr: String)`
 
@@ -81,7 +104,15 @@ the `addr_aggregator` module and the `endpoint_aggregator` module.
 
   delete addr that is added.
 
+* `batch_add_addrs(acct: &signer, addrs: vector<String>, addr_infos: vector<AddrInfo>)`
+
+  **func description:**
+
+  add addrs in batch way!
+
 ### 1.2 Endpoint Aggregator
+
+Namespace: `my_addr::endpoint_aggregator`
 
 * `create_endpoint_aggregator(acct: &signer)`
 
@@ -93,12 +124,16 @@ the `addr_aggregator` module and the `endpoint_aggregator` module.
   struct Endpoint has store, copy, drop {
     url: String,
     description: String,
-    msg: String,
     verification_url: String
   }
+  
   struct EndpointAggregator has key {
     key_addr: address,
-    endpoints: vector<Endpoint>
+    endpoints_map: Table<String, Endpoint>,
+    names: vector<String>,
+    add_endpoint_event_set: AddEndpointEventSet,
+    update_endpoint_event_set: UpdateEndpointEventSet,
+    delete_endpoint_event_set: DeleteEndpointEventSet,
   }
   ```
 
@@ -110,10 +145,12 @@ the `addr_aggregator` module and the `endpoint_aggregator` module.
 
   **params description:**
 
+  * **url:** the link of endpoint url.
+
   * **description:** the description of endpoint
   * **verification_url:** the link of verification of url, the key addr is the msg for payload.
 
-* `update_endpoint(acct: &signer, url: String, new_description: String,new_url: String, new_verification_url: String)`
+* `update_endpoint(acct: &signer, url: String, new_description: String, new_url: String, new_verification_url: String)`
 
   **func description:**
 
@@ -124,6 +161,34 @@ the `addr_aggregator` module and the `endpoint_aggregator` module.
   **func description:**
 
   delete endpoint that is added.
+  
+* `batch_add_endpoints(acct: &signer, names: vector<String>, endpoints: vector<Endpoint> )`
+
+### 1.3 Addr-*
+
+Namespace: `my_addr::addr-*`, such as:`my_addr:addr-aptos`
+
+Impl `addr-*` module to support more type of address!
+
+* `update_addr(addr_info: &mut AddrInfo, signature: &mut String)`
+
+  type: `public func`
+
+  update addr with signature.
+
+* `update_*_addr(acct: &signer, addr: String, signature: String)`
+
+  update addr func that can be called by signer.
+
+### 1.4 Init
+
+Namespace:`my_addr::init`
+
+* `init(acct: &signer, type: u64, description: String)`
+
+  **func description:**
+
+  Init addr_aggregator and endpoint_aggregator in one func.
 
 ## 0x02 Quick Deployment Guide
 
@@ -170,8 +235,6 @@ aptos move compile --package-dir [path]/MoveDID/did-aptos --named-addresses my_a
 aptos move publish --package-dir [path]/MoveDID/did-aptos --named-addresses my_addr=$PROFILE --profile $PROFILE
 ```
 
-## 0x03 How to Append Module Dynamic?
+## 0x03 Prover of MoveDID
 
-## 0x04 Source Code Analysis
-
-## 0x05 Prover of MoveDID
+see in all the files that ended with `spec.move`.
