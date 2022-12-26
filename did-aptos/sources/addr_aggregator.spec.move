@@ -38,8 +38,8 @@ spec my_addr::addr_aggregator {
 
     /// The number of 'addr' added should same as the number of 'addrinfo'.
     /// The AddrAggregatord should under the signer.
-    /// The value of max_id after batch_add_addr should plus the number of the addresses.
-    spec  batch_add_addr(
+    /// The value of max_id after batch_add_addrs should plus the number of the addresses.
+    spec  batch_add_addrs(
         acct: &signer,
         addrs: vector<String>,
         addr_infos : vector<AddrInfo>
@@ -72,7 +72,7 @@ spec my_addr::addr_aggregator {
     /// The addr has 0x as it's prefix.
     /// The AddrAggregatord is under the signer.
     /// The length of signature should not same as 0.
-    spec update_addr_msg_with_chains_and_description(acct: &signer, addr: String, chains: vector<String>, description: String) {
+    spec update_addr_info_with_chains_and_description(acct: &signer, addr: String, chains: vector<String>, description: String) {
         include addr_info::CheckAddrPrefix;
         let addr_aggr = global<AddrAggregator>(signer::address_of(acct));
         let addr_info = table::spec_get(addr_aggr.addr_infos_map, addr);
@@ -81,7 +81,7 @@ spec my_addr::addr_aggregator {
 
     /// The addr has 0x as it's prefix.
     /// The AddrAggregatord should under the signer.
-    spec update_addr_for_non_verify(acct: &signer, addr: String, chains: vector<String>, description: String) {
+    spec update_addr_info_for_non_verification(acct: &signer, addr: String, chains: vector<String>, description: String) {
         include addr_info::CheckAddrPrefix;
         let addr_aggr = global<AddrAggregator>(signer::address_of(acct));
         let addr_info = table::spec_get(addr_aggr.addr_infos_map, addr);

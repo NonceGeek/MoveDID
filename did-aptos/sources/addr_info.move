@@ -114,7 +114,7 @@ module my_addr::addr_info {
     }
 
     // Update.
-    public fun update_addr_msg_with_chains_and_description(addr_info: &mut AddrInfo, chains: vector<String>, description: String) {
+    public fun update_addr_info_with_chains_and_description(addr_info: &mut AddrInfo, chains: vector<String>, description: String) {
         // Check addr_info's signature has verified.
         assert!(vector::length(&addr_info.signature) != 0, ERR_ADDR_NO_FIRST_VERIFY);
 
@@ -153,7 +153,7 @@ module my_addr::addr_info {
         addr_info.updated_at = timestamp::now_seconds();
     }
 
-    public fun update_addr_for_non_verify(addr_info: &mut AddrInfo, chains: vector<String>, description: String) {
+    public fun update_addr_info_for_non_verification(addr_info: &mut AddrInfo, chains: vector<String>, description: String) {
         // Check addr_info's signature must no verified.
         assert!(vector::length(&addr_info.signature) == 0, ERR_ADDR_MUST_NO_VERIFY);
 

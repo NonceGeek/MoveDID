@@ -20,7 +20,7 @@ spec my_addr::endpoint_aggregator {
         ensures std::table::spec_contains(endpoint_aggr.endpoints_map,name) == true;
     }
 
-    spec batch_add_endpoint {
+    spec batch_add_endpoints {
         pragma aborts_if_is_partial;
         aborts_if len(names) != len(endpoints);
     }

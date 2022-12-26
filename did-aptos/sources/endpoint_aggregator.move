@@ -96,7 +96,7 @@ module my_addr::endpoint_aggregator {
         })
     }
 
-    public entry fun batch_add_endpoint(
+    public entry fun batch_add_endpoints(
         acct: &signer,
         names: vector<String>,
         endpoints: vector<Endpoint>
