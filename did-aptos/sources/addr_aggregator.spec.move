@@ -38,8 +38,8 @@ spec my_addr::addr_aggregator {
 
     /// The number of 'addr' added should same as the number of 'addrinfo'.
     /// The AddrAggregatord should under the signer.
-    /// The value of max_id after batch_add_addr should plus the number of the addresses.
-    spec  batch_add_addr(
+    /// The value of max_id after batch_add_addrs should plus the number of the addresses.
+    spec  batch_add_addrs(
         acct: &signer,
         addrs: vector<String>,
         addr_infos : vector<AddrInfo>
