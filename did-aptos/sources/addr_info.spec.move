@@ -25,7 +25,7 @@ spec my_addr::addr_info {
 
     /// The signature under the addr_info should not be empty.
     /// BlockResource should under the @aptos_framework.
-    spec update_addr_msg_with_chains_and_description(addr_info: &mut AddrInfo, chains: vector<String>, description: String) {
+    spec update_addr_info_for_non_verification(addr_info: &mut AddrInfo, chains: vector<String>, description: String) {
         ensures len(addr_info.signature) != 0;
         ensures exists<block::BlockResource>(@aptos_framework);
     }

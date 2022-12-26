@@ -186,7 +186,7 @@ module my_addr::addr_aggregator {
         });
     }
 
-    // Update aptos addr with signature and pubkey.
+    // Update aptos addr with signature
     public entry fun update_aptos_addr(acct: &signer,
                                        addr: String, signature: String) acquires AddrAggregator {
         // Check addr 0x prefix.
@@ -202,8 +202,8 @@ module my_addr::addr_aggregator {
         });
     }
 
-    // Update addr msg.
-    public entry fun update_addr_msg_with_chains_and_description(
+    // Update addr info for non verification.
+    public entry fun update_addr_info_for_non_verification(
         acct: &signer, addr: String, chains: vector<String>, description: String) acquires AddrAggregator {
         // Check addr 0x prefix.
         addr_info::check_addr_prefix(addr);
@@ -211,7 +211,7 @@ module my_addr::addr_aggregator {
         let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
         let addr_info = table::borrow_mut(&mut addr_aggr.addr_infos_map, addr);
 
-        addr_info::update_addr_msg_with_chains_and_description(addr_info, chains, description);
+        addr_info::update_addr_info_for_non_verification(addr_info, chains, description);
 
         event::emit_event(&mut addr_aggr.update_addr_event_set.update_addr_event, UpdateAddrEvent {
             addr,
