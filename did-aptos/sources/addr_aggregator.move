@@ -263,5 +263,60 @@ module my_addr::addr_aggregator {
             i = i + 1;
         };
     }
+
+    #[test_only]
+    use std::string;
+    use aptos_framework::timestamp;
+    use aptos_framework::block;
+
+    #[test(acct = @0x123)]
+    public entry fun test_create_addr_aggregator(acct: &signer) acquires AddrAggregator{
+        account::create_account_for_test(signer::address_of(acct));
+        create_addr_aggregator(acct, 0,  string::utf8(b"test"));
+        let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
+        assert!(addr_aggr.description == string::utf8(b"test"), 501);
+    }
+
+    #[test(acct = @0x123)]
+    public entry fun test_update_addr_aggregator_description(acct: &signer) acquires AddrAggregator{
+        account::create_account_for_test(signer::address_of(acct));
+        create_addr_aggregator(acct, 0,  string::utf8(b"test"));
+        update_addr_aggregator_description(acct, string::utf8(b"updated"));
+
+        let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
+        assert!(addr_aggr.description == string::utf8(b"updated"), 502);
+    }
+
+    #[test(aptos_framework = @0x1, acct = @0x123)]
+    public entry fun test_add_addr(aptos_framework: &signer, acct: &signer) acquires AddrAggregator{
+        account::create_account_for_test(signer::address_of(acct));
+        account::create_account_for_test(@aptos_framework);
+        timestamp::set_time_has_started_for_testing(aptos_framework);
+        block::initialize_for_test(aptos_framework, 1000);
+
+        create_addr_aggregator(acct, 0,  string::utf8(b"test"));
+        add_addr(acct, 0, string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), string::utf8(b""), vector[string::utf8(b"eth"), string::utf8(b"polygon")],
+        string::utf8(b"evm addr"));
+        let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
+        let info = table::borrow_mut(&mut addr_aggr.addr_infos_map, string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"));
+        let msg = addr_info::get_msg(info);
+
+        assert!(msg == string::utf8(b"0.1.nonce_geek"), 503);
+    }
+
+    #[test(aptos_framework = @0x1, acct = @0x123)]
+    public entry fun test_update_addr(aptos_framework: &signer, acct: &signer) acquires AddrAggregator{
+        account::create_account_for_test(signer::address_of(acct));
+        account::create_account_for_test(@aptos_framework);
+        timestamp::set_time_has_started_for_testing(aptos_framework);
+        block::initialize_for_test(aptos_framework, 1000);
+
+        create_addr_aggregator(acct, 0,  string::utf8(b"test"));
+        add_addr(acct, 0, string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), string::utf8(b""), vector[string::utf8(b"eth"), string::utf8(b"polygon")],
+            string::utf8(b"evm addr"));
+
+        // msg is 0.1.nonce_geek
+        update_eth_addr(acct,string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), string::utf8(b"0x1a76dc6deda57cd6fcf5e6b9acff4ff28fdef50a8971e8d8bfe198cc72714287275e99a3c688586b84efab9a8f650e8a8655f6d2a61e31d63c07382025c7ebc01c"));
+    }
 }
 
