@@ -93,6 +93,28 @@ module my_addr::addr_info {
         }
     }
 
+    #[test_only]
+    public fun set_addr_info_init_for_testing(
+                                              addr_type: u64,
+                                              addr: String,
+                                              pubkey: String,
+                                              chains: vector<String>,
+                                              description: String) : AddrInfo{
+        AddrInfo{
+            addr,
+            chains,
+            description,
+            signature: b"",
+            msg: string::utf8(b""),
+            created_at: 0,
+            updated_at: 0,
+            id:0,
+            addr_type,
+            expired_at:0,
+            pubkey,
+        }
+    }
+
     // Check addr is 0x prefix.
     public fun check_addr_prefix(addr: String) {
         assert!(string::sub_string(&addr, 0, 2) == string::utf8(b"0x"), ERR_ADDR_INVALID_PREFIX);
