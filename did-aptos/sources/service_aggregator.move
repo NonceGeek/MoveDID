@@ -172,6 +172,100 @@ module my_addr::service_aggregator {
             i = i + 1;
         };
     }
+
+    #[test_only]
+    use aptos_framework::timestamp;
+    use aptos_framework::block;
+    use std::string;
+
+    #[test(acct = @0x123)]
+    public entry fun test_create_service_aggregator(acct: &signer) acquires ServiceAggregator{
+        account::create_account_for_test(signer::address_of(acct));
+        create_service_aggregator(acct);
+        let service_aggr = borrow_global_mut<ServiceAggregator>(signer::address_of(acct));
+        assert!(service_aggr.key_addr == @0x123, 501);
+    }
+
+    #[test(acct = @0x123)]
+    public entry fun test_add_service(acct: &signer) acquires ServiceAggregator {
+        account::create_account_for_test(signer::address_of(acct));
+        create_service_aggregator(acct);
+        add_service(acct, string::utf8(b"nonce.geek"), string::utf8(b"test"), string::utf8(b"https://movedid.build"), string::utf8(b"https://movedid.build"));
+        let service_aggr = borrow_global_mut<ServiceAggregator>(signer::address_of(acct));
+        let name = vector::pop_back(&mut service_aggr.names);
+        assert!(name == string::utf8(b"nonce.geek"), 502);
+    }
+    
+    #[test(acct = @0x123)]
+    public entry fun test_batch_add_services(acct: &signer) acquires ServiceAggregator {
+        account::create_account_for_test(signer::address_of(acct));
+        create_service_aggregator(acct);
+        let names = vector[string::utf8(b"nonce1"), string::utf8(b"nonce2")];
+        let svr1  = Service{
+            url:string::utf8(b"nonce1.url"),
+            description:string::utf8(b"nonce1.desc"),
+            verification_url:string::utf8(b"nonce1.verif"),
+        };
+
+        let svr2  = Service{
+            url:string::utf8(b"nonce2.url"),
+            description:string::utf8(b"nonce2.desc"),
+            verification_url:string::utf8(b"nonce2.verif"),
+        };
+        let svrs = vector<Service>[svr1, svr2];
+        batch_add_services(acct, names, svrs);
+
+        let service_aggr = borrow_global_mut<ServiceAggregator>(signer::address_of(acct));
+        let _name = vector::pop_back(&mut service_aggr.names);
+        assert!(vector::length(&service_aggr.names) == 1, 503);
+        assert!(_name == string::utf8(b"nonce2"), 507);
+    }
+
+    #[test(aptos_framework = @0x1, acct = @0x123)]
+    public entry fun test_update_service(aptos_framework: &signer, acct: &signer) acquires ServiceAggregator {
+        account::create_account_for_test(signer::address_of(acct));
+        account::create_account_for_test(@aptos_framework);
+        timestamp::set_time_has_started_for_testing(aptos_framework);
+        block::initialize_for_test(aptos_framework, 1000);
+
+        create_service_aggregator(acct);
+        add_service(acct, string::utf8(b"nonce.geek"), string::utf8(b"test"), string::utf8(b"https://movedid.build"), string::utf8(b"https://movedid.build"));
+        update_service(acct, string::utf8(b"nonce.geek"), string::utf8(b"test2"), string::utf8(b"https://movedid.build2"), string::utf8(b"https://movedid.build2"));
+
+        let service_aggr = borrow_global_mut<ServiceAggregator>(signer::address_of(acct));
+        let service = table::borrow_mut(&mut service_aggr.services_map, string::utf8(b"nonce.geek"));
+
+        assert!(service.description == string::utf8(b"test2"), 504);
+    }
+
+    #[test(aptos_framework = @0x1, acct = @0x123)]
+    public entry fun test_delete_service(aptos_framework: &signer, acct: &signer) acquires ServiceAggregator {
+        account::create_account_for_test(signer::address_of(acct));
+        account::create_account_for_test(@aptos_framework);
+        timestamp::set_time_has_started_for_testing(aptos_framework);
+        block::initialize_for_test(aptos_framework, 1000);
+
+        create_service_aggregator(acct);
+        let names = vector[string::utf8(b"nonce1"), string::utf8(b"nonce2")];
+        let svr1  = Service{
+            url:string::utf8(b"nonce1.url"),
+            description:string::utf8(b"nonce1.desc"),
+            verification_url:string::utf8(b"nonce1.verif"),
+        };
+
+        let svr2  = Service{
+            url:string::utf8(b"nonce2.url"),
+            description:string::utf8(b"nonce2.desc"),
+            verification_url:string::utf8(b"nonce2.verif"),
+        };
+        let svrs = vector<Service>[svr1, svr2];
+        batch_add_services(acct, names, svrs);
+        delete_service(acct, string::utf8(b"nonce1"));
+
+        let service_aggr = borrow_global_mut<ServiceAggregator>(signer::address_of(acct));
+        assert!(vector::length(&service_aggr.names) == 1, 505);
+    }
+
 }
 
 
