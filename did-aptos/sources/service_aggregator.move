@@ -174,8 +174,6 @@ module my_addr::service_aggregator {
     }
 
     #[test_only]
-    use aptos_framework::timestamp;
-    use aptos_framework::block;
     use std::string;
 
     #[test(acct = @0x123)]
@@ -221,12 +219,9 @@ module my_addr::service_aggregator {
         assert!(_name == string::utf8(b"nonce2"), 507);
     }
 
-    #[test(aptos_framework = @0x1, acct = @0x123)]
-    public entry fun test_update_service(aptos_framework: &signer, acct: &signer) acquires ServiceAggregator {
+    #[test(acct = @0x123)]
+    public entry fun test_update_service(acct: &signer) acquires ServiceAggregator {
         account::create_account_for_test(signer::address_of(acct));
-        account::create_account_for_test(@aptos_framework);
-        timestamp::set_time_has_started_for_testing(aptos_framework);
-        block::initialize_for_test(aptos_framework, 1000);
 
         create_service_aggregator(acct);
         add_service(acct, string::utf8(b"nonce.geek"), string::utf8(b"test"), string::utf8(b"https://movedid.build"), string::utf8(b"https://movedid.build"));
@@ -238,12 +233,9 @@ module my_addr::service_aggregator {
         assert!(service.description == string::utf8(b"test2"), 504);
     }
 
-    #[test(aptos_framework = @0x1, acct = @0x123)]
-    public entry fun test_delete_service(aptos_framework: &signer, acct: &signer) acquires ServiceAggregator {
+    #[test(acct = @0x123)]
+    public entry fun test_delete_service(acct: &signer) acquires ServiceAggregator {
         account::create_account_for_test(signer::address_of(acct));
-        account::create_account_for_test(@aptos_framework);
-        timestamp::set_time_has_started_for_testing(aptos_framework);
-        block::initialize_for_test(aptos_framework, 1000);
 
         create_service_aggregator(acct);
         let names = vector[string::utf8(b"nonce1"), string::utf8(b"nonce2")];
@@ -265,7 +257,6 @@ module my_addr::service_aggregator {
         let service_aggr = borrow_global_mut<ServiceAggregator>(signer::address_of(acct));
         assert!(vector::length(&service_aggr.names) == 1, 505);
     }
-
 }
 
 
