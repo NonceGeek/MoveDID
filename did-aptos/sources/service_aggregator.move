@@ -172,6 +172,81 @@ module my_addr::service_aggregator {
             i = i + 1;
         };
     }
+
+    #[test_only]
+    use std::string;
+    // use aptos_framework::timestamp;
+    // use aptos_framework::block;
+
+    #[test(acct = @0x123)]
+    public entry fun test_create_service_aggregator(acct: &signer) acquires ServiceAggregator{
+        account::create_account_for_test(signer::address_of(acct));
+        create_service_aggregator(acct);
+
+        let service_aggr = borrow_global_mut<ServiceAggregator>(signer::address_of(acct));
+        assert!(vector::length(&service_aggr.names) == 0, 601);
+    }
+
+    #[test(acct = @0x123)]
+    public entry fun test_add_addr(acct: &signer) acquires ServiceAggregator{
+        account::create_account_for_test(signer::address_of(acct));
+        create_service_aggregator(acct);
+
+        add_service(acct, string::utf8(b"google"), string::utf8(b"www.google.com"), string::utf8(b"google"), string::utf8(b""));
+        let service_aggr = borrow_global_mut<ServiceAggregator>(signer::address_of(acct));
+        let service = table::borrow_mut(&mut service_aggr.services_map, string::utf8(b"google"));
+        assert!(service.description == string::utf8(b"google"), 602);
+    }
+
+    #[test(acct = @0x123)]
+    public entry fun test_batch_add_service(acct: &signer) acquires ServiceAggregator{
+        account::create_account_for_test(signer::address_of(acct));
+        create_service_aggregator(acct);
+
+        let names = vector::empty<String>();
+        let services = vector::empty<Service>();
+        let first_service = Service {
+            url : string::utf8(b"www.google.com"),
+            description : string::utf8(b"google"),
+            verification_url : string::utf8(b"")
+        };
+        vector::push_back(&mut names, string::utf8(b"google"));
+        vector::push_back(&mut services, first_service);
+
+        let second_service = Service {
+            url : string::utf8(b"www.twitter.com"),
+            description : string::utf8(b"twitter"),
+            verification_url: string::utf8(b"")
+        };
+        vector::push_back(&mut names, string::utf8(b"twitter"));
+        vector::push_back(&mut services, second_service);
+        batch_add_services(acct, names, services);
+    }
+
+    #[test(acct = @0x123)]
+    public entry fun test_update_service(acct: &signer) acquires ServiceAggregator{
+        account::create_account_for_test(signer::address_of(acct));
+        create_service_aggregator(acct);
+        add_service(acct, string::utf8(b"google"), string::utf8(b"www.google.com"), string::utf8(b"google"), string::utf8(b""));
+
+        update_service(acct, string::utf8(b"google"), string::utf8(b"mail_google"), string::utf8(b"mail.google.com"), string::utf8(b""));
+        let service_aggr = borrow_global_mut<ServiceAggregator>(signer::address_of(acct));
+        let service = table::borrow_mut(&mut service_aggr.services_map, string::utf8(b"google"));
+        assert!(service.description == string::utf8(b"mail_google"), 603);
+    }
+
+    #[test(acct = @0x123)]
+    public entry fun test_delete_service(acct: &signer) acquires ServiceAggregator{
+        account::create_account_for_test(signer::address_of(acct));
+        create_service_aggregator(acct);
+        add_service(acct, string::utf8(b"google"), string::utf8(b"www.google.com"), string::utf8(b"google"), string::utf8(b""));
+
+        delete_service(acct,string::utf8(b"google"));
+        let service_aggr = borrow_global_mut<ServiceAggregator>(signer::address_of(acct));
+        assert!(table::contains(&mut service_aggr.services_map, string::utf8(b"google")) == false, 604);
+    }
+
+
 }
 
 
