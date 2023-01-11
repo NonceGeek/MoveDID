@@ -48,9 +48,7 @@ The implementation follows the [did@w3c](https://www.w3.org/TR/did-core/)
 
 * Aptos:
 
-> 62ac709295d3e20c559daa476d27d5c00e096aa5f62a3a6e0283d25616d24606
-> 
-> https://explorer.aptoslabs.com/account/62ac709295d3e20c559daa476d27d5c00e096aa5f62a3a6e0283d25616d24606/modules
+> https://explorer.aptoslabs.com/account/0x65f4a0954aa6e68d2381ff98b7676df2fe57beee3ca37a4a8a57fa621c1db872/modules
 
 ## Parts
 
