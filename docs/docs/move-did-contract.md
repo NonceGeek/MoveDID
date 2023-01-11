@@ -1,6 +1,7 @@
 ---
 title: "MoveDID Contract"
 slug: "/move-did-contract"
+sidebar_position: 1
 hidden: true
 hide_table_of_contents: false
 ---
@@ -16,7 +17,7 @@ In the Aptos Move contract(modules), methods marked as `public entry fun` are pu
 
 The main entry in the MoveDID contract  are two modules: 
 
-the `addr_aggregator` module and the `endpoint_aggregator` module.
+the `addr_aggregator` module and the `service_aggregator` module.
 
 ### 1.1 Addr Aggregator
 
@@ -110,59 +111,59 @@ Namespace: `my_addr::addr_aggregator`
 
   add addrs in batch way!
 
-### 1.2 Endpoint Aggregator
+### 1.2 Service Aggregator
 
-Namespace: `my_addr::endpoint_aggregator`
+Namespace: `my_addr::service_aggregator`
 
-* `create_endpoint_aggregator(acct: &signer)`
+* `create_service_aggregator(acct: &signer)`
 
   **func description:**
 
   Create the resource addr aggregator. The struct of addr aggregator:
 
   ```rust
-  struct Endpoint has store, copy, drop {
+  struct Service has store, copy, drop {
     url: String,
     description: String,
     verification_url: String
   }
   
-  struct EndpointAggregator has key {
+  struct ServiceAggregator has key {
     key_addr: address,
-    endpoints_map: Table<String, Endpoint>,
+    services_map: Table<String, Service>,
     names: vector<String>,
-    add_endpoint_event_set: AddEndpointEventSet,
-    update_endpoint_event_set: UpdateEndpointEventSet,
-    delete_endpoint_event_set: DeleteEndpointEventSet,
+    add_service_event_set: AddServiceEventSet,
+    update_service_event_set: UpdateServiceEventSet,
+    delete_service_event_set: DeleteServiceEventSet,
   }
   ```
 
-* `add_endpoint(acct: &signer, url: String, description: String, verification_url: String`)
+* `add_service(acct: &signer, url: String, description: String, verification_url: String`)
 
   **func description:**
 
-  Add a new endpoint. It's optional to verify the endpoint by msg and verification_url. For example, verify the github account by gist with msg.
+  Add a new service. It's optional to verify the service by msg and verification_url. For example, verify the github account by gist with msg.
 
   **params description:**
 
-  * **url:** the link of endpoint url.
+  * **url:** the link of service url.
 
-  * **description:** the description of endpoint
+  * **description:** the description of service
   * **verification_url:** the link of verification of url, the key addr is the msg for payload.
 
-* `update_endpoint(acct: &signer, url: String, new_description: String, new_url: String, new_verification_url: String)`
+* `update_service(acct: &signer, url: String, new_description: String, new_url: String, new_verification_url: String)`
 
   **func description:**
 
-  Update the eth endpoint that indexed by the url.
+  Update the eth service that indexed by the url.
 
-* `delete_endpoint(acct: &signer, url: String)`
+* `delete_service(acct: &signer, url: String)`
 
   **func description:**
 
-  delete endpoint that is added.
+  delete service that is added.
   
-* `batch_add_endpoints(acct: &signer, names: vector<String>, endpoints: vector<Endpoint> )`
+* `batch_add_services(acct: &signer, names: vector<String>, services: vector<Service> )`
 
 ### 1.3 Addr-*
 
@@ -188,7 +189,7 @@ Namespace:`my_addr::init`
 
   **func description:**
 
-  Init addr_aggregator and endpoint_aggregator in one func.
+  Init addr_aggregator and service_aggregator in one func.
 
 ## 0x02 Quick Deployment Guide
 

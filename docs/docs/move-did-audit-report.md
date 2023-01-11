@@ -2,6 +2,7 @@
 title: "MoveDID Audit Report"
 slug: "move-did-audit-report"
 hide_table_of_contents: false
+sidebar_position: 2
 ---
 
 # Audit for MoveDID

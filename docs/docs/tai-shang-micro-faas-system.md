@@ -2,6 +2,7 @@
 title: "TaiShang Micro FaaS System"
 slug: "tai-shang-micro-faas-system"
 hide_table_of_contents: false
+sidebar_position: 5
 ---
 
 # TaiShang Micro FaaS System

@@ -266,8 +266,6 @@ module my_addr::addr_aggregator {
 
     #[test_only]
     use std::string;
-    use aptos_framework::timestamp;
-    use aptos_framework::block;
 
     #[test(acct = @0x123)]
     public entry fun test_create_addr_aggregator(acct: &signer) acquires AddrAggregator{
