@@ -43,6 +43,10 @@ The implementation follows the [did@w3c](https://www.w3.org/TR/did-core/)
 > homepage:
 >
 > https://github.com/NonceGeek/MoveDID-Homepage
+>
+> web3_move_ex sdk:
+>
+> https://github.com/NonceGeek/web3_move_ex
 
 ## Dev Modules on Move Chains
 
