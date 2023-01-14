@@ -54,6 +54,12 @@ The implementation follows the [did@w3c](https://www.w3.org/TR/did-core/)
 
 > https://explorer.aptoslabs.com/account/0x65f4a0954aa6e68d2381ff98b7676df2fe57beee3ca37a4a8a57fa621c1db872/modules
 
+## 🏆 Prizes
+
+Dorahack Aptos Grant DAO Prize 2nd: 
+
+> https://dorahacks.io/zh/aptos/2/top
+
 ## Parts
 
 * did contracts:
