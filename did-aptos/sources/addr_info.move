@@ -4,6 +4,7 @@ module my_addr::addr_info {
     use my_addr::utils;
     use aptos_framework::block;
     use aptos_framework::timestamp;
+    // use std::debug;
 
     // Err enum.
     const ERR_ADDR_INFO_MSG_EMPTY: u64 = 1001;
@@ -56,13 +57,16 @@ module my_addr::addr_info {
 
 
     // Init.
-    public fun init_addr_info(id: u64,
-                              addr_type: u64,
-                              addr: String,
-                              pubkey: String,
-                              chains: &vector<String>,
-                              description: String): AddrInfo {
-        // Gen msg; format=height.chain_id.nonce_geek.
+    public fun init_addr_info(
+        send_addr : address,
+        id: u64,
+        addr_type: u64,
+        addr: String,
+        pubkey: String,
+        chains: &vector<String>,
+        description: String,
+        expire_second : u64): AddrInfo {
+        // Gen msg; format=height.chain_id.send_addr.id.nonce_geek .
         let height = block::get_current_block_height();
         let msg = utils::u64_to_vec_u8_string(height);
 
@@ -72,11 +76,19 @@ module my_addr::addr_info {
         vector::append(&mut msg, b".");
         vector::append(&mut msg, chain_id_vec);
 
+        let send_addr_vec = utils::address_to_ascii_u8_vec(send_addr);
+        vector::append(&mut msg, b".");
+        vector::append(&mut msg, send_addr_vec);
+
+        let id_vec = utils::u64_to_vec_u8_string(id);
+        vector::append(&mut msg, b".");
+        vector::append(&mut msg, id_vec);
+
         let msg_suffix = b".nonce_geek";
         vector::append(&mut msg, msg_suffix);
 
         let now = timestamp::now_seconds();
-        let expired_at = now + 31536000; // 1 year time expired
+        let expired_at = now + expire_second; // udpate expired_at
 
         AddrInfo {
             addr,
@@ -95,11 +107,11 @@ module my_addr::addr_info {
 
     #[test_only]
     public fun set_addr_info_init_for_testing(
-                                              addr_type: u64,
-                                              addr: String,
-                                              pubkey: String,
-                                              chains: vector<String>,
-                                              description: String) : AddrInfo{
+        addr_type: u64,
+        addr: String,
+        pubkey: String,
+        chains: vector<String>,
+        description: String) : AddrInfo{
         AddrInfo{
             addr,
             chains,
@@ -184,4 +196,3 @@ module my_addr::addr_info {
         addr_info.updated_at = timestamp::now_seconds();
     }
 }
-
