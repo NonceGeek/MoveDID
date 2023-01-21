@@ -101,7 +101,7 @@ module my_addr::addr_aggregator {
         addr_aggr.description = description;
     }
 
-    public fun add_one_addr(
+    public fun do_add_addr(
                             addr_aggr: &mut AddrAggregator,
                             send_addr : address,
                             addr_type: u64,
@@ -144,7 +144,7 @@ module my_addr::addr_aggregator {
         let send_addr = signer::address_of(acct);
         let addr_aggr = borrow_global_mut<AddrAggregator>(send_addr);
 
-        add_one_addr(addr_aggr, send_addr, addr_type, addr, pubkey, chains, description, expire_second);
+        do_add_addr(addr_aggr, send_addr, addr_type, addr, pubkey, chains, description, expire_second);
     }
 
     // Batch add addrs.
@@ -176,7 +176,7 @@ module my_addr::addr_aggregator {
             let description = vector::borrow<String>(&descriptions, i);
             let expire_second = vector::borrow<u64>(&expire_second_vec, i);
 
-            add_one_addr(addr_aggr, send_addr, *addr_type, *addr, *pubkey, *chains, *description, *expire_second);
+            do_add_addr(addr_aggr, send_addr, *addr_type, *addr, *pubkey, *chains, *description, *expire_second);
 
             i = i + 1;
         };
