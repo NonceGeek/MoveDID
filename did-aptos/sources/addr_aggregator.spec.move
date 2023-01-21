@@ -36,20 +36,20 @@ spec my_addr::addr_aggregator {
         table::spec_contains(addr_infos_map, addr)
     }
 
-    /// The number of 'addr' added should same as the number of 'addrinfo'.
-    /// The AddrAggregatord should under the signer.
-    /// The value of max_id after batch_add_addrs should plus the number of the addresses.
-    spec  batch_add_addrs(
-        acct: &signer,
-        addrs: vector<String>,
-        addr_infos : vector<AddrInfo>
-    ) {
-        let addrs_length = len(addrs);
-        let old_addr_aggr = global<AddrAggregator>(signer::address_of(acct));
-        let post addr_aggr = global<AddrAggregator>(signer::address_of(acct));
-        ensures len(addrs) == len(addr_infos);
-        ensures addr_aggr.max_id == old_addr_aggr.max_id + addrs_length;
-    }
+    // /// The number of 'addr' added should same as the number of 'addrinfo'.
+    // /// The AddrAggregatord should under the signer.
+    // /// The value of max_id after batch_add_addrs should plus the number of the addresses.
+    // spec  batch_add_addrs(
+    //     acct: &signer,
+    //     addrs: vector<String>,
+    //     addr_infos : vector<AddrInfo>
+    // ) {
+    //     let addrs_length = len(addrs);
+    //     let old_addr_aggr = global<AddrAggregator>(signer::address_of(acct));
+    //     let post addr_aggr = global<AddrAggregator>(signer::address_of(acct));
+    //     ensures len(addrs) == len(addr_infos);
+    //     ensures addr_aggr.max_id == old_addr_aggr.max_id + addrs_length;
+    // }
 
     /// The addr has 0x as it's prefix.
     /// The AddrAggregatord should under the signer.

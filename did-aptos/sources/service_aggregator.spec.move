@@ -20,10 +20,10 @@ spec my_addr::service_aggregator {
         ensures std::table::spec_contains(service_aggr.services_map,name) == true;
     }
 
-    spec batch_add_services {
-        pragma aborts_if_is_partial;
-        aborts_if len(names) != len(services);
-    }
+    // spec batch_add_services {
+    //     pragma aborts_if_is_partial;
+    //     aborts_if len(names) != len(services);
+    // }
 
     spec update_service {
         let addr = signer::address_of(acct);

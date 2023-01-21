@@ -5,7 +5,7 @@ spec my_addr::addr_info {
 
     /// BlockResource should under the @aptos_framework.
     /// CurrentTimeMicroseconds should under the @aptos_framework.
-    spec init_addr_info(id: u64, addr_type: u64, addr: String, pubkey: String, chains: &vector<String>, description: String): AddrInfo {
+    spec init_addr_info(send_addr : address, id: u64, addr_type: u64, addr: String, pubkey: String, chains: &vector<String>, description: String, expire_second : u64): AddrInfo {
         ensures exists<block::BlockResource>(@aptos_framework);
         ensures exists<timestamp::CurrentTimeMicroseconds>(@aptos_framework);
         }

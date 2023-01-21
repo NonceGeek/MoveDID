@@ -2,8 +2,8 @@ module my_addr::utils {
     use std::vector;
     use std::string::{Self, String};
     use std::bcs;
-    // #[test_only]
-    // use std::debug;
+    #[test_only]
+    use std::debug;
 
     const ERR_INVALID_ASCII_CHAR: u64 = 3000;
     const ERR_STRING_LENGTH_INVALID: u64 = 3001;
@@ -111,8 +111,36 @@ module my_addr::utils {
         result
     }
 
-    #[test_only]
-    use aptos_std::debug;
+    // Translate Address to as
+    public fun address_to_ascii_u8_vec(address : address) : vector<u8> {
+        let vec = bcs::to_bytes(&address);
+
+        // let result = 0u64;
+        // let vec =
+        let result = vector::empty<u8>();
+        // debug::print(&vec);
+        // debug::print(&vector::length(&vec));
+
+        let i = 0;
+        while(i < vector::length(&vec)) {
+            let h = *vector::borrow(&vec, i);
+            let h_high = h / 16;
+            h_high = h_high + 48;
+            vector::push_back(&mut result, h_high);
+
+            let h_low = h % 16;
+            h_low = h_low + 48;
+            vector::push_back(&mut result, h_low);
+
+            i = i+1;
+        };
+        result
+    }
+
+
+
+    // #[test_only]
+    // use aptos_std::debug;
     #[test_only]
     use aptos_std::from_bcs;
 

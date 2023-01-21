@@ -101,27 +101,26 @@ module my_addr::addr_aggregator {
         addr_aggr.description = description;
     }
 
-    // Add addr.
-    public entry fun add_addr(acct: &signer,
-                              addr_type: u64,
-                              addr: String,
-                              pubkey: String,
-                              chains: vector<String>,
-                              description: String) acquires AddrAggregator {
+    public fun do_add_addr(
+                            addr_aggr: &mut AddrAggregator,
+                            send_addr : address,
+                            addr_type: u64,
+                            addr: String,
+                            pubkey: String,
+                            chains: vector<String>,
+                            description: String,
+                            expire_second : u64)  {
         // Check addr is 0x begin.
         addr_info::check_addr_prefix(addr);
-
-        let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
 
         // Check addr is already exist.
         assert!(!exist_addr_by_map(&mut addr_aggr.addr_infos_map, addr), ERR_ADDR_ALREADY_EXSIT);
 
-        let id = addr_aggr.max_id + 1;
-        let addr_info = addr_info::init_addr_info(id, addr_type, addr, pubkey, &chains, description);
+        addr_aggr.max_id = addr_aggr.max_id +1;
+        let addr_info = addr_info::init_addr_info(send_addr, addr_aggr.max_id, addr_type, addr, pubkey, &chains, description, expire_second);
         table::add(&mut addr_aggr.addr_infos_map, addr, addr_info);
         vector::push_back(&mut addr_aggr.addrs, addr);
 
-        addr_aggr.max_id = addr_aggr.max_id + 1;
 
         event::emit_event(&mut addr_aggr.add_addr_event_set.add_addr_event, AddAddrEvent {
             addr_type,
@@ -132,35 +131,52 @@ module my_addr::addr_aggregator {
         })
     }
 
+    // Add addr.
+    public entry fun add_addr(
+                              acct: &signer,
+                              addr_type: u64,
+                              addr: String,
+                              pubkey: String,
+                              chains: vector<String>,
+                              description: String,
+                              expire_second : u64
+    ) acquires AddrAggregator {
+        let send_addr = signer::address_of(acct);
+        let addr_aggr = borrow_global_mut<AddrAggregator>(send_addr);
+
+        do_add_addr(addr_aggr, send_addr, addr_type, addr, pubkey, chains, description, expire_second);
+    }
+
     // Batch add addrs.
     public entry fun batch_add_addrs(
         acct: &signer,
         addrs: vector<String>,
-        addr_infos: vector<AddrInfo>
+        addr_types: vector<u64>,
+        pubkeys: vector<String>,
+        chains_vec: vector<vector<String>>,
+        descriptions: vector<String>,
+        expire_second_vec : vector<u64>
     ) acquires AddrAggregator {
         let addrs_length = vector::length(&addrs);
-        let addr_infos_length = vector::length(&addr_infos);
-        assert!(addrs_length == addr_infos_length, ERR_ADDR_PARAM_VECTOR_LENGHT_MISMATCH);
+        let length_match = addrs_length == vector::length(&addrs) && addrs_length == vector::length(&addr_types)
+            && addrs_length == vector::length(&addrs) && addrs_length == vector::length(&pubkeys)
+            && addrs_length == vector::length(&chains_vec) && addrs_length == vector::length(&descriptions)
+            && addrs_length == vector::length(&expire_second_vec) ;
+        assert!(length_match, ERR_ADDR_PARAM_VECTOR_LENGHT_MISMATCH);
 
-        let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
+        let send_addr = signer::address_of(acct);
+        let addr_aggr = borrow_global_mut<AddrAggregator>(send_addr);
 
         let i = 0;
         while (i < addrs_length) {
-            let name = vector::borrow<String>(&addrs, i);
-            let addr_info = vector::borrow<AddrInfo>(&addr_infos, i);
+            let addr = vector::borrow<String>(&addrs, i);
+            let addr_type = vector::borrow<u64>(&addr_types, i);
+            let pubkey = vector::borrow<String>(&pubkeys, i);
+            let chains = vector::borrow<vector<String>>(&chains_vec, i);
+            let description = vector::borrow<String>(&descriptions, i);
+            let expire_second = vector::borrow<u64>(&expire_second_vec, i);
 
-            table::add(&mut addr_aggr.addr_infos_map, *name, *addr_info);
-            vector::push_back(&mut addr_aggr.addrs, *name);
-
-            addr_aggr.max_id = addr_aggr.max_id + 1;
-
-            event::emit_event(&mut addr_aggr.add_addr_event_set.add_addr_event, AddAddrEvent {
-                addr_type: addr_info::get_addr_type(addr_info),
-                addr: addr_info::get_addr(addr_info),
-                pubkey: addr_info::get_pubkey(addr_info),
-                chains: addr_info::get_chains(addr_info),
-                description: addr_info::get_description(addr_info)
-            });
+            do_add_addr(addr_aggr, send_addr, *addr_type, *addr, *pubkey, *chains, *description, *expire_second);
 
             i = i + 1;
         };
@@ -264,8 +280,20 @@ module my_addr::addr_aggregator {
         };
     }
 
+    #[view]
+    /// Returns the balance of `owner` for provided `CoinType`.
+    public fun get_max_id(owner: address): u64 acquires AddrAggregator {
+        borrow_global<AddrAggregator>(owner).max_id
+    }
+
     #[test_only]
     use std::string;
+    #[test_only]
+    use aptos_framework::timestamp;
+    #[test_only]
+    use aptos_framework::block;
+    #[test_only]
+    use std::debug;
 
     #[test(acct = @0x123)]
     public entry fun test_create_addr_aggregator(acct: &signer) acquires AddrAggregator{
@@ -294,12 +322,13 @@ module my_addr::addr_aggregator {
 
         create_addr_aggregator(acct, 0,  string::utf8(b"test"));
         add_addr(acct, 0, string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), string::utf8(b""), vector[string::utf8(b"eth"), string::utf8(b"polygon")],
-        string::utf8(b"evm addr"));
+            string::utf8(b"evm addr"), 7200);
         let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
         let info = table::borrow_mut(&mut addr_aggr.addr_infos_map, string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"));
         let msg = addr_info::get_msg(info);
 
-        assert!(msg == string::utf8(b"0.1.nonce_geek"), 503);
+        debug::print(&msg);
+        assert!(msg == string::utf8(b"0.1.0000000000000000000000000000000000000000000000000000000000000123.1.nonce_geek"), 503);
     }
 
     #[test(aptos_framework = @0x1, acct = @0x123)]
@@ -310,16 +339,10 @@ module my_addr::addr_aggregator {
         block::initialize_for_test(aptos_framework, 1000);
 
         create_addr_aggregator(acct, 0,  string::utf8(b"test"));
-
-        let addr_infos = vector::empty<AddrInfo>();
-        let first_addr_info = addr_info::set_addr_info_init_for_testing(0,string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"),
-            string::utf8(b""),vector[string::utf8(b"eth"), string::utf8(b"polygon")], string::utf8(b"first addr"));
-        let second_addr_info = addr_info::set_addr_info_init_for_testing(1,string::utf8(b"0x978c213990c4833df71548df7ce49d54c759d6b6d932de22b24d56060b7af2aa"),
-            string::utf8(b""),vector[string::utf8(b"aptos")], string::utf8(b"second addr"));
-        vector::push_back(&mut addr_infos, first_addr_info);
-        vector::push_back(&mut addr_infos, second_addr_info);
-
-        batch_add_addrs(acct,vector[string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"),string::utf8(b"0x978c213990c4833df71548df7ce49d54c759d6b6d932de22b24d56060b7af2aa")],  addr_infos);
+        batch_add_addrs(acct,vector[string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"),string::utf8(b"0x978c213990c4833df71548df7ce49d54c759d6b6d932de22b24d56060b7af2aa")],
+            vector[0,1], vector[string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"),string::utf8(b"0x978c213990c4833df71548df7ce49d54c759d6b6d932de22b24d56060b7af2aa")],
+            vector[vector[string::utf8(b"eth"), string::utf8(b"polygon")],vector[string::utf8(b"aptos")]],
+            vector[string::utf8(b"first addr"),string::utf8(b"second addr")],vector[7200, 7200]);
     }
 
     #[test(aptos_framework = @0x1, acct = @0x123)]
@@ -331,10 +354,10 @@ module my_addr::addr_aggregator {
 
         create_addr_aggregator(acct, 0,  string::utf8(b"test"));
         add_addr(acct, 0, string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), string::utf8(b""), vector[string::utf8(b"eth"), string::utf8(b"polygon")],
-            string::utf8(b"evm addr"));
+            string::utf8(b"evm addr"),7200);
 
-        // msg is 0.1.nonce_geek
-        update_eth_addr(acct,string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), string::utf8(b"0x1a76dc6deda57cd6fcf5e6b9acff4ff28fdef50a8971e8d8bfe198cc72714287275e99a3c688586b84efab9a8f650e8a8655f6d2a61e31d63c07382025c7ebc01c"));
+        // msg is 0.1.0000000000000000000000000000000000000000000000000000000000000123.1.nonce_geek
+        update_eth_addr(acct,string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), string::utf8(b"0xb0700aa203916f9ad772171bf84197229f37b093e0e6f09ce700e10736918c1102200286a408ea32bd621a412a9baf273f78d6de2f9c636ab0ca8440e5152f131c"));
     }
 
     #[test(aptos_framework = @0x1, acct = @0x123)]
@@ -346,10 +369,10 @@ module my_addr::addr_aggregator {
 
         create_addr_aggregator(acct, 0,  string::utf8(b"test"));
         add_addr(acct, 1, string::utf8(b"0x978c213990c4833df71548df7ce49d54c759d6b6d932de22b24d56060b7af2aa"), string::utf8(b"0xde19e5d1880cac87d57484ce9ed2e84cf0f9599f12e7cc3a52e4e7657a763f2c"), vector[string::utf8(b"aptos")],
-            string::utf8(b"aptos addr"));
+            string::utf8(b"aptos addr"),7200);
 
-        // msg is 0.1.nonce_geek
-        update_aptos_addr(acct,string::utf8(b"0x978c213990c4833df71548df7ce49d54c759d6b6d932de22b24d56060b7af2aa"), string::utf8(b"0xcba913550a569392e455fe98155a11c2dfea2368d4b0c8ccc4bc27d03e3f728886c31ede5ded276a23f0204211b707c8a18faa59584452f0a1d067a3d17fed08"));
+        // msg is 0.1.0000000000000000000000000000000000000000000000000000000000000123.1.nonce_geek
+        update_aptos_addr(acct,string::utf8(b"0x978c213990c4833df71548df7ce49d54c759d6b6d932de22b24d56060b7af2aa"), string::utf8(b"0x9aa39c8eeb03472eb7444a9f3fd6cd39633879a9700b6346a12b4e232fb3b4ed034fc34ed491eb1534efba76300d6b3feb753b9a7f49c2706a6c68f017879e06"));
     }
 
     #[test(aptos_framework = @0x1, acct = @0x123)]
@@ -361,10 +384,10 @@ module my_addr::addr_aggregator {
 
         create_addr_aggregator(acct, 0,  string::utf8(b"test"));
         add_addr(acct, 0, string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), string::utf8(b""), vector[string::utf8(b"eth"), string::utf8(b"polygon")],
-            string::utf8(b"evm addr"));
+            string::utf8(b"evm addr"),7200);
 
-        // msg is 0.1.nonce_geek
-        update_eth_addr(acct,string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), string::utf8(b"0x1a76dc6deda57cd6fcf5e6b9acff4ff28fdef50a8971e8d8bfe198cc72714287275e99a3c688586b84efab9a8f650e8a8655f6d2a61e31d63c07382025c7ebc01c"));
+        // msg is 0.1.0000000000000000000000000000000000000000000000000000000000000123.1.nonce_geek
+        update_eth_addr(acct,string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), string::utf8(b"0xb0700aa203916f9ad772171bf84197229f37b093e0e6f09ce700e10736918c1102200286a408ea32bd621a412a9baf273f78d6de2f9c636ab0ca8440e5152f131c"));
 
         update_addr_info_with_chains_and_description(acct,string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), vector[string::utf8(b"bsc")],
             string::utf8(b"evm bsc addr"));
@@ -379,7 +402,7 @@ module my_addr::addr_aggregator {
 
         create_addr_aggregator(acct, 0,  string::utf8(b"test"));
         add_addr(acct, 0, string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), string::utf8(b""), vector[string::utf8(b"eth"), string::utf8(b"polygon")],
-            string::utf8(b"evm addr"));
+            string::utf8(b"evm addr"), 7200);
 
         update_addr_info_for_non_verification(acct,string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), vector[string::utf8(b"bsc")],
             string::utf8(b"evm bsc addr"));
@@ -394,7 +417,7 @@ module my_addr::addr_aggregator {
 
         create_addr_aggregator(acct, 0,  string::utf8(b"test"));
         add_addr(acct, 0, string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), string::utf8(b""), vector[string::utf8(b"eth"), string::utf8(b"polygon")],
-            string::utf8(b"evm addr"));
+            string::utf8(b"evm addr"), 7200);
 
         delete_addr(acct, string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"));
 
@@ -402,4 +425,3 @@ module my_addr::addr_aggregator {
         assert!(table::contains(&mut addr_aggr.addr_infos_map, string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325")) == false, 505);
     }
 }
-
