@@ -158,8 +158,7 @@ module my_addr::addr_aggregator {
         expire_second_vec : vector<u64>
     ) acquires AddrAggregator {
         let addrs_length = vector::length(&addrs);
-        let length_match = addrs_length == vector::length(&addrs) && addrs_length == vector::length(&addr_types)
-            && addrs_length == vector::length(&addrs) && addrs_length == vector::length(&pubkeys)
+        let length_match = addrs_length == vector::length(&addr_types) && addrs_length == vector::length(&pubkeys)
             && addrs_length == vector::length(&chains_vec) && addrs_length == vector::length(&descriptions)
             && addrs_length == vector::length(&expire_second_vec) ;
         assert!(length_match, ERR_ADDR_PARAM_VECTOR_LENGHT_MISMATCH);
@@ -280,10 +279,22 @@ module my_addr::addr_aggregator {
         };
     }
 
+    // Returns addr agggregator max_id
     #[view]
-    /// Returns the balance of `owner` for provided `CoinType`.
     public fun get_max_id(owner: address): u64 acquires AddrAggregator {
         borrow_global<AddrAggregator>(owner).max_id
+    }
+
+    // Returns addr agggregator description
+    #[view]
+    public fun get_description(owner: address): String acquires AddrAggregator {
+        borrow_global<AddrAggregator>(owner).description
+    }
+
+    // Returns addr agggregator type
+    #[view]
+    public fun get_type(owner: address): u64 acquires AddrAggregator {
+        borrow_global<AddrAggregator>(owner).type
     }
 
     #[test_only]
