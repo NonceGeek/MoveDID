@@ -73,7 +73,7 @@ module my_addr::service_aggregator {
         move_to<ServiceAggregator>(acct, service_aggr);
     }
 
-    public fun do_add_service(
+    fun do_add_service(
         service_aggr: &mut ServiceAggregator,
         name: String,
         url: String,
