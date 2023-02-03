@@ -5,6 +5,8 @@ module my_addr::addr_aptos {
     use aptos_framework::timestamp;
     use my_addr::addr_info::{Self, AddrInfo};
 
+    friend my_addr::addr_aggregator;
+
     // Aptos addr type.
     const ADDR_TYPE_APTOS: u64 = 1;
 

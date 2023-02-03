@@ -7,6 +7,8 @@ module my_addr::addr_eth {
     use aptos_std::aptos_hash;
     use my_addr::addr_info::{Self, AddrInfo};
 
+    friend my_addr::addr_aggregator;
+
     // Eth addr type.
     const ADDR_TYPE_ETH: u64 = 0;
 

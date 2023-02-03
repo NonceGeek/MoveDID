@@ -101,7 +101,7 @@ module my_addr::addr_aggregator {
         addr_aggr.description = description;
     }
 
-    public fun do_add_addr(
+    fun do_add_addr(
                             addr_aggr: &mut AddrAggregator,
                             send_addr : address,
                             addr_type: u64,
