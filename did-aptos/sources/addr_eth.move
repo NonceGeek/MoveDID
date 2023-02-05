@@ -19,7 +19,7 @@ module my_addr::addr_eth {
     const ERR_INVALID_ETH_ADDR: u64 = 2001;
 
 
-    public fun update_addr(addr_info: &mut AddrInfo, signature: &mut String) {
+    public(friend) fun update_addr(addr_info: &mut AddrInfo, signature: &mut String) {
         let addr_info_msg = addr_info::get_msg(addr_info);
         // Check msg etmpy.
         assert!(addr_info_msg != string::utf8(b""), addr_info::err_addr_info_etmpty());
