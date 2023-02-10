@@ -217,7 +217,7 @@ module my_addr::addr_aggregator {
         });
     }
 
-    // TODO: Update addr info for addr that verficated. ETH & Aptos
+    // Update addr info for addr that verficated, you should resign after you update info.
     public entry fun update_addr_info_with_chains_and_description(
         acct: &signer, addr: String, chains: vector<String>, description: String) acquires AddrAggregator {
         // Check addr 0x prefix.

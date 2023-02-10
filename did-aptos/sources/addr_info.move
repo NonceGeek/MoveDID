@@ -38,26 +38,27 @@ module my_addr::addr_info {
     }
 
     // Get attr.
+    #[view]
     public fun get_msg(addr_info: &AddrInfo): String { addr_info.msg }
-
+    #[view]
     public fun get_addr(addr_info: &AddrInfo): String { addr_info.addr }
-
+    #[view]
     public fun get_addr_type(addr_info: &AddrInfo): u64 { addr_info.addr_type }
-
+    #[view] 
     public fun get_created_at(addr_info: &AddrInfo): u64 { addr_info.created_at }
-
+    #[view]
     public fun get_updated_at(addr_info: &AddrInfo): u64 { addr_info.updated_at }
-
+    #[view]
     public fun get_pubkey(addr_info: &AddrInfo): String { addr_info.pubkey }
-
+    #[view]
     public fun get_chains(addr_info: &AddrInfo): vector<String> { addr_info.chains }
-
+    #[view]
     public fun get_description(addr_info: &AddrInfo): String { addr_info.description }
 
 
-    // Init.
+    // TODO: (Friend) Init. 
     public fun init_addr_info(
-        send_addr : address,
+        send_addr: address,
         id: u64,
         addr_type: u64,
         addr: String,
@@ -105,10 +106,12 @@ module my_addr::addr_info {
     }
 
     // Check addr is 0x prefix.
+    #[view]
     public fun check_addr_prefix(addr: String) {
         assert!(string::sub_string(&addr, 0, 2) == string::utf8(b"0x"), ERR_ADDR_INVALID_PREFIX);
     }
 
+    #[view]
     public fun equal_addr(addr_info: &AddrInfo, addr: String): bool {
         let flag = false;
         if (addr_info.addr == addr) {
@@ -118,13 +121,13 @@ module my_addr::addr_info {
     }
 
 
-    // Set attr.
+    // TODO: (Friend) Set attr.
     public fun set_sign_and_updated_at(addr_info: &mut AddrInfo, sig: vector<u8>, updated_at: u64) {
         addr_info.signature = sig;
         addr_info.updated_at = updated_at;
     }
 
-    // Update.
+     // TODO: (Friend) Update addr info for addr that verficated, you should resign after you update info.
     public fun update_addr_info_with_chains_and_description(addr_info: &mut AddrInfo, chains: vector<String>, description: String) {
         // Check addr_info's signature has verified.
         assert!(vector::length(&addr_info.signature) != 0, ERR_ADDR_NO_FIRST_VERIFY);
@@ -164,6 +167,7 @@ module my_addr::addr_info {
         addr_info.updated_at = timestamp::now_seconds();
     }
 
+    // TODO: (Friend) Update addr info for non verification.
     public fun update_addr_info_for_non_verification(addr_info: &mut AddrInfo, chains: vector<String>, description: String) {
         // Check addr_info's signature must no verified.
         assert!(vector::length(&addr_info.signature) == 0, ERR_ADDR_MUST_NO_VERIFY);

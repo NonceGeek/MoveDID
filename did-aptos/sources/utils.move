@@ -8,6 +8,7 @@ module my_addr::utils {
     const ERR_INVALID_ASCII_CHAR: u64 = 3000;
     const ERR_STRING_LENGTH_INVALID: u64 = 3001;
 
+    #[view]
     public fun u64_to_vec_u8(val : u64) : vector<u8> {
         let result = vector::empty<u8>();
         
@@ -26,6 +27,7 @@ module my_addr::utils {
         result
     } 
 
+    #[view]
     public fun u64_to_vec_u8_string(val : u64) : vector<u8> {
       let result = vector::empty<u8>();
 
@@ -43,7 +45,8 @@ module my_addr::utils {
       result
    } 
 
-   public fun ascii_u8_to_number(u : u8) : u8 {
+    #[view]
+    public fun ascii_u8_to_number(u : u8) : u8 {
         assert!((u >= 48 && u <=57)||(u >= 65 && u <= 70 ) || (u >= 97 && u <= 102), ERR_INVALID_ASCII_CHAR);
         let byte = 0;
         if (u >= 48 && u <=57) {
@@ -66,8 +69,9 @@ module my_addr::utils {
 
 
 
-   // Transfer string to vector u8 bytes.
-   public fun string_to_vector_u8(str : &String) : vector<u8> {
+    // Transfer string to vector u8 bytes.
+    #[view]
+    public fun string_to_vector_u8(str : &String) : vector<u8> {
         assert!(string::length(str) % 2 == 0, ERR_STRING_LENGTH_INVALID);
         let vec = string::bytes(str);
 
@@ -88,9 +92,10 @@ module my_addr::utils {
         };
 
         result
-   }
+    }
 
     // Trim pos chars and transfer string to vector u8 bytes.
+    #[view]
     public fun trim_string_to_vector_u8(str : &String, pos: u64) :  vector<u8>{
 
         let s = string::sub_string(str, pos, string::length(str));
@@ -98,6 +103,7 @@ module my_addr::utils {
     }
 
     // Address to u64.
+    #[view]
     public fun address_to_u64(address : address) : u64 {
         let vec = bcs::to_bytes(&address);
 
@@ -111,7 +117,8 @@ module my_addr::utils {
         result
     }
 
-    // Translate Address to as
+    // Translate Address to ascii_u8_vec. 
+    #[view]
     public fun address_to_ascii_u8_vec(address : address) : vector<u8> {
         let vec = bcs::to_bytes(&address);
 

@@ -17,19 +17,8 @@ module my_addr::eth_sig_verifier {
     const ERR_ETH_SIGNATURE_FAIL : u64 = 4001;
     const ERR_ETH_INVALID_PUBKEY  : u64 = 4002;
 
-    fun pubkey_to_address(pk_bytes: vector<u8>): vector<u8> {
-        let data = aptos_hash::keccak256(pk_bytes);
-        let result = vector::empty<u8>();
-
-        let i = 12;
-        while (i < 32) {
-            let v = vector::borrow(&data, i);
-            vector::push_back(&mut result, *v);
-            i = i + 1
-        };
-        result
-    }
-
+    // TODO: addr, msg, sig
+    #[view]
     public fun verify_eth_sig(signature: vector<u8>, addr: vector<u8>, message: vector<u8>): bool {
         let signature_length = vector::length(&signature);
         assert!(signature_length == 65, ERR_ETH_INVALID_SIGNATURE_LENGTH);
@@ -54,6 +43,19 @@ module my_addr::eth_sig_verifier {
         };
 
         false
+    }
+
+    fun pubkey_to_address(pk_bytes: vector<u8>): vector<u8> {
+        let data = aptos_hash::keccak256(pk_bytes);
+        let result = vector::empty<u8>();
+
+        let i = 12;
+        while (i < 32) {
+            let v = vector::borrow(&data, i);
+            vector::push_back(&mut result, *v);
+            i = i + 1
+        };
+        result
     }
 
     #[test]

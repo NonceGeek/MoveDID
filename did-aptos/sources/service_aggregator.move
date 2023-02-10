@@ -73,6 +73,18 @@ module my_addr::service_aggregator {
         move_to<ServiceAggregator>(acct, service_aggr);
     }
 
+    public entry fun add_service(
+        acct: &signer,
+        name: String,
+        url: String,
+        description: String,
+        verification_url: String,
+        expire_second: u64
+    ) acquires ServiceAggregator {
+        let service_aggr = borrow_global_mut<ServiceAggregator>(signer::address_of(acct));
+        do_add_service(service_aggr, name, url, description, verification_url, expire_second);
+    }
+
     fun do_add_service(
         service_aggr: &mut ServiceAggregator,
         name: String,
@@ -99,18 +111,6 @@ module my_addr::service_aggregator {
             description,
             verification_url
         })
-    }
-
-    public entry fun add_service(
-        acct: &signer,
-        name: String,
-        url: String,
-        description: String,
-        verification_url: String,
-        expire_second: u64
-    ) acquires ServiceAggregator {
-        let service_aggr = borrow_global_mut<ServiceAggregator>(signer::address_of(acct));
-        do_add_service(service_aggr, name, url, description, verification_url, expire_second);
     }
 
     public entry fun batch_add_services(

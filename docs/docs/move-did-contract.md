@@ -13,29 +13,43 @@ See Source Files in:
 
 ## 0x00 Function Summary Table
 
-| Module/Function Name                         | Modifier         | Args                                                         |
-| -------------------------------------------- | ---------------- | ------------------------------------------------------------ |
-| init                                         | -                | -                                                            |
-| init                                         | public entry fun | `acct: &signer, type: u64, description: String`              |
-| addr_aggregator                              | -                | -                                                            |
-| create_addr_aggregator                       | public entry fun | `acct: &signer, type: u64, description: String`              |
-| update_addr_aggregator_description           | public entry fun | `acct: &signer, description: String`                         |
-| add_addr                                     | public entry fun | `acct: &signer, addr_type: u64, addr: String, pubkey: String, chains: vector<String>, description: String, expire_second : u64` |
-| do_add_addr                                  | fun              | `addr_aggr: &mut AddrAggregator,send_addr : address, addr_type: u64, addr: String, pubkey: String, chains: vector<String>, description: String, expire_second : u64` |
-| batch_add_addrs                              | public entry fun | `acct: &signer, addrs: vector<String>, addr_types: vector<u64>, pubkeys: vector<String>, chains_vec: vector<vector<String>>, descriptions: vector<String>, expire_seconds: vector<u64>` |
-| exist_addr_by_map                            | fun              | `addr_infos_map: &mut Table<String, AddrInfo>, addr: String` |
-| update_eth_addr                              | public entry fun | `(acct: &signer, addr: String, signature: String)`           |
-| update_aptos_addr                            | public entry fun | `(acct: &signer, addr: String, signature: String)`           |
-| update_addr_info_with_chains_and_description | public entry fun |                                                              |
-| update_addr_info_for_non_verification        | public entry fun | `acct: &signer, addr: String, chains: vector<String>, description: String` |
-| delete_addr                                  | public entry fun | `acct: &signer, addr: String`                                |
-|                                              |                  |                                                              |
-|                                              |                  |                                                              |
-|                                              |                  |                                                              |
-|                                              |                  |                                                              |
-|                                              |                  |                                                              |
-
-
+| Module/Function Name                         | **Modifier**                                              | **Args**                                                     |
+| -------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------ |
+| **init**                                     | **-**                                                     | **-**                                                        |
+| init                                         | public entry fun                                          | `acct: &signer, type: u64, description: String`              |
+| **addr_aggregator**                          | **-**                                                     | **-**                                                        |
+| create_addr_aggregator                       | public entry fun                                          | `acct: &signer, type: u64, description: String`              |
+| update_addr_aggregator_description           | public entry fun                                          | `acct: &signer, description: String`                         |
+| add_addr                                     | public entry fun                                          | `acct: &signer, addr_type: u64, addr: String, pubkey: String, chains: vector<String>, description: String, expire_second : u64` |
+| do_add_addr                                  | fun                                                       | `addr_aggr: &mut AddrAggregator,send_addr : address, addr_type: u64, addr: String, pubkey: String, chains: vector<String>, description: String, expire_second : u64` |
+| batch_add_addrs                              | public entry fun                                          | `acct: &signer, addrs: vector<String>, addr_types: vector<u64>, pubkeys: vector<String>, chains_vec: vector<vector<String>>, descriptions: vector<String>, expire_seconds: vector<u64>` |
+| exist_addr_by_map                            | fun                                                       | `addr_infos_map: &mut Table<String, AddrInfo>, addr: String` |
+| update_eth_addr                              | public entry fun                                          | `(acct: &signer, addr: String, signature: String)`           |
+| update_aptos_addr                            | public entry fun                                          | `(acct: &signer, addr: String, signature: String)`           |
+| update_addr_info_with_chains_and_description | public entry fun                                          |                                                              |
+| update_addr_info_for_non_verification        | public entry fun                                          | `acct: &signer, addr: String, chains: vector<String>, description: String` |
+| delete_addr                                  | public entry fun                                          | `acct: &signer, addr: String`                                |
+| **addr_aptos**                               | **-**                                                     | **-**                                                        |
+| update_addr                                  | public(friend) fun<br />* friend my_addr::addr_aggregator | `addr_info: &mut AddrInfo, signature: &mut String`           |
+| **addr_eth**                                 | **-**                                                     | **-**                                                        |
+| update_addr                                  | public(friend) fun<br />* friend my_addr::addr_aggregator | `addr_info: &mut AddrInfo, signature: &mut String`           |
+| **eth_sig_verifier**                         | **-**                                                     | **-**                                                        |
+| verify_eth_sig                               | public fun<br /> \#[view]                                 | //TODO                                                       |
+| pubkey_to_address                            | fun                                                       | `pk_bytes: vector<u8>`                                       |
+| **addr_info**                                | **-**                                                     | **-**                                                        |
+| init_addr_info                               | public fun // TODO:check?                                 |                                                              |
+| check_addr_prefix                            | \#[view]                                                  |                                                              |
+| equal_addr                                   | \#[view]                                                  |                                                              |
+| set_sign_and_updated_at                      | // TODO: check？                                          |                                                              |
+| update_addr_info_with_chains_and_description | // TODO: check？                                          |                                                              |
+| update_addr_info_for_non_verification        | // TODO: check？                                          |                                                              |
+| **service_aggregator**                       | **-**                                                     | **-**                                                        |
+| create_service_aggregator                    | public entry fun                                          | `acct: &signer`                                              |
+| add_service                                  | public entry fun                                          | `acct: &signer, name: String, url: String, description: String, verification_url: String, expire_second: u64` |
+| do_add_service                               | fun                                                       | `service_aggr: &mut ServiceAggregator, name: String, url: String, description: String, verification_url: String, expire_second: u64` |
+| batch_add_services                           | public entry fun                                          | `acct: &signer, names: vector<String>, urls: vector<String>, descriptions : vector<String>, verification_urls: vector<String>, expire_second_vec: vector<u64>` |
+| update_service                               | public entry fun                                          | `acct: &signer, name: String, new_description: String, new_url: String, new_verification_url: String` |
+| delete_service                               | public entry fun                                          | `acct: &signer, name: String`                                |
 
 ## 0x01 ABI Documentation of MoveDID
 
