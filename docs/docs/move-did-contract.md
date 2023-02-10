@@ -11,6 +11,32 @@ See Source Files in:
 
 > https://github.com/NonceGeek/MoveDID/tree/main/did-aptos
 
+## 0x00 Function Summary Table
+
+| Module/Function Name                         | Modifier         | Args                                                         |
+| -------------------------------------------- | ---------------- | ------------------------------------------------------------ |
+| init                                         | -                | -                                                            |
+| init                                         | public entry fun | `acct: &signer, type: u64, description: String`              |
+| addr_aggregator                              | -                | -                                                            |
+| create_addr_aggregator                       | public entry fun | `acct: &signer, type: u64, description: String`              |
+| update_addr_aggregator_description           | public entry fun | `acct: &signer, description: String`                         |
+| add_addr                                     | public entry fun | `acct: &signer, addr_type: u64, addr: String, pubkey: String, chains: vector<String>, description: String, expire_second : u64` |
+| do_add_addr                                  | fun              | `addr_aggr: &mut AddrAggregator,send_addr : address, addr_type: u64, addr: String, pubkey: String, chains: vector<String>, description: String, expire_second : u64` |
+| batch_add_addrs                              | public entry fun | `acct: &signer, addrs: vector<String>, addr_types: vector<u64>, pubkeys: vector<String>, chains_vec: vector<vector<String>>, descriptions: vector<String>, expire_seconds: vector<u64>` |
+| exist_addr_by_map                            | fun              | `addr_infos_map: &mut Table<String, AddrInfo>, addr: String` |
+| update_eth_addr                              | public entry fun | `(acct: &signer, addr: String, signature: String)`           |
+| update_aptos_addr                            | public entry fun | `(acct: &signer, addr: String, signature: String)`           |
+| update_addr_info_with_chains_and_description | public entry fun |                                                              |
+| update_addr_info_for_non_verification        | public entry fun | `acct: &signer, addr: String, chains: vector<String>, description: String` |
+| delete_addr                                  | public entry fun | `acct: &signer, addr: String`                                |
+|                                              |                  |                                                              |
+|                                              |                  |                                                              |
+|                                              |                  |                                                              |
+|                                              |                  |                                                              |
+|                                              |                  |                                                              |
+
+
+
 ## 0x01 ABI Documentation of MoveDID
 
 In the Aptos Move contract(modules), methods marked as `public entry fun` are publicly accessible.

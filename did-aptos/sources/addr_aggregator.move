@@ -101,15 +101,31 @@ module my_addr::addr_aggregator {
         addr_aggr.description = description;
     }
 
+    // Add addr.
+    public entry fun add_addr(
+                              acct: &signer,
+                              addr_type: u64,
+                              addr: String,
+                              pubkey: String,
+                              chains: vector<String>,
+                              description: String,
+                              expire_second : u64
+    ) acquires AddrAggregator {
+        let send_addr = signer::address_of(acct);
+        let addr_aggr = borrow_global_mut<AddrAggregator>(send_addr);
+
+        do_add_addr(addr_aggr, send_addr, addr_type, addr, pubkey, chains, description, expire_second);
+    }
+
     fun do_add_addr(
-                            addr_aggr: &mut AddrAggregator,
-                            send_addr : address,
-                            addr_type: u64,
-                            addr: String,
-                            pubkey: String,
-                            chains: vector<String>,
-                            description: String,
-                            expire_second : u64)  {
+                    addr_aggr: &mut AddrAggregator,
+                    send_addr : address,
+                    addr_type: u64,
+                    addr: String,
+                    pubkey: String,
+                    chains: vector<String>,
+                    description: String,
+                    expire_second : u64)  {
         // Check addr is 0x begin.
         addr_info::check_addr_prefix(addr);
 
@@ -131,22 +147,6 @@ module my_addr::addr_aggregator {
         })
     }
 
-    // Add addr.
-    public entry fun add_addr(
-                              acct: &signer,
-                              addr_type: u64,
-                              addr: String,
-                              pubkey: String,
-                              chains: vector<String>,
-                              description: String,
-                              expire_second : u64
-    ) acquires AddrAggregator {
-        let send_addr = signer::address_of(acct);
-        let addr_aggr = borrow_global_mut<AddrAggregator>(send_addr);
-
-        do_add_addr(addr_aggr, send_addr, addr_type, addr, pubkey, chains, description, expire_second);
-    }
-
     // Batch add addrs.
     public entry fun batch_add_addrs(
         acct: &signer,
@@ -155,12 +155,12 @@ module my_addr::addr_aggregator {
         pubkeys: vector<String>,
         chains_vec: vector<vector<String>>,
         descriptions: vector<String>,
-        expire_second_vec : vector<u64>
+        expire_seconds : vector<u64>
     ) acquires AddrAggregator {
         let addrs_length = vector::length(&addrs);
         let length_match = addrs_length == vector::length(&addr_types) && addrs_length == vector::length(&pubkeys)
             && addrs_length == vector::length(&chains_vec) && addrs_length == vector::length(&descriptions)
-            && addrs_length == vector::length(&expire_second_vec) ;
+            && addrs_length == vector::length(&expire_seconds) ;
         assert!(length_match, ERR_ADDR_PARAM_VECTOR_LENGHT_MISMATCH);
 
         let send_addr = signer::address_of(acct);
@@ -173,7 +173,7 @@ module my_addr::addr_aggregator {
             let pubkey = vector::borrow<String>(&pubkeys, i);
             let chains = vector::borrow<vector<String>>(&chains_vec, i);
             let description = vector::borrow<String>(&descriptions, i);
-            let expire_second = vector::borrow<u64>(&expire_second_vec, i);
+            let expire_second = vector::borrow<u64>(&expire_seconds, i);
 
             do_add_addr(addr_aggr, send_addr, *addr_type, *addr, *pubkey, *chains, *description, *expire_second);
 
@@ -217,7 +217,7 @@ module my_addr::addr_aggregator {
         });
     }
 
-    // Update addr info for non verification.
+    // TODO: Update addr info for addr that verficated. ETH & Aptos
     public entry fun update_addr_info_with_chains_and_description(
         acct: &signer, addr: String, chains: vector<String>, description: String) acquires AddrAggregator {
         // Check addr 0x prefix.
@@ -235,7 +235,7 @@ module my_addr::addr_aggregator {
         });
     }
 
-    // Update addr info for non verify.
+    // Update addr info for non verification.
     public entry fun update_addr_info_for_non_verification(
         acct: &signer, addr: String, chains: vector<String>, description: String) acquires AddrAggregator {
         // Check addr 0x prefix.

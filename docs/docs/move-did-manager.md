@@ -11,3 +11,6 @@ The Manager dApp for MoveDID!
 
 > https://manager.movedid.build
 
+Technology Architecture:
+
+![MoveDID-Manager](https://p.ipic.vip/6136p8.png)

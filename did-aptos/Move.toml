@@ -12,5 +12,5 @@ chain_id = "0x1"
 [dependencies]
 MoveStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", subdir="aptos-move/framework/move-stdlib/", rev="aptos-cli-v1.0.4" }
 AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", subdir="aptos-move/framework/aptos-framework/", rev="aptos-cli-v1.0.4" }
-# MoveStdlib = { local = "/Users/liaohua/aptos-core/aptos-move/framework/move-stdlib" }
-# AptosFramework = { local = "/Users/liaohua/aptos-core/aptos-move/framework/aptos-framework" }
+# MoveStdlib = { local = "~/aptos-core/aptos-move/framework/move-stdlib" }
+# AptosFramework = { local = "~/aptos-core/aptos-move/framework/aptos-framework" }

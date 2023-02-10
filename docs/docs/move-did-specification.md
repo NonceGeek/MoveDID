@@ -64,8 +64,6 @@ DID Documents 的例子可见：
 
 ### 3.2 msg - signature 验证机制
 
-
-
 ## 4 Service 的升级
 
 然而，w3c 仅是定义了 Service 最基本的格式，在生产环境中，我们需要对 Service 的玩法进行扩展。
@@ -75,13 +73,13 @@ DID Documents 的例子可见：
 service 的 url 可能适用于 Address Aggregator  中的所有地址，也可能只针对固定的某个地址，因此有必要对 URL 进行扩展：
 
 ```bash
-https://example.com/{{addr_0 | addr_1 | addr_2}}
+https://example.com/{addr_0 | addr_1 | addr_2}
 ```
 
 如果是针对 Address Aggregator 中的所有地址，则可以用：
 
 ```bash
-https://example.com/{{addrs}}
+https://example.com/{addrs}
 ```
 
 ### 4.2 加入 verification_url 字段
