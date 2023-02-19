@@ -203,14 +203,14 @@ module my_addr::addr_aggregator {
 
     // Update aptos addr with signature
     public entry fun update_aptos_addr(acct: &signer,
-                                       addr: String, signature: String) acquires AddrAggregator {
+                                       addr: String, signature: String, msg: String) acquires AddrAggregator {
         // Check addr 0x prefix.
         addr_info::check_addr_prefix(addr);
 
         let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
         let addr_info = table::borrow_mut(&mut addr_aggr.addr_infos_map, addr);
 
-        addr_aptos::update_addr(addr_info, &mut signature);
+        addr_aptos::update_addr(addr_info, &mut signature, msg);
 
         event::emit_event(&mut addr_aggr.update_addr_signature_event_set.update_addr_signature_event, UpdateAddrSignatureEvent {
             addr
@@ -383,7 +383,8 @@ module my_addr::addr_aggregator {
             string::utf8(b"aptos addr"),7200);
 
         // msg is 0.1.0000000000000000000000000000000000000000000000000000000000000123.1.nonce_geek
-        update_aptos_addr(acct,string::utf8(b"0x978c213990c4833df71548df7ce49d54c759d6b6d932de22b24d56060b7af2aa"), string::utf8(b"0x9aa39c8eeb03472eb7444a9f3fd6cd39633879a9700b6346a12b4e232fb3b4ed034fc34ed491eb1534efba76300d6b3feb753b9a7f49c2706a6c68f017879e06"));
+        let msg = string::utf8(b"0.1.0000000000000000000000000000000000000000000000000000000000000123.1.nonce_geek");
+        update_aptos_addr(acct, string::utf8(b"0x978c213990c4833df71548df7ce49d54c759d6b6d932de22b24d56060b7af2aa"), string::utf8(b"0x9aa39c8eeb03472eb7444a9f3fd6cd39633879a9700b6346a12b4e232fb3b4ed034fc34ed491eb1534efba76300d6b3feb753b9a7f49c2706a6c68f017879e06"), msg);
     }
 
     #[test(aptos_framework = @0x1, acct = @0x123)]
