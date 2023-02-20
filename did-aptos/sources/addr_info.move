@@ -19,7 +19,7 @@ module my_addr::addr_info {
     const ERR_ADDR_MUST_NO_VERIFY: u64 = 1007;
 
     // Err pack.
-    public fun err_addr_info_etmpty(): u64 { ERR_ADDR_INFO_MSG_EMPTY }
+    public fun err_addr_info_empty(): u64 { ERR_ADDR_INFO_MSG_EMPTY }
 
     public fun err_invalid_addr_type(): u64 { ERR_INVALID_ADR_TYPE }
 

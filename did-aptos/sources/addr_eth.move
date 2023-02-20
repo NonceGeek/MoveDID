@@ -22,7 +22,7 @@ module my_addr::addr_eth {
     public(friend) fun update_addr(addr_info: &mut AddrInfo, signature: &mut String) {
         let addr_info_msg = addr_info::get_msg(addr_info);
         // Check msg etmpy.
-        assert!(addr_info_msg != string::utf8(b""), addr_info::err_addr_info_etmpty());
+        assert!(addr_info_msg != string::utf8(b""), addr_info::err_addr_info_empty());
 
         // Check addr length.
         assert!(string::length(&addr_info::get_addr(addr_info)) == ETH_ADDR_LEGNTH + 2, ERR_INVALID_ETH_ADDR);
