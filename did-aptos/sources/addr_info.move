@@ -165,6 +165,8 @@ module my_addr::addr_info {
         addr_info.chains = chains;
         addr_info.description = description;
         addr_info.updated_at = timestamp::now_seconds();
+        // reset the signature.
+        addr_info.signature = b"";
     }
 
     // Update addr info for non verification.
