@@ -119,11 +119,19 @@ module my_addr::utils {
         while(i < vector::length(&vec)) {
             let h = *vector::borrow(&vec, i);
             let h_high = h / 16;
-            h_high = h_high + 48;
+            if (h_high < 10) {
+                h_high = h_high + 48;
+            } else {
+                h_high = h_high -10 + 97;
+            };
             vector::push_back(&mut result, h_high);
 
             let h_low = h % 16;
-            h_low = h_low + 48;
+            if (h_low < 10) {
+                h_low = h_low + 48;
+            } else {
+                h_low = h_low -10 + 97;
+            };
             vector::push_back(&mut result, h_low);
 
             i = i+1;
@@ -145,6 +153,15 @@ module my_addr::utils {
 
         let result  = address_to_u64(addr_out);
         debug::print(&result)
+    }
+
+    #[test]
+    fun test_address_to_ascii_u8_vec() {
+        let address = @0x5a05b2ec94017f9e0a2cb20132ae15bc492f4527971c1296afdd084ac246a09a;
+        let bcs_value =  bcs::to_bytes(&address);
+        debug::print(&bcs_value);
+        let v = address_to_ascii_u8_vec(address);
+        debug::print(&v);
     }
 }
 
