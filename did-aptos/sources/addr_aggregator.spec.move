@@ -60,14 +60,14 @@ spec my_addr::addr_aggregator {
         include addr_eth::UpdateAddr{addr_info};
     }
 
-    /// The addr has 0x as it's prefix.
-    /// The AddrAggregatord should under the signer.
-    spec update_aptos_addr(acct: &signer, addr: String, signature: String) {
-        include addr_info::CheckAddrPrefix;
-        let addr_aggr = global<AddrAggregator>(signer::address_of(acct));
-        let addr_info = table::spec_get(addr_aggr.addr_infos_map, addr);
-        include addr_aptos::UpdateAddr{addr_info};
-    }
+    // /// The addr has 0x as it's prefix.
+    // /// The AddrAggregatord should under the signer.
+    // spec update_aptos_addr(acct: &signer, addr: String, signature: String) {
+    //     include addr_info::CheckAddrPrefix;
+    //     let addr_aggr = global<AddrAggregator>(signer::address_of(acct));
+    //     let addr_info = table::spec_get(addr_aggr.addr_infos_map, addr);
+    //     include addr_aptos::UpdateAddr{addr_info};
+    // }
 
     /// The addr has 0x as it's prefix.
     /// The AddrAggregatord is under the signer.
