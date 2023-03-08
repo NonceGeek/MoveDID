@@ -50,7 +50,7 @@ The implementation follows the [did@w3c](https://www.w3.org/TR/did-core/)
 
 ##  Modules on Aptos(Beta Stage)
 
-> [0x9ca629d01f577596c05faff8daccbc4669ebebff64449d58f7994db85e891b99](https://explorer.aptoslabs.com/account/0xcd6e69ff3c22db037584fb1650f7ca75df721fb0143690fb33f2f3bd0c1fe5bd/modules)
+> [TODO](https://explorer.aptoslabs.com/account/TODO/modules)
 
 ## 🏆 Prizes
 
