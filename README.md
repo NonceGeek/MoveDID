@@ -52,7 +52,7 @@ The implementation follows the [did@w3c](https://www.w3.org/TR/did-core/)
 
 * Aptos:
 
-> https://explorer.aptoslabs.com/account/0x65f4a0954aa6e68d2381ff98b7676df2fe57beee3ca37a4a8a57fa621c1db872/modules
+> [0x9ca629d01f577596c05faff8daccbc4669ebebff64449d58f7994db85e891b99](https://explorer.aptoslabs.com/account/0xcd6e69ff3c22db037584fb1650f7ca75df721fb0143690fb33f2f3bd0c1fe5bd/modules)
 
 ## 🏆 Prizes
 
@@ -65,7 +65,7 @@ Dorahack Aptos Grant DAO Prize 2nd:
 * did contracts:
   The did contracts in MOVE Lang.
 
-  * [x] aptos ( audited)
+  * [x] aptos (Audited)
 
 * SBT as Verifiable Credential
 
