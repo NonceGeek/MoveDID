@@ -20,9 +20,18 @@ module my_addr::service_aggregator {
         key_addr: address,
         services_map: Table<String, Service>,
         names: vector<String>,
+        create_service_aggregator_event_set: CreateSericeAggregatorEventSet,
         add_service_event_set: AddServiceEventSet,
         update_service_event_set: UpdateServiceEventSet,
-        delete_service_event_set: DeleteServiceEventSet
+        delete_service_event_set: DeleteServiceEventSet,
+    }
+
+    struct CreateSericeAggregatorEvent has drop, store {
+        key_addr: address,
+    }
+
+    struct CreateSericeAggregatorEventSet has store {
+        create_service_aggregator_event: EventHandle<CreateSericeAggregatorEvent>
     }
 
     struct AddrServiceEvent has drop, store {
@@ -60,6 +69,9 @@ module my_addr::service_aggregator {
             key_addr: signer::address_of(acct),
             services_map: table::new(),
             names: vector::empty<String>(),
+            create_service_aggregator_event_set: CreateSericeAggregatorEventSet {
+                create_service_aggregator_event: account::new_event_handle<CreateSericeAggregatorEvent>(acct)
+            },
             add_service_event_set: AddServiceEventSet{
                 add_service_event: account::new_event_handle<AddrServiceEvent>(acct)
             },
@@ -68,8 +80,11 @@ module my_addr::service_aggregator {
             },
             delete_service_event_set: DeleteServiceEventSet {
                 delete_service_event: account::new_event_handle<DeleteServiceEvent>(acct)
-            }
+            },
         };
+        event::emit_event(&mut service_aggr.create_service_aggregator_event_set.create_service_aggregator_event, CreateSericeAggregatorEvent {
+            key_addr: signer::address_of(acct)
+        });
         move_to<ServiceAggregator>(acct, service_aggr);
     }
 

@@ -26,10 +26,21 @@ module my_addr::addr_aggregator {
         type: u64,
         description: String,
         max_id: u64,
+        create_addr_aggregator_event_set: CreateAddrAggregatorEventSet,
         add_addr_event_set: AddAddrEventSet,
         update_addr_signature_event_set: UpdateAddrSignatureEventSet,
         update_addr_event_set: UpdateAddrEventSet,
         delete_addr_event_set: DeleteAddrEventSet,
+    }
+
+    struct CreateAddrAggregatorEvent has drop, store {
+        key_addr: address,
+        type: u64,
+        description: String,
+    }
+ 
+    struct CreateAddrAggregatorEventSet has store {
+        create_addr_aggregator_event: EventHandle<CreateAddrAggregatorEvent>
     }
 
     struct AddAddrEvent has drop, store {
@@ -79,6 +90,9 @@ module my_addr::addr_aggregator {
             type,
             description,
             max_id: 0,
+            create_addr_aggregator_event_set: CreateAddrAggregatorEventSet {
+                create_addr_aggregator_event: account::new_event_handle<CreateAddrAggregatorEvent>(acct),
+            },
             add_addr_event_set: AddAddrEventSet{
                 add_addr_event: account::new_event_handle<AddAddrEvent>(acct),
             },
@@ -90,8 +104,13 @@ module my_addr::addr_aggregator {
             },
             delete_addr_event_set: DeleteAddrEventSet {
                 delete_addr_event: account::new_event_handle<DeleteAddrEvent>(acct),
-            }
+            },
         };
+        event::emit_event(&mut addr_aggr.create_addr_aggregator_event_set.create_addr_aggregator_event, CreateAddrAggregatorEvent {
+            key_addr: signer::address_of(acct),
+            type,
+            description,
+        });
         move_to<AddrAggregator>(acct, addr_aggr);
     }
 
@@ -364,11 +383,11 @@ module my_addr::addr_aggregator {
         block::initialize_for_test(aptos_framework, 1000);
 
         create_addr_aggregator(acct, 0,  string::utf8(b"test"));
-        add_addr(acct, 0, string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), string::utf8(b""), vector[string::utf8(b"eth"), string::utf8(b"polygon")],
+        add_addr(acct, 0, string::utf8(b"0xa096A7161efe350A9762Cb608cE76B6ea9c50aCf"), string::utf8(b""), vector[string::utf8(b"eth"), string::utf8(b"polygon")],
             string::utf8(b"evm addr"),7200);
 
         // msg is 0.1.0000000000000000000000000000000000000000000000000000000000000123.1.nonce_geek
-        update_eth_addr(acct,string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), string::utf8(b"0xb0700aa203916f9ad772171bf84197229f37b093e0e6f09ce700e10736918c1102200286a408ea32bd621a412a9baf273f78d6de2f9c636ab0ca8440e5152f131c"));
+        update_eth_addr(acct,string::utf8(b"0xa096A7161efe350A9762Cb608cE76B6ea9c50aCf"), string::utf8(b"0xf1e7f1d06a07f6fd543460d83b2df377868048beede9bcbdf1d5bbdb70aea82c4e962ef547d396d1b1323824ab3ebc47f18c88fec0c51ef6613d1a2fd7041b3f1b"));
     }
 
     #[test(aptos_framework = @0x1, acct = @0x123)]
