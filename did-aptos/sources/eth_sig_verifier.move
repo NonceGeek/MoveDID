@@ -19,7 +19,7 @@ module my_addr::eth_sig_verifier {
 
     // TODO: addr, msg, sig
     #[view]
-    public fun verify_eth_sig(signature: vector<u8>, addr: vector<u8>, message: vector<u8>): bool {
+    public fun verify_eth_sig(addr: vector<u8>, message: vector<u8>, signature: vector<u8>): bool {
         let signature_length = vector::length(&signature);
         assert!(signature_length == 65, ERR_ETH_INVALID_SIGNATURE_LENGTH);
 
@@ -88,7 +88,7 @@ module my_addr::eth_sig_verifier {
 
         let sig = utils::string_to_vector_u8(&str);
 
-        assert!(verify_eth_sig(sig, address_bytes, msg_hash), 101);
+        assert!(verify_eth_sig(address_bytes, msg_hash, sig), 101);
     }
 
     #[test]

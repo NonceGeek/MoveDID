@@ -41,7 +41,7 @@ module my_addr::addr_eth {
         vector::append(&mut sign_origin, utils::u64_to_vec_u8_string(msg_length));
         vector::append(&mut sign_origin, *string::bytes(&addr_info_msg));
         let msg_hash = aptos_hash::keccak256(sign_origin); //kecacak256 hash
-        assert!(eth_sig_verifier::verify_eth_sig(sig_bytes, addr_byte, msg_hash), addr_info::err_signature_verify_fail());
+        assert!(eth_sig_verifier::verify_eth_sig(addr_byte, msg_hash, sig_bytes), addr_info::err_signature_verify_fail());
 
         // Verify the now - created_at <= 2h.
         let now = timestamp::now_seconds();
