@@ -1,7 +1,8 @@
 [package]
 name = "did"
-version = "0.0.1"
-# upgrade_policy = "compatible"
+version = "0.1.0"
+# https://aptos.dev/guides/move-guides/upgrading-move-code/
+upgrade_policy = "compatible"
 
 [addresses]
 my_addr = "_"
