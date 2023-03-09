@@ -20,17 +20,16 @@ module my_addr::service_aggregator {
         key_addr: address,
         services_map: Table<String, Service>,
         names: vector<String>,
-        create_service_aggregator_event_set: CreateSericeAggregatorEventSet,
         add_service_event_set: AddServiceEventSet,
         update_service_event_set: UpdateServiceEventSet,
         delete_service_event_set: DeleteServiceEventSet,
     }
 
     struct CreateSericeAggregatorEvent has drop, store {
-        module_addr: address,
+        key_addr: address,
     }
 
-    struct CreateSericeAggregatorEventSet has store {
+    struct CreateSericeAggregatorEventSet has key, store {
         create_service_aggregator_event: EventHandle<CreateSericeAggregatorEvent>
     }
 
@@ -64,14 +63,25 @@ module my_addr::service_aggregator {
         delete_service_event: EventHandle<DeleteServiceEvent>,
     }
 
-    public entry fun create_service_aggregator(acct: &signer) {
+    // This is only callable during publishing.
+    fun init_module(account: &signer) {
+        move_to(account, CreateSericeAggregatorEventSet {
+            create_service_aggregator_event: account::new_event_handle<CreateSericeAggregatorEvent>(account),
+        });
+    }
+
+    fun emit_create_service_aggregator_event(key_addr: address) acquires CreateSericeAggregatorEventSet {
+        let event = CreateSericeAggregatorEvent {
+            key_addr,
+        };
+        event::emit_event(&mut borrow_global_mut<CreateSericeAggregatorEventSet>(@my_addr).create_service_aggregator_event, event);
+    }
+
+    public entry fun create_service_aggregator(acct: &signer) acquires CreateSericeAggregatorEventSet {
         let service_aggr = ServiceAggregator {
             key_addr: signer::address_of(acct),
             services_map: table::new(),
             names: vector::empty<String>(),
-            create_service_aggregator_event_set: CreateSericeAggregatorEventSet {
-                create_service_aggregator_event: account::new_event_handle<CreateSericeAggregatorEvent>(acct)
-            },
             add_service_event_set: AddServiceEventSet{
                 add_service_event: account::new_event_handle<AddrServiceEvent>(acct)
             },
@@ -82,9 +92,9 @@ module my_addr::service_aggregator {
                 delete_service_event: account::new_event_handle<DeleteServiceEvent>(acct)
             },
         };
-        event::emit_event(&mut service_aggr.create_service_aggregator_event_set.create_service_aggregator_event, CreateSericeAggregatorEvent {
-            module_addr: @my_addr
-        });
+
+        emit_create_service_aggregator_event(signer::address_of(acct));
+
         move_to<ServiceAggregator>(acct, service_aggr);
     }
 
@@ -209,7 +219,7 @@ module my_addr::service_aggregator {
     use std::string;
 
     #[test(acct = @0x123)]
-    public entry fun test_create_service_aggregator(acct: &signer) acquires ServiceAggregator{
+    public entry fun test_create_service_aggregator(acct: &signer) acquires ServiceAggregator, CreateSericeAggregatorEventSet {
         account::create_account_for_test(signer::address_of(acct));
         create_service_aggregator(acct);
         let service_aggr = borrow_global_mut<ServiceAggregator>(signer::address_of(acct));
@@ -217,7 +227,7 @@ module my_addr::service_aggregator {
     }
 
     #[test(aptos_framework = @0x1, acct = @0x123)]
-    public entry fun test_add_service(aptos_framework: &signer, acct: &signer) acquires ServiceAggregator {
+    public entry fun test_add_service(aptos_framework: &signer, acct: &signer) acquires ServiceAggregator, CreateSericeAggregatorEventSet {
         account::create_account_for_test(signer::address_of(acct));
         timestamp::set_time_has_started_for_testing(aptos_framework);
 
@@ -229,7 +239,7 @@ module my_addr::service_aggregator {
     }
 
     #[test(aptos_framework = @0x1, acct = @0x123)]
-    public entry fun test_batch_add_services(aptos_framework: &signer, acct: &signer) acquires ServiceAggregator {
+    public entry fun test_batch_add_services(aptos_framework: &signer, acct: &signer) acquires ServiceAggregator, CreateSericeAggregatorEventSet {
         account::create_account_for_test(signer::address_of(acct));
         timestamp::set_time_has_started_for_testing(aptos_framework);
 
@@ -249,7 +259,7 @@ module my_addr::service_aggregator {
 
 
     #[test(aptos_framework = @0x1, acct = @0x123)]
-    public entry fun test_update_service(aptos_framework: &signer, acct: &signer) acquires ServiceAggregator {
+    public entry fun test_update_service(aptos_framework: &signer, acct: &signer) acquires ServiceAggregator, CreateSericeAggregatorEventSet {
         account::create_account_for_test(signer::address_of(acct));
         timestamp::set_time_has_started_for_testing(aptos_framework);
 
@@ -264,7 +274,7 @@ module my_addr::service_aggregator {
     }
 
     #[test(aptos_framework = @0x1, acct = @0x123)]
-    public entry fun test_delete_services(aptos_framework: &signer, acct: &signer) acquires ServiceAggregator {
+    public entry fun test_delete_services(aptos_framework: &signer, acct: &signer) acquires ServiceAggregator, CreateSericeAggregatorEventSet {
         account::create_account_for_test(signer::address_of(acct));
         timestamp::set_time_has_started_for_testing(aptos_framework);
 
