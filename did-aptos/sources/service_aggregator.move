@@ -27,7 +27,7 @@ module my_addr::service_aggregator {
     }
 
     struct CreateSericeAggregatorEvent has drop, store {
-        key_addr: address,
+        module_addr: address,
     }
 
     struct CreateSericeAggregatorEventSet has store {
@@ -83,7 +83,7 @@ module my_addr::service_aggregator {
             },
         };
         event::emit_event(&mut service_aggr.create_service_aggregator_event_set.create_service_aggregator_event, CreateSericeAggregatorEvent {
-            key_addr: signer::address_of(acct)
+            module_addr: @my_addr
         });
         move_to<ServiceAggregator>(acct, service_aggr);
     }

@@ -34,7 +34,7 @@ module my_addr::addr_aggregator {
     }
 
     struct CreateAddrAggregatorEvent has drop, store {
-        key_addr: address,
+        module_addr: address,
         type: u64,
         description: String,
     }
@@ -107,7 +107,7 @@ module my_addr::addr_aggregator {
             },
         };
         event::emit_event(&mut addr_aggr.create_addr_aggregator_event_set.create_addr_aggregator_event, CreateAddrAggregatorEvent {
-            key_addr: signer::address_of(acct),
+            module_addr: @my_addr,
             type,
             description,
         });
