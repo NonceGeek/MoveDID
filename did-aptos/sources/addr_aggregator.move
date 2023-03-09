@@ -26,7 +26,6 @@ module my_addr::addr_aggregator {
         type: u64,
         description: String,
         max_id: u64,
-        create_addr_aggregator_event_set: CreateAddrAggregatorEventSet,
         add_addr_event_set: AddAddrEventSet,
         update_addr_signature_event_set: UpdateAddrSignatureEventSet,
         update_addr_event_set: UpdateAddrEventSet,
@@ -39,7 +38,7 @@ module my_addr::addr_aggregator {
         description: String,
     }
  
-    struct CreateAddrAggregatorEventSet has store {
+    struct CreateAddrAggregatorEventSet has key, store {
         create_addr_aggregator_event: EventHandle<CreateAddrAggregatorEvent>
     }
 
@@ -81,8 +80,24 @@ module my_addr::addr_aggregator {
         delete_addr_event: EventHandle<DeleteAddrEvent>
     }
 
+    // This is only callable during publishing.
+    fun init_module(account: &signer) {
+        move_to(account, CreateAddrAggregatorEventSet {
+            create_addr_aggregator_event: account::new_event_handle<CreateAddrAggregatorEvent>(account),
+        });
+    }
+
+    fun emit_create_addr_aggregator_event(key_addr: address,  type: u64, description: String) acquires CreateAddrAggregatorEventSet {
+        let event = CreateAddrAggregatorEvent {
+            key_addr,
+            type,
+            description,
+        };
+        event::emit_event(&mut borrow_global_mut<CreateAddrAggregatorEventSet>(@my_addr).create_addr_aggregator_event, event);
+    }
+
     // Init.
-    public entry fun create_addr_aggregator(acct: &signer, type: u64, description: String) {
+    public entry fun create_addr_aggregator(acct: &signer, type: u64, description: String) acquires CreateAddrAggregatorEventSet {
         let addr_aggr = AddrAggregator {
             key_addr: signer::address_of(acct),
             addr_infos_map: table::new(),
@@ -90,9 +105,7 @@ module my_addr::addr_aggregator {
             type,
             description,
             max_id: 0,
-            create_addr_aggregator_event_set: CreateAddrAggregatorEventSet {
-                create_addr_aggregator_event: account::new_event_handle<CreateAddrAggregatorEvent>(acct),
-            },
+
             add_addr_event_set: AddAddrEventSet{
                 add_addr_event: account::new_event_handle<AddAddrEvent>(acct),
             },
@@ -106,11 +119,9 @@ module my_addr::addr_aggregator {
                 delete_addr_event: account::new_event_handle<DeleteAddrEvent>(acct),
             },
         };
-        event::emit_event(&mut addr_aggr.create_addr_aggregator_event_set.create_addr_aggregator_event, CreateAddrAggregatorEvent {
-            key_addr: signer::address_of(acct),
-            type,
-            description,
-        });
+
+        emit_create_addr_aggregator_event(signer::address_of(acct), type, description);
+
         move_to<AddrAggregator>(acct, addr_aggr);
     }
 
@@ -326,7 +337,7 @@ module my_addr::addr_aggregator {
     use std::debug;
 
     #[test(acct = @0x123)]
-    public entry fun test_create_addr_aggregator(acct: &signer) acquires AddrAggregator{
+    public entry fun test_create_addr_aggregator(acct: &signer) acquires AddrAggregator, CreateAddrAggregatorEventSet {
         account::create_account_for_test(signer::address_of(acct));
         create_addr_aggregator(acct, 0,  string::utf8(b"test"));
         let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
@@ -334,7 +345,7 @@ module my_addr::addr_aggregator {
     }
 
     #[test(acct = @0x123)]
-    public entry fun test_update_addr_aggregator_description(acct: &signer) acquires AddrAggregator{
+    public entry fun test_update_addr_aggregator_description(acct: &signer) acquires AddrAggregator, CreateAddrAggregatorEventSet {
         account::create_account_for_test(signer::address_of(acct));
         create_addr_aggregator(acct, 0,  string::utf8(b"test"));
         update_addr_aggregator_description(acct, string::utf8(b"updated"));
@@ -344,7 +355,7 @@ module my_addr::addr_aggregator {
     }
 
     #[test(aptos_framework = @0x1, acct = @0x123)]
-    public entry fun test_add_addr(aptos_framework: &signer, acct: &signer) acquires AddrAggregator{
+    public entry fun test_add_addr(aptos_framework: &signer, acct: &signer, my_addr: &signer) acquires AddrAggregator, CreateAddrAggregatorEventSet {
         account::create_account_for_test(signer::address_of(acct));
         account::create_account_for_test(@aptos_framework);
         timestamp::set_time_has_started_for_testing(aptos_framework);
@@ -362,7 +373,7 @@ module my_addr::addr_aggregator {
     }
 
     #[test(aptos_framework = @0x1, acct = @0x123)]
-    public entry fun test_batch_add_addr(aptos_framework: &signer, acct: &signer) acquires AddrAggregator{
+    public entry fun test_batch_add_addr(aptos_framework: &signer, acct: &signer) acquires AddrAggregator, CreateAddrAggregatorEventSet {
         account::create_account_for_test(signer::address_of(acct));
         account::create_account_for_test(@aptos_framework);
         timestamp::set_time_has_started_for_testing(aptos_framework);
@@ -376,7 +387,7 @@ module my_addr::addr_aggregator {
     }
 
     #[test(aptos_framework = @0x1, acct = @0x123)]
-    public entry fun test_update_eth_addr(aptos_framework: &signer, acct: &signer) acquires AddrAggregator{
+    public entry fun test_update_eth_addr(aptos_framework: &signer, acct: &signer) acquires AddrAggregator, CreateAddrAggregatorEventSet {
         account::create_account_for_test(signer::address_of(acct));
         account::create_account_for_test(@aptos_framework);
         timestamp::set_time_has_started_for_testing(aptos_framework);
@@ -391,7 +402,7 @@ module my_addr::addr_aggregator {
     }
 
     #[test(aptos_framework = @0x1, acct = @0x123)]
-    public entry fun test_update_aptos_addr(aptos_framework: &signer, acct: &signer) acquires AddrAggregator{
+    public entry fun test_update_aptos_addr(aptos_framework: &signer, acct: &signer) acquires AddrAggregator, CreateAddrAggregatorEventSet {
         account::create_account_for_test(signer::address_of(acct));
         account::create_account_for_test(@aptos_framework);
         timestamp::set_time_has_started_for_testing(aptos_framework);
@@ -407,7 +418,7 @@ module my_addr::addr_aggregator {
     }
 
     #[test(aptos_framework = @0x1, acct = @0x123)]
-    public entry fun test_update_addr_info_with_chains_and_description(aptos_framework: &signer, acct: &signer) acquires AddrAggregator{
+    public entry fun test_update_addr_info_with_chains_and_description(aptos_framework: &signer, acct: &signer) acquires AddrAggregator, CreateAddrAggregatorEventSet {
         account::create_account_for_test(signer::address_of(acct));
         account::create_account_for_test(@aptos_framework);
         timestamp::set_time_has_started_for_testing(aptos_framework);
@@ -425,7 +436,7 @@ module my_addr::addr_aggregator {
     }
 
     #[test(aptos_framework = @0x1, acct = @0x123)]
-    public entry fun test_update_addr_info_for_non_verification(aptos_framework: &signer, acct: &signer) acquires AddrAggregator{
+    public entry fun test_update_addr_info_for_non_verification(aptos_framework: &signer, acct: &signer) acquires AddrAggregator, CreateAddrAggregatorEventSet {
         account::create_account_for_test(signer::address_of(acct));
         account::create_account_for_test(@aptos_framework);
         timestamp::set_time_has_started_for_testing(aptos_framework);
@@ -440,7 +451,7 @@ module my_addr::addr_aggregator {
     }
 
     #[test(aptos_framework = @0x1, acct = @0x123)]
-    public entry fun test_delete_addr(aptos_framework: &signer, acct: &signer) acquires AddrAggregator{
+    public entry fun test_delete_addr(aptos_framework: &signer, acct: &signer) acquires AddrAggregator, CreateAddrAggregatorEventSet {
         account::create_account_for_test(signer::address_of(acct));
         account::create_account_for_test(@aptos_framework);
         timestamp::set_time_has_started_for_testing(aptos_framework);
