@@ -52,11 +52,11 @@ The implementation follows the [did@w3c](https://www.w3.org/TR/did-core/)
 
 Mainnet:
 
-> [1eeebb44732b5d1b441479755da608fda48fde9a6a3a22051e4d6cb7fdce764b](https://explorer.aptoslabs.com/account/1eeebb44732b5d1b441479755da608fda48fde9a6a3a22051e4d6cb7fdce764b/modules)
+> [TODO](https://explorer.aptoslabs.com/account/TODO/modules)
 
 Testnet for Dev: 
 
-> [65f4a2dc1cb95005d10444a09917f7476b4b6f1deff8c625364faaacdfdc7489](https://explorer.aptoslabs.com/account/65f4a2dc1cb95005d10444a09917f7476b4b6f1deff8c625364faaacdfdc7489)
+> [ddfec6154b51261e65411d196dfb35cafeb0831243eff78393bef3c0ad4ead99](https://explorer.aptoslabs.com/account/ddfec6154b51261e65411d196dfb35cafeb0831243eff78393bef3c0ad4ead99/modules)
 
 ## 🏆 Prizes
 
