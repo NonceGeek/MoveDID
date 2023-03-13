@@ -8,7 +8,8 @@ upgrade_policy = "compatible"
 my_addr = "_"
 std = "0x1"
 aptos_framework = "0x1"
-chain_id = "0x1"
+chain_id = "0x1" # for mainnet
+# chain_id = "0x2" # for testnet
 
 [dependencies]
 MoveStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", subdir="aptos-move/framework/move-stdlib/", rev="aptos-cli-v1.0.4" }
