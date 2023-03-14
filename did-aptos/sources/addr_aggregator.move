@@ -423,7 +423,7 @@ module my_addr::addr_aggregator {
     }
 
     #[test(aptos_framework = @0x1, acct = @0x123)]
-    public entry fun test_update_addr_info_with_chains_and_description(aptos_framework: &signer, acct: &signer) acquires AddrAggregator, CreateAddrAggregatorEventSet {
+    public entry fun test_update_addr_info_with_chains_and_description_and_expired_at(aptos_framework: &signer, acct: &signer) acquires AddrAggregator, CreateAddrAggregatorEventSet {
         account::create_account_for_test(signer::address_of(acct));
         account::create_account_for_test(@aptos_framework);
         timestamp::set_time_has_started_for_testing(aptos_framework);
@@ -436,8 +436,8 @@ module my_addr::addr_aggregator {
         // msg is 0.1.0000000000000000000000000000000000000000000000000000000000000123.1.nonce_geek
         update_eth_addr(acct,string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), string::utf8(b"0xb0700aa203916f9ad772171bf84197229f37b093e0e6f09ce700e10736918c1102200286a408ea32bd621a412a9baf273f78d6de2f9c636ab0ca8440e5152f131c"));
 
-        update_addr_info_with_chains_and_description(acct,string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), vector[string::utf8(b"bsc")],
-            string::utf8(b"evm bsc addr"));
+        update_addr_info_with_chains_and_description_and_expired_at(acct,string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), vector[string::utf8(b"bsc")],
+            string::utf8(b"evm bsc addr"), 0);
     }
 
     #[test(aptos_framework = @0x1, acct = @0x123)]
@@ -452,7 +452,7 @@ module my_addr::addr_aggregator {
             string::utf8(b"evm addr"), 7200);
 
         update_addr_info_for_non_verification(acct,string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), vector[string::utf8(b"bsc")],
-            string::utf8(b"evm bsc addr"));
+            string::utf8(b"evm bsc addr"), 0);
     }
 
     #[test(aptos_framework = @0x1, acct = @0x123)]
