@@ -56,7 +56,7 @@ Mainnet:
 
 Testnet for Dev: 
 
-> [4aaee84c40acbc24f57b974c10774609378b5a4e364262a3379eef153138f160](https://explorer.aptoslabs.com/account/4aaee84c40acbc24f57b974c10774609378b5a4e364262a3379eef153138f160/modules)
+> [dc5d86d9a83e647558d271054cc4ef4e671031ee977fe7c1fcdd41aa5e3a16c3](https://explorer.aptoslabs.com/account/dc5d86d9a83e647558d271054cc4ef4e671031ee977fe7c1fcdd41aa5e3a16c3/modules)
 
 ## 🏆 Prizes
 
