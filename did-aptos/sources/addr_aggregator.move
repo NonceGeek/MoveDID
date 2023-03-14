@@ -47,7 +47,8 @@ module my_addr::addr_aggregator {
         addr: String,
         pubkey: String,
         chains: vector<String>,
-        description: String
+        description: String,
+        expired_at: u64
     }
 
     struct AddAddrEventSet has store  {
@@ -65,7 +66,8 @@ module my_addr::addr_aggregator {
     struct UpdateAddrEvent has drop, store {
         addr: String,
         chains: vector<String>,
-        description: String
+        description: String, 
+        expired_at: u64
     }
 
     struct UpdateAddrEventSet has store  {
@@ -139,12 +141,12 @@ module my_addr::addr_aggregator {
                               pubkey: String,
                               chains: vector<String>,
                               description: String,
-                              expire_second : u64
+                              expired_at : u64
     ) acquires AddrAggregator {
         let send_addr = signer::address_of(acct);
         let addr_aggr = borrow_global_mut<AddrAggregator>(send_addr);
 
-        do_add_addr(addr_aggr, send_addr, addr_type, addr, pubkey, chains, description, expire_second);
+        do_add_addr(addr_aggr, send_addr, addr_type, addr, pubkey, chains, description, expired_at);
     }
 
     fun do_add_addr(
@@ -155,7 +157,7 @@ module my_addr::addr_aggregator {
                     pubkey: String,
                     chains: vector<String>,
                     description: String,
-                    expire_second : u64)  {
+                    expired_at : u64)  {
         // Check addr is 0x begin.
         addr_info::check_addr_prefix(addr);
 
@@ -163,7 +165,7 @@ module my_addr::addr_aggregator {
         assert!(!exist_addr_by_map(&mut addr_aggr.addr_infos_map, addr), ERR_ADDR_ALREADY_EXSIT);
 
         addr_aggr.max_id = addr_aggr.max_id +1;
-        let addr_info = addr_info::init_addr_info(send_addr, addr_aggr.max_id, addr_type, addr, pubkey, &chains, description, expire_second);
+        let addr_info = addr_info::init_addr_info(send_addr, addr_aggr.max_id, addr_type, addr, pubkey, &chains, description, expired_at);
         table::add(&mut addr_aggr.addr_infos_map, addr, addr_info);
         vector::push_back(&mut addr_aggr.addrs, addr);
 
@@ -174,6 +176,7 @@ module my_addr::addr_aggregator {
             pubkey,
             chains,
             description,
+            expired_at
         })
     }
 
@@ -185,12 +188,12 @@ module my_addr::addr_aggregator {
         pubkeys: vector<String>,
         chains_vec: vector<vector<String>>,
         descriptions: vector<String>,
-        expire_seconds : vector<u64>
+        expired_at_vec : vector<u64>
     ) acquires AddrAggregator {
         let addrs_length = vector::length(&addrs);
         let length_match = addrs_length == vector::length(&addr_types) && addrs_length == vector::length(&pubkeys)
             && addrs_length == vector::length(&chains_vec) && addrs_length == vector::length(&descriptions)
-            && addrs_length == vector::length(&expire_seconds) ;
+            && addrs_length == vector::length(&expired_at_vec) ;
         assert!(length_match, ERR_ADDR_PARAM_VECTOR_LENGHT_MISMATCH);
 
         let send_addr = signer::address_of(acct);
@@ -203,9 +206,9 @@ module my_addr::addr_aggregator {
             let pubkey = vector::borrow<String>(&pubkeys, i);
             let chains = vector::borrow<vector<String>>(&chains_vec, i);
             let description = vector::borrow<String>(&descriptions, i);
-            let expire_second = vector::borrow<u64>(&expire_seconds, i);
+            let expired_at = vector::borrow<u64>(&expired_at_vec, i);
 
-            do_add_addr(addr_aggr, send_addr, *addr_type, *addr, *pubkey, *chains, *description, *expire_second);
+            do_add_addr(addr_aggr, send_addr, *addr_type, *addr, *pubkey, *chains, *description, *expired_at);
 
             i = i + 1;
         };
@@ -248,38 +251,40 @@ module my_addr::addr_aggregator {
     }
 
     // Update addr info for addr that verficated, you should resign after you update info.
-    public entry fun update_addr_info_with_chains_and_description(
-        acct: &signer, addr: String, chains: vector<String>, description: String) acquires AddrAggregator {
+    public entry fun update_addr_info_with_chains_and_description_and_expired_at(
+        acct: &signer, addr: String, chains: vector<String>, description: String, expired_at: u64) acquires AddrAggregator {
         // Check addr 0x prefix.
         addr_info::check_addr_prefix(addr);
 
         let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
         let addr_info = table::borrow_mut(&mut addr_aggr.addr_infos_map, addr);
 
-        addr_info::update_addr_info_with_chains_and_description(addr_info, chains, description);
+        addr_info::update_addr_info_with_chains_and_description_and_expired_at(addr_info, chains, description, expired_at);
 
         event::emit_event(&mut addr_aggr.update_addr_event_set.update_addr_event, UpdateAddrEvent {
             addr,
             chains,
-            description
+            description,
+            expired_at
         });
     }
 
     // Update addr info for non verification.
     public entry fun update_addr_info_for_non_verification(
-        acct: &signer, addr: String, chains: vector<String>, description: String) acquires AddrAggregator {
+        acct: &signer, addr: String, chains: vector<String>, description: String, expired_at: u64) acquires AddrAggregator {
         // Check addr 0x prefix.
         addr_info::check_addr_prefix(addr);
 
         let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
         let addr_info = table::borrow_mut(&mut addr_aggr.addr_infos_map, addr);
 
-        addr_info::update_addr_info_for_non_verification(addr_info, chains, description);
+        addr_info::update_addr_info_for_non_verification(addr_info, chains, description, expired_at);
 
         event::emit_event(&mut addr_aggr.update_addr_event_set.update_addr_event, UpdateAddrEvent {
             addr,
             chains,
-            description
+            description,
+            expired_at
         });
     }
 

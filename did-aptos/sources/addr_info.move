@@ -68,7 +68,7 @@ module my_addr::addr_info {
         pubkey: String,
         chains: &vector<String>,
         description: String,
-        expire_second : u64): AddrInfo {
+        expired_at : u64): AddrInfo {
         // Gen msg; format=height.chain_id.send_addr.id.nonce_geek .
         let height = block::get_current_block_height();
         let msg = utils::u64_to_vec_u8_string(height);
@@ -91,7 +91,6 @@ module my_addr::addr_info {
         vector::append(&mut msg, msg_suffix);
 
         let now = timestamp::now_seconds();
-        let expired_at = now + expire_second; // udpate expired_at
 
         AddrInfo {
             addr,
@@ -128,7 +127,12 @@ module my_addr::addr_info {
     }
 
      // Update addr info for addr that verficated, you should resign after you update info.
-     public(friend) fun update_addr_info_with_chains_and_description(addr_info: &mut AddrInfo, chains: vector<String>, description: String) {
+     public(friend) fun update_addr_info_with_chains_and_description_and_expired_at(
+        addr_info: &mut AddrInfo, 
+        chains: vector<String>, 
+        description: String,
+        expired_at: u64
+        ) {
         // Check addr_info's signature has verified.
         assert!(vector::length(&addr_info.signature) != 0, ERR_ADDR_NO_FIRST_VERIFY);
 
@@ -164,18 +168,25 @@ module my_addr::addr_info {
         addr_info.msg = string::utf8(msg);
         addr_info.chains = chains;
         addr_info.description = description;
+        addr_info.expired_at = expired_at;
         addr_info.updated_at = timestamp::now_seconds();
         // reset the signature.
         addr_info.signature = b"";
     }
 
     // Update addr info for non verification.
-    public(friend) fun update_addr_info_for_non_verification(addr_info: &mut AddrInfo, chains: vector<String>, description: String) {
+    public(friend) fun update_addr_info_for_non_verification(
+        addr_info: &mut AddrInfo, 
+        chains: vector<String>, 
+        description: String,
+        expired_at: u64
+        ) {
         // Check addr_info's signature must no verified.
         assert!(vector::length(&addr_info.signature) == 0, ERR_ADDR_MUST_NO_VERIFY);
 
         addr_info.chains = chains;
         addr_info.description = description;
+        addr_info.expired_at = expired_at;
         addr_info.updated_at = timestamp::now_seconds();
     }
 
