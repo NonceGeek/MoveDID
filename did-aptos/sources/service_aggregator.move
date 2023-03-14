@@ -15,14 +15,6 @@ module my_addr::service_aggregator {
         expired_at: u64
     }
 
-    struct ServiceAggregator has key {
-        key_addr: address,
-        services_map: Table<String, Service>,
-        names: vector<String>,
-        add_service_event_set: AddServiceEventSet,
-        update_service_event_set: UpdateServiceEventSet,
-        delete_service_event_set: DeleteServiceEventSet,
-    }
 
     struct CreateServiceAggregatorEvent has drop, store {
         key_addr: address,
@@ -40,28 +32,25 @@ module my_addr::service_aggregator {
         expired_at: u64
     }
 
-    struct AddServiceEventSet has store {
-        add_service_event: EventHandle<AddrServiceEvent>
-    }
-
     struct UpdateServiceEvent has drop, store {
         name: String,
         description: String,
         url: String,
-        verification_url: String, 
+        verification_url: String,
         expired_at: u64
-    }
-
-    struct UpdateServiceEventSet has store {
-        update_service_event: EventHandle<UpdateServiceEvent>,
     }
 
     struct DeleteServiceEvent has drop, store {
         name: String
     }
 
-    struct DeleteServiceEventSet has store {
-        delete_service_event: EventHandle<DeleteServiceEvent>,
+    struct ServiceAggregator has key {
+        key_addr: address,
+        services_map: Table<String, Service>,
+        names: vector<String>,
+        add_service_events: EventHandle<AddrServiceEvent>,
+        update_service_events: EventHandle<UpdateServiceEvent>,
+        delete_service_events: EventHandle<DeleteServiceEvent>,
     }
 
     // This is only callable during publishing.
@@ -83,15 +72,9 @@ module my_addr::service_aggregator {
             key_addr: signer::address_of(acct),
             services_map: table::new(),
             names: vector::empty<String>(),
-            add_service_event_set: AddServiceEventSet{
-                add_service_event: account::new_event_handle<AddrServiceEvent>(acct)
-            },
-            update_service_event_set: UpdateServiceEventSet{
-                update_service_event: account::new_event_handle<UpdateServiceEvent>(acct)
-            },
-            delete_service_event_set: DeleteServiceEventSet {
-                delete_service_event: account::new_event_handle<DeleteServiceEvent>(acct)
-            },
+            add_service_events: account::new_event_handle<AddrServiceEvent>(acct),
+            update_service_events: account::new_event_handle<UpdateServiceEvent>(acct),
+            delete_service_events: account::new_event_handle<DeleteServiceEvent>(acct),
         };
 
         emit_create_service_aggregator_event(signer::address_of(acct));
@@ -129,7 +112,7 @@ module my_addr::service_aggregator {
         table::add(&mut service_aggr.services_map, name, service_info);
         vector::push_back(&mut service_aggr.names, name);
 
-        event::emit_event(&mut service_aggr.add_service_event_set.add_service_event, AddrServiceEvent {
+        event::emit_event(&mut service_aggr.add_service_events, AddrServiceEvent {
             name,
             description,
             url,
@@ -141,7 +124,7 @@ module my_addr::service_aggregator {
     public entry fun batch_add_services(
         acct: &signer,
         names: vector<String>,
-        descriptions : vector<String>,
+        descriptions: vector<String>,
         urls: vector<String>,
         verification_urls: vector<String>,
         expired_at_vec: vector<u64>
@@ -185,7 +168,7 @@ module my_addr::service_aggregator {
         service.url = new_url;
         service.expired_at = expired_at;
 
-        event::emit_event(&mut service_aggr.update_service_event_set.update_service_event, UpdateServiceEvent {
+        event::emit_event(&mut service_aggr.update_service_events, UpdateServiceEvent {
             name,
             description: new_description,
             url: new_url,
@@ -208,7 +191,7 @@ module my_addr::service_aggregator {
             if (*current_name == name) {
                 vector::remove(&mut service_aggr.names, i);
 
-                event::emit_event(&mut service_aggr.delete_service_event_set.delete_service_event, DeleteServiceEvent {
+                event::emit_event(&mut service_aggr.delete_service_events, DeleteServiceEvent {
                     name
                 });
 
@@ -224,15 +207,17 @@ module my_addr::service_aggregator {
     #[test(acct = @0x123)]
     public entry fun test_create_service_aggregator(acct: &signer) acquires ServiceAggregator, CreateServiceAggregatorEventSet {
         account::create_account_for_test(signer::address_of(acct));
+        init_module(acct); //init module
+
         create_service_aggregator(acct);
         let service_aggr = borrow_global_mut<ServiceAggregator>(signer::address_of(acct));
         assert!(service_aggr.key_addr == @0x123, 501);
     }
 
     #[test(aptos_framework = @0x1, acct = @0x123)]
-    public entry fun test_add_service(aptos_framework: &signer, acct: &signer) acquires ServiceAggregator, CreateServiceAggregatorEventSet {
+    public entry fun test_add_service(acct: &signer) acquires ServiceAggregator, CreateServiceAggregatorEventSet {
         account::create_account_for_test(signer::address_of(acct));
-        timestamp::set_time_has_started_for_testing(aptos_framework);
+        init_module(acct); //init module
 
         create_service_aggregator(acct);
         add_service(acct, string::utf8(b"nonce.geek"), string::utf8(b"test"), string::utf8(b"https://movedid.build"), string::utf8(b"https://movedid.build"), 7200);
@@ -241,17 +226,17 @@ module my_addr::service_aggregator {
         assert!(name == string::utf8(b"nonce.geek"), 502);
     }
 
-    #[test(aptos_framework = @0x1, acct = @0x123)]
-    public entry fun test_batch_add_services(aptos_framework: &signer, acct: &signer) acquires ServiceAggregator, CreateServiceAggregatorEventSet {
+    #[test(acct = @0x123)]
+    public entry fun test_batch_add_services(acct: &signer) acquires ServiceAggregator, CreateServiceAggregatorEventSet {
         account::create_account_for_test(signer::address_of(acct));
-        timestamp::set_time_has_started_for_testing(aptos_framework);
+        init_module(acct); //init module
 
         create_service_aggregator(acct);
         let names = vector[string::utf8(b"nonce1"), string::utf8(b"nonce2")];
 
         batch_add_services(acct, names, vector[string::utf8(b"nonce1.url"), string::utf8(b"nonce2.url")],
-            vector[string::utf8(b"nonce1.desc"),string::utf8(b"nonce2.desc")],
-            vector[string::utf8(b"nonce1.verif"),string::utf8(b"nonce2.verif")], vector[0,0]
+            vector[string::utf8(b"nonce1.desc"), string::utf8(b"nonce2.desc")],
+            vector[string::utf8(b"nonce1.verif"), string::utf8(b"nonce2.verif")], vector[0, 0]
         );
 
         let service_aggr = borrow_global_mut<ServiceAggregator>(signer::address_of(acct));
@@ -261,14 +246,14 @@ module my_addr::service_aggregator {
     }
 
 
-    #[test(aptos_framework = @0x1, acct = @0x123)]
-    public entry fun test_update_service(aptos_framework: &signer, acct: &signer) acquires ServiceAggregator, CreateServiceAggregatorEventSet {
+    #[test(acct = @0x123)]
+    public entry fun test_update_service(acct: &signer) acquires ServiceAggregator, CreateServiceAggregatorEventSet {
         account::create_account_for_test(signer::address_of(acct));
-        timestamp::set_time_has_started_for_testing(aptos_framework);
+        init_module(acct); //init module
 
         create_service_aggregator(acct);
         add_service(acct, string::utf8(b"nonce.geek"), string::utf8(b"test"), string::utf8(b"https://movedid.build"), string::utf8(b"https://movedid.build"), 0);
-        update_service(acct, string::utf8(b"nonce.geek"), string::utf8(b"test2"), string::utf8(b"https://movedid.build2"), string::utf8(b"https://movedid.build2", 0));
+        update_service(acct, string::utf8(b"nonce.geek"), string::utf8(b"test2"), string::utf8(b"https://movedid.build2"), string::utf8(b"https://movedid.build2"), 0);
 
         let service_aggr = borrow_global_mut<ServiceAggregator>(signer::address_of(acct));
         let service = table::borrow_mut(&mut service_aggr.services_map, string::utf8(b"nonce.geek"));
@@ -276,16 +261,16 @@ module my_addr::service_aggregator {
         assert!(service.description == string::utf8(b"test2"), 504);
     }
 
-    #[test(aptos_framework = @0x1, acct = @0x123)]
-    public entry fun test_delete_services(aptos_framework: &signer, acct: &signer) acquires ServiceAggregator, CreateServiceAggregatorEventSet {
+    #[test(acct = @0x123)]
+    public entry fun test_delete_services(acct: &signer) acquires ServiceAggregator, CreateServiceAggregatorEventSet {
         account::create_account_for_test(signer::address_of(acct));
-        timestamp::set_time_has_started_for_testing(aptos_framework);
+        init_module(acct); //init module
 
         create_service_aggregator(acct);
         let names = vector[string::utf8(b"nonce1"), string::utf8(b"nonce2")];
         batch_add_services(acct, names, vector[string::utf8(b"nonce1.url"), string::utf8(b"nonce2.url")],
-            vector[string::utf8(b"nonce1.desc"),string::utf8(b"nonce2.desc")],
-            vector[string::utf8(b"nonce1.verif"),string::utf8(b"nonce2.verif")], vector[0,0]
+            vector[string::utf8(b"nonce1.desc"), string::utf8(b"nonce2.desc")],
+            vector[string::utf8(b"nonce1.verif"), string::utf8(b"nonce2.verif")], vector[0, 0]
         );
 
         delete_service(acct, string::utf8(b"nonce1"));

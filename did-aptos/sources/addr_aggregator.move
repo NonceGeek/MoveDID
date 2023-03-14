@@ -18,28 +18,14 @@ module my_addr::addr_aggregator {
     const ERR_ADDR_ALREADY_EXSIT: u64 = 1000;
     const ERR_ADDR_PARAM_VECTOR_LENGHT_MISMATCH: u64 = 1001;
 
-
-    struct AddrAggregator has key {
-        key_addr: address,
-        addr_infos_map: Table<String, AddrInfo>,
-        addrs: vector<String>,
-        type: u64,
-        description: String,
-        max_id: u64,
-        add_addr_event_set: AddAddrEventSet,
-        update_addr_signature_event_set: UpdateAddrSignatureEventSet,
-        update_addr_event_set: UpdateAddrEventSet,
-        delete_addr_event_set: DeleteAddrEventSet,
-    }
-
     struct CreateAddrAggregatorEvent has drop, store {
         key_addr: address,
         type: u64,
         description: String,
     }
- 
+
     struct CreateAddrAggregatorEventSet has key, store {
-        create_addr_aggregator_event: EventHandle<CreateAddrAggregatorEvent>
+        create_addr_aggregator_events: EventHandle<CreateAddrAggregatorEvent>
     }
 
     struct AddAddrEvent has drop, store {
@@ -51,51 +37,48 @@ module my_addr::addr_aggregator {
         expired_at: u64
     }
 
-    struct AddAddrEventSet has store  {
-        add_addr_event: EventHandle<AddAddrEvent>,
-    }
-
     struct UpdateAddrSignatureEvent has drop, store {
         addr: String
-    }
-
-    struct UpdateAddrSignatureEventSet has store  {
-        update_addr_signature_event: EventHandle<UpdateAddrSignatureEvent>,
     }
 
     struct UpdateAddrEvent has drop, store {
         addr: String,
         chains: vector<String>,
-        description: String, 
+        description: String,
         expired_at: u64
-    }
-
-    struct UpdateAddrEventSet has store  {
-        update_addr_event: EventHandle<UpdateAddrEvent>,
     }
 
     struct DeleteAddrEvent has drop, store {
         addr: String
     }
 
-    struct DeleteAddrEventSet has store {
-        delete_addr_event: EventHandle<DeleteAddrEvent>
+    struct AddrAggregator has key {
+        key_addr: address,
+        addr_infos_map: Table<String, AddrInfo>,
+        addrs: vector<String>,
+        type: u64,
+        description: String,
+        max_id: u64,
+        add_addr_events: EventHandle<AddAddrEvent>,
+        update_addr_signature_events: EventHandle<UpdateAddrSignatureEvent>,
+        update_addr_events: EventHandle<UpdateAddrEvent>,
+        delete_addr_events: EventHandle<DeleteAddrEvent>,
     }
 
     // This is only callable during publishing.
     fun init_module(account: &signer) {
         move_to(account, CreateAddrAggregatorEventSet {
-            create_addr_aggregator_event: account::new_event_handle<CreateAddrAggregatorEvent>(account),
+            create_addr_aggregator_events: account::new_event_handle<CreateAddrAggregatorEvent>(account),
         });
     }
 
-    fun emit_create_addr_aggregator_event(key_addr: address,  type: u64, description: String) acquires CreateAddrAggregatorEventSet {
+    fun emit_create_addr_aggregator_event(key_addr: address, type: u64, description: String) acquires CreateAddrAggregatorEventSet {
         let event = CreateAddrAggregatorEvent {
             key_addr,
             type,
             description,
         };
-        event::emit_event(&mut borrow_global_mut<CreateAddrAggregatorEventSet>(@my_addr).create_addr_aggregator_event, event);
+        event::emit_event(&mut borrow_global_mut<CreateAddrAggregatorEventSet>(@my_addr).create_addr_aggregator_events, event);
     }
 
     // Init.
@@ -107,19 +90,10 @@ module my_addr::addr_aggregator {
             type,
             description,
             max_id: 0,
-
-            add_addr_event_set: AddAddrEventSet{
-                add_addr_event: account::new_event_handle<AddAddrEvent>(acct),
-            },
-            update_addr_signature_event_set: UpdateAddrSignatureEventSet{
-                update_addr_signature_event: account::new_event_handle<UpdateAddrSignatureEvent>(acct)
-            },
-            update_addr_event_set: UpdateAddrEventSet {
-                update_addr_event:account::new_event_handle<UpdateAddrEvent>(acct)
-            },
-            delete_addr_event_set: DeleteAddrEventSet {
-                delete_addr_event: account::new_event_handle<DeleteAddrEvent>(acct),
-            },
+            add_addr_events: account::new_event_handle<AddAddrEvent>(acct),
+            update_addr_signature_events: account::new_event_handle<UpdateAddrSignatureEvent>(acct),
+            update_addr_events: account::new_event_handle<UpdateAddrEvent>(acct),
+            delete_addr_events: account::new_event_handle<DeleteAddrEvent>(acct),
         };
 
         emit_create_addr_aggregator_event(signer::address_of(acct), type, description);
@@ -135,13 +109,13 @@ module my_addr::addr_aggregator {
 
     // Add addr.
     public entry fun add_addr(
-                              acct: &signer,
-                              addr_type: u64,
-                              addr: String,
-                              pubkey: String,
-                              chains: vector<String>,
-                              description: String,
-                              expired_at : u64
+        acct: &signer,
+        addr_type: u64,
+        addr: String,
+        pubkey: String,
+        chains: vector<String>,
+        description: String,
+        expired_at: u64
     ) acquires AddrAggregator {
         let send_addr = signer::address_of(acct);
         let addr_aggr = borrow_global_mut<AddrAggregator>(send_addr);
@@ -150,27 +124,27 @@ module my_addr::addr_aggregator {
     }
 
     fun do_add_addr(
-                    addr_aggr: &mut AddrAggregator,
-                    send_addr : address,
-                    addr_type: u64,
-                    addr: String,
-                    pubkey: String,
-                    chains: vector<String>,
-                    description: String,
-                    expired_at : u64)  {
+        addr_aggr: &mut AddrAggregator,
+        send_addr: address,
+        addr_type: u64,
+        addr: String,
+        pubkey: String,
+        chains: vector<String>,
+        description: String,
+        expired_at: u64) {
         // Check addr is 0x begin.
         addr_info::check_addr_prefix(addr);
 
         // Check addr is already exist.
         assert!(!exist_addr_by_map(&mut addr_aggr.addr_infos_map, addr), ERR_ADDR_ALREADY_EXSIT);
 
-        addr_aggr.max_id = addr_aggr.max_id +1;
+        addr_aggr.max_id = addr_aggr.max_id + 1;
         let addr_info = addr_info::init_addr_info(send_addr, addr_aggr.max_id, addr_type, addr, pubkey, &chains, description, expired_at);
         table::add(&mut addr_aggr.addr_infos_map, addr, addr_info);
         vector::push_back(&mut addr_aggr.addrs, addr);
 
 
-        event::emit_event(&mut addr_aggr.add_addr_event_set.add_addr_event, AddAddrEvent {
+        event::emit_event(&mut addr_aggr.add_addr_events, AddAddrEvent {
             addr_type,
             addr,
             pubkey,
@@ -188,7 +162,7 @@ module my_addr::addr_aggregator {
         pubkeys: vector<String>,
         chains_vec: vector<vector<String>>,
         descriptions: vector<String>,
-        expired_at_vec : vector<u64>
+        expired_at_vec: vector<u64>
     ) acquires AddrAggregator {
         let addrs_length = vector::length(&addrs);
         let length_match = addrs_length == vector::length(&addr_types) && addrs_length == vector::length(&pubkeys)
@@ -229,7 +203,7 @@ module my_addr::addr_aggregator {
 
         addr_eth::update_addr(addr_info, &mut signature);
 
-        event::emit_event(&mut addr_aggr.update_addr_signature_event_set.update_addr_signature_event, UpdateAddrSignatureEvent {
+        event::emit_event(&mut addr_aggr.update_addr_signature_events, UpdateAddrSignatureEvent {
             addr
         });
     }
@@ -245,7 +219,7 @@ module my_addr::addr_aggregator {
 
         addr_aptos::update_addr(addr_info, &mut signature, msg);
 
-        event::emit_event(&mut addr_aggr.update_addr_signature_event_set.update_addr_signature_event, UpdateAddrSignatureEvent {
+        event::emit_event(&mut addr_aggr.update_addr_signature_events, UpdateAddrSignatureEvent {
             addr
         });
     }
@@ -261,7 +235,7 @@ module my_addr::addr_aggregator {
 
         addr_info::update_addr_info_with_chains_and_description_and_expired_at(addr_info, chains, description, expired_at);
 
-        event::emit_event(&mut addr_aggr.update_addr_event_set.update_addr_event, UpdateAddrEvent {
+        event::emit_event(&mut addr_aggr.update_addr_events, UpdateAddrEvent {
             addr,
             chains,
             description,
@@ -280,7 +254,7 @@ module my_addr::addr_aggregator {
 
         addr_info::update_addr_info_for_non_verification(addr_info, chains, description, expired_at);
 
-        event::emit_event(&mut addr_aggr.update_addr_event_set.update_addr_event, UpdateAddrEvent {
+        event::emit_event(&mut addr_aggr.update_addr_events, UpdateAddrEvent {
             addr,
             chains,
             description,
@@ -305,7 +279,7 @@ module my_addr::addr_aggregator {
             if (*current_addr == addr) {
                 vector::remove(&mut addr_aggr.addrs, i);
 
-                event::emit_event(&mut addr_aggr.delete_addr_event_set.delete_addr_event, DeleteAddrEvent {
+                event::emit_event(&mut addr_aggr.delete_addr_events, DeleteAddrEvent {
                     addr
                 });
                 break
@@ -344,7 +318,9 @@ module my_addr::addr_aggregator {
     #[test(acct = @0x123)]
     public entry fun test_create_addr_aggregator(acct: &signer) acquires AddrAggregator, CreateAddrAggregatorEventSet {
         account::create_account_for_test(signer::address_of(acct));
-        create_addr_aggregator(acct, 0,  string::utf8(b"test"));
+        init_module(acct); //init module
+
+        create_addr_aggregator(acct, 0, string::utf8(b"test"));
         let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
         assert!(addr_aggr.description == string::utf8(b"test"), 501);
     }
@@ -352,7 +328,9 @@ module my_addr::addr_aggregator {
     #[test(acct = @0x123)]
     public entry fun test_update_addr_aggregator_description(acct: &signer) acquires AddrAggregator, CreateAddrAggregatorEventSet {
         account::create_account_for_test(signer::address_of(acct));
-        create_addr_aggregator(acct, 0,  string::utf8(b"test"));
+        init_module(acct); //init module
+
+        create_addr_aggregator(acct, 0, string::utf8(b"test"));
         update_addr_aggregator_description(acct, string::utf8(b"updated"));
 
         let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
@@ -360,13 +338,14 @@ module my_addr::addr_aggregator {
     }
 
     #[test(aptos_framework = @0x1, acct = @0x123)]
-    public entry fun test_add_addr(aptos_framework: &signer, acct: &signer, my_addr: &signer) acquires AddrAggregator, CreateAddrAggregatorEventSet {
+    public entry fun test_add_addr(aptos_framework: &signer, acct: &signer) acquires AddrAggregator, CreateAddrAggregatorEventSet {
         account::create_account_for_test(signer::address_of(acct));
         account::create_account_for_test(@aptos_framework);
         timestamp::set_time_has_started_for_testing(aptos_framework);
         block::initialize_for_test(aptos_framework, 1000);
+        init_module(acct); //init module
 
-        create_addr_aggregator(acct, 0,  string::utf8(b"test"));
+        create_addr_aggregator(acct, 0, string::utf8(b"test"));
         add_addr(acct, 0, string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), string::utf8(b""), vector[string::utf8(b"eth"), string::utf8(b"polygon")],
             string::utf8(b"evm addr"), 7200);
         let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
@@ -374,7 +353,7 @@ module my_addr::addr_aggregator {
         let msg = addr_info::get_msg(info);
 
         debug::print(&msg);
-        assert!(msg == string::utf8(b"0.1.0000000000000000000000000000000000000000000000000000000000000123.1.nonce_geek"), 503);
+        assert!(msg == string::utf8(b"0.2.0000000000000000000000000000000000000000000000000000000000000123.1.nonce_geek"), 503);
     }
 
     #[test(aptos_framework = @0x1, acct = @0x123)]
@@ -383,12 +362,13 @@ module my_addr::addr_aggregator {
         account::create_account_for_test(@aptos_framework);
         timestamp::set_time_has_started_for_testing(aptos_framework);
         block::initialize_for_test(aptos_framework, 1000);
+        init_module(acct); //init module
 
-        create_addr_aggregator(acct, 0,  string::utf8(b"test"));
-        batch_add_addrs(acct,vector[string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"),string::utf8(b"0x978c213990c4833df71548df7ce49d54c759d6b6d932de22b24d56060b7af2aa")],
-            vector[0,1], vector[string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"),string::utf8(b"0x978c213990c4833df71548df7ce49d54c759d6b6d932de22b24d56060b7af2aa")],
-            vector[vector[string::utf8(b"eth"), string::utf8(b"polygon")],vector[string::utf8(b"aptos")]],
-            vector[string::utf8(b"first addr"),string::utf8(b"second addr")],vector[7200, 7200]);
+        create_addr_aggregator(acct, 0, string::utf8(b"test"));
+        batch_add_addrs(acct, vector[string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), string::utf8(b"0x978c213990c4833df71548df7ce49d54c759d6b6d932de22b24d56060b7af2aa")],
+            vector[0, 1], vector[string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), string::utf8(b"0x978c213990c4833df71548df7ce49d54c759d6b6d932de22b24d56060b7af2aa")],
+            vector[vector[string::utf8(b"eth"), string::utf8(b"polygon")], vector[string::utf8(b"aptos")]],
+            vector[string::utf8(b"first addr"), string::utf8(b"second addr")], vector[7200, 7200]);
     }
 
     #[test(aptos_framework = @0x1, acct = @0x123)]
@@ -397,13 +377,14 @@ module my_addr::addr_aggregator {
         account::create_account_for_test(@aptos_framework);
         timestamp::set_time_has_started_for_testing(aptos_framework);
         block::initialize_for_test(aptos_framework, 1000);
+        init_module(acct); //init module
 
-        create_addr_aggregator(acct, 0,  string::utf8(b"test"));
-        add_addr(acct, 0, string::utf8(b"0xa096A7161efe350A9762Cb608cE76B6ea9c50aCf"), string::utf8(b""), vector[string::utf8(b"eth"), string::utf8(b"polygon")],
-            string::utf8(b"evm addr"),7200);
+        create_addr_aggregator(acct, 0, string::utf8(b"test"));
+        add_addr(acct, 0, string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), string::utf8(b""), vector[string::utf8(b"eth"), string::utf8(b"polygon")],
+            string::utf8(b"evm addr"), 7200);
 
-        // msg is 0.1.0000000000000000000000000000000000000000000000000000000000000123.1.nonce_geek
-        update_eth_addr(acct,string::utf8(b"0xa096A7161efe350A9762Cb608cE76B6ea9c50aCf"), string::utf8(b"0xf1e7f1d06a07f6fd543460d83b2df377868048beede9bcbdf1d5bbdb70aea82c4e962ef547d396d1b1323824ab3ebc47f18c88fec0c51ef6613d1a2fd7041b3f1b"));
+        // msg is 0.2.0000000000000000000000000000000000000000000000000000000000000123.1.nonce_geek
+        update_eth_addr(acct, string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), string::utf8(b"0xede93b0920b5c0584102bee3804cda9c83c4e05d4b2cde7aecdc1182f25021521b934c08f48552eaa286bf28f2c2cfa30c8395d6d95a95aae125ba2befb2e85c1b"));
     }
 
     #[test(aptos_framework = @0x1, acct = @0x123)]
@@ -412,14 +393,15 @@ module my_addr::addr_aggregator {
         account::create_account_for_test(@aptos_framework);
         timestamp::set_time_has_started_for_testing(aptos_framework);
         block::initialize_for_test(aptos_framework, 1000);
+        init_module(acct); //init module
 
-        create_addr_aggregator(acct, 0,  string::utf8(b"test"));
+        create_addr_aggregator(acct, 0, string::utf8(b"test"));
         add_addr(acct, 1, string::utf8(b"0x978c213990c4833df71548df7ce49d54c759d6b6d932de22b24d56060b7af2aa"), string::utf8(b"0xde19e5d1880cac87d57484ce9ed2e84cf0f9599f12e7cc3a52e4e7657a763f2c"), vector[string::utf8(b"aptos")],
-            string::utf8(b"aptos addr"),7200);
+            string::utf8(b"aptos addr"), 7200);
 
-        // msg is 0.1.0000000000000000000000000000000000000000000000000000000000000123.1.nonce_geek
-        let msg = string::utf8(b"0.1.0000000000000000000000000000000000000000000000000000000000000123.1.nonce_geek");
-        update_aptos_addr(acct, string::utf8(b"0x978c213990c4833df71548df7ce49d54c759d6b6d932de22b24d56060b7af2aa"), string::utf8(b"0x9aa39c8eeb03472eb7444a9f3fd6cd39633879a9700b6346a12b4e232fb3b4ed034fc34ed491eb1534efba76300d6b3feb753b9a7f49c2706a6c68f017879e06"), msg);
+        // msg is 0.2.0000000000000000000000000000000000000000000000000000000000000123.1.nonce_geek
+        let msg = string::utf8(b"0.2.0000000000000000000000000000000000000000000000000000000000000123.1.nonce_geek");
+        update_aptos_addr(acct, string::utf8(b"0x978c213990c4833df71548df7ce49d54c759d6b6d932de22b24d56060b7af2aa"), string::utf8(b"0x1fc94485554e14c5cd59de70763e57b1222a33041185971e58cefc1d96105a5e6b2290a77fe62ac170690cdd9881119bbfa7d004790834803f723706958f6e03"), msg);
     }
 
     #[test(aptos_framework = @0x1, acct = @0x123)]
@@ -428,15 +410,16 @@ module my_addr::addr_aggregator {
         account::create_account_for_test(@aptos_framework);
         timestamp::set_time_has_started_for_testing(aptos_framework);
         block::initialize_for_test(aptos_framework, 1000);
+        init_module(acct); //init module
 
-        create_addr_aggregator(acct, 0,  string::utf8(b"test"));
+        create_addr_aggregator(acct, 0, string::utf8(b"test"));
         add_addr(acct, 0, string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), string::utf8(b""), vector[string::utf8(b"eth"), string::utf8(b"polygon")],
-            string::utf8(b"evm addr"),7200);
+            string::utf8(b"evm addr"), 7200);
 
         // msg is 0.1.0000000000000000000000000000000000000000000000000000000000000123.1.nonce_geek
-        update_eth_addr(acct,string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), string::utf8(b"0xb0700aa203916f9ad772171bf84197229f37b093e0e6f09ce700e10736918c1102200286a408ea32bd621a412a9baf273f78d6de2f9c636ab0ca8440e5152f131c"));
+        update_eth_addr(acct, string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), string::utf8(b"0xede93b0920b5c0584102bee3804cda9c83c4e05d4b2cde7aecdc1182f25021521b934c08f48552eaa286bf28f2c2cfa30c8395d6d95a95aae125ba2befb2e85c1b"));
 
-        update_addr_info_with_chains_and_description_and_expired_at(acct,string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), vector[string::utf8(b"bsc")],
+        update_addr_info_with_chains_and_description_and_expired_at(acct, string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), vector[string::utf8(b"bsc")],
             string::utf8(b"evm bsc addr"), 0);
     }
 
@@ -446,12 +429,13 @@ module my_addr::addr_aggregator {
         account::create_account_for_test(@aptos_framework);
         timestamp::set_time_has_started_for_testing(aptos_framework);
         block::initialize_for_test(aptos_framework, 1000);
+        init_module(acct); //init module
 
-        create_addr_aggregator(acct, 0,  string::utf8(b"test"));
+        create_addr_aggregator(acct, 0, string::utf8(b"test"));
         add_addr(acct, 0, string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), string::utf8(b""), vector[string::utf8(b"eth"), string::utf8(b"polygon")],
             string::utf8(b"evm addr"), 7200);
 
-        update_addr_info_for_non_verification(acct,string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), vector[string::utf8(b"bsc")],
+        update_addr_info_for_non_verification(acct, string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), vector[string::utf8(b"bsc")],
             string::utf8(b"evm bsc addr"), 0);
     }
 
@@ -461,8 +445,9 @@ module my_addr::addr_aggregator {
         account::create_account_for_test(@aptos_framework);
         timestamp::set_time_has_started_for_testing(aptos_framework);
         block::initialize_for_test(aptos_framework, 1000);
+        init_module(acct); //init module
 
-        create_addr_aggregator(acct, 0,  string::utf8(b"test"));
+        create_addr_aggregator(acct, 0, string::utf8(b"test"));
         add_addr(acct, 0, string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), string::utf8(b""), vector[string::utf8(b"eth"), string::utf8(b"polygon")],
             string::utf8(b"evm addr"), 7200);
 
