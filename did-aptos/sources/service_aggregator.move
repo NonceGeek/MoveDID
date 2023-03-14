@@ -9,8 +9,8 @@ module my_addr::service_aggregator {
     const ERR_SERVICE_PARAM_VECTOR_LENGHT_MISMATCH: u64 = 5000;
 
     struct Service has store, copy, drop {
-        url: String,
         description: String,
+        url: String,
         verification_url: String,
         expired_at: u64
     }
@@ -34,8 +34,8 @@ module my_addr::service_aggregator {
 
     struct AddrServiceEvent has drop, store {
         name: String,
-        url: String,
         description: String,
+        url: String,
         verification_url: String,
         expired_at: u64
     }
@@ -46,8 +46,8 @@ module my_addr::service_aggregator {
 
     struct UpdateServiceEvent has drop, store {
         name: String,
-        url: String,
         description: String,
+        url: String,
         verification_url: String, 
         expired_at: u64
     }
@@ -108,7 +108,7 @@ module my_addr::service_aggregator {
         expired_at: u64
     ) acquires ServiceAggregator {
         let service_aggr = borrow_global_mut<ServiceAggregator>(signer::address_of(acct));
-        do_add_service(service_aggr, name, url, description, verification_url, expired_at);
+        do_add_service(service_aggr, name, description, url, verification_url, expired_at);
     }
 
     fun do_add_service(
@@ -120,8 +120,8 @@ module my_addr::service_aggregator {
         expired_at: u64
     ) {
         let service_info = Service {
-            url,
             description,
+            url,
             verification_url,
             expired_at
         };
@@ -131,8 +131,8 @@ module my_addr::service_aggregator {
 
         event::emit_event(&mut service_aggr.add_service_event_set.add_service_event, AddrServiceEvent {
             name,
-            url,
             description,
+            url,
             verification_url,
             expired_at
         })
@@ -162,7 +162,7 @@ module my_addr::service_aggregator {
             let description = vector::borrow<String>(&descriptions, i);
             let verification_url = vector::borrow<String>(&verification_urls, i);
             let expired_at = vector::borrow<u64>(&expired_at_vec, i);
-            do_add_service(service_aggr, *name, *url, *description, *verification_url, *expired_at);
+            do_add_service(service_aggr, *name, *description, *url, *verification_url, *expired_at);
 
             i = i + 1;
         };
@@ -187,8 +187,8 @@ module my_addr::service_aggregator {
 
         event::emit_event(&mut service_aggr.update_service_event_set.update_service_event, UpdateServiceEvent {
             name,
-            url: new_url,
             description: new_description,
+            url: new_url,
             verification_url: new_verification_url,
             expired_at: expired_at
         })
