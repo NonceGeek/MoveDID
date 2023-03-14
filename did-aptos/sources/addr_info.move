@@ -18,15 +18,7 @@ module my_addr::addr_info {
     const ERR_ADDR_NO_FIRST_VERIFY: u64 = 1006;
     const ERR_ADDR_MUST_NO_VERIFY: u64 = 1007;
 
-    // Err pack.
-    public fun err_addr_info_empty(): u64 { ERR_ADDR_INFO_MSG_EMPTY }
-
-    public fun err_invalid_addr_type(): u64 { ERR_INVALID_ADR_TYPE }
-
-    public fun err_signature_verify_fail(): u64 { ERR_SIGNATURE_VERIFY_FAIL }
-
-    public fun err_timestamp_exceed(): u64 { ERR_TIMESTAMP_EXCEED }
-
+    //:!:>resource
     struct AddrInfo has store, copy, drop {
         addr: String,
         description: String,
@@ -40,6 +32,16 @@ module my_addr::addr_info {
         expired_at: u64,
         pubkey: String,
     }
+    //<:!:resource
+
+    // Err pack.
+    public fun err_addr_info_empty(): u64 { ERR_ADDR_INFO_MSG_EMPTY }
+
+    public fun err_invalid_addr_type(): u64 { ERR_INVALID_ADR_TYPE }
+
+    public fun err_signature_verify_fail(): u64 { ERR_SIGNATURE_VERIFY_FAIL }
+
+    public fun err_timestamp_exceed(): u64 { ERR_TIMESTAMP_EXCEED }
 
     // Get attr.
     public fun get_msg(addr_info: &AddrInfo): String { addr_info.msg }

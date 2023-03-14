@@ -18,6 +18,21 @@ module my_addr::addr_aggregator {
     const ERR_ADDR_ALREADY_EXSIT: u64 = 1000;
     const ERR_ADDR_PARAM_VECTOR_LENGHT_MISMATCH: u64 = 1001;
 
+    //:!:>resource
+    struct AddrAggregator has key {
+        key_addr: address,
+        addr_infos_map: Table<String, AddrInfo>,
+        addrs: vector<String>,
+        type: u64,
+        description: String,
+        max_id: u64,
+        add_addr_events: EventHandle<AddAddrEvent>,
+        update_addr_signature_events: EventHandle<UpdateAddrSignatureEvent>,
+        update_addr_events: EventHandle<UpdateAddrEvent>,
+        delete_addr_events: EventHandle<DeleteAddrEvent>,
+    }
+    //<:!:resource
+
     struct CreateAddrAggregatorEvent has drop, store {
         key_addr: address,
         type: u64,
@@ -50,19 +65,6 @@ module my_addr::addr_aggregator {
 
     struct DeleteAddrEvent has drop, store {
         addr: String
-    }
-
-    struct AddrAggregator has key {
-        key_addr: address,
-        addr_infos_map: Table<String, AddrInfo>,
-        addrs: vector<String>,
-        type: u64,
-        description: String,
-        max_id: u64,
-        add_addr_events: EventHandle<AddAddrEvent>,
-        update_addr_signature_events: EventHandle<UpdateAddrSignatureEvent>,
-        update_addr_events: EventHandle<UpdateAddrEvent>,
-        delete_addr_events: EventHandle<DeleteAddrEvent>,
     }
 
     // This is only callable during publishing.

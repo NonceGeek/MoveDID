@@ -8,12 +8,23 @@ module my_addr::service_aggregator {
 
     const ERR_SERVICE_PARAM_VECTOR_LENGHT_MISMATCH: u64 = 5000;
 
+    //:!:>resource
     struct Service has store, copy, drop {
         description: String,
         url: String,
         verification_url: String,
         expired_at: u64
     }
+
+    struct ServiceAggregator has key {
+        key_addr: address,
+        services_map: Table<String, Service>,
+        names: vector<String>,
+        add_service_events: EventHandle<AddrServiceEvent>,
+        update_service_events: EventHandle<UpdateServiceEvent>,
+        delete_service_events: EventHandle<DeleteServiceEvent>,
+    }
+    //<:!:resource
 
 
     struct CreateServiceAggregatorEvent has drop, store {
@@ -42,15 +53,6 @@ module my_addr::service_aggregator {
 
     struct DeleteServiceEvent has drop, store {
         name: String
-    }
-
-    struct ServiceAggregator has key {
-        key_addr: address,
-        services_map: Table<String, Service>,
-        names: vector<String>,
-        add_service_events: EventHandle<AddrServiceEvent>,
-        update_service_events: EventHandle<UpdateServiceEvent>,
-        delete_service_events: EventHandle<DeleteServiceEvent>,
     }
 
     // This is only callable during publishing.
