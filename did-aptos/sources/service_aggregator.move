@@ -102,8 +102,8 @@ module my_addr::service_aggregator {
     public entry fun add_service(
         acct: &signer,
         name: String,
-        url: String,
         description: String,
+        url: String,
         verification_url: String,
         expired_at: u64
     ) acquires ServiceAggregator {
@@ -114,8 +114,8 @@ module my_addr::service_aggregator {
     fun do_add_service(
         service_aggr: &mut ServiceAggregator,
         name: String,
-        url: String,
         description: String,
+        url: String,
         verification_url: String,
         expired_at: u64
     ) {
@@ -141,8 +141,8 @@ module my_addr::service_aggregator {
     public entry fun batch_add_services(
         acct: &signer,
         names: vector<String>,
-        urls: vector<String>,
         descriptions : vector<String>,
+        urls: vector<String>,
         verification_urls: vector<String>,
         expired_at_vec: vector<u64>
     ) acquires ServiceAggregator {
