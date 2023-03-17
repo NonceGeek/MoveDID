@@ -8,6 +8,8 @@ module my_addr::utils {
     const ERR_INVALID_ASCII_CHAR: u64 = 3000;
     const ERR_STRING_LENGTH_INVALID: u64 = 3001;
 
+    // TODO: public fun gen_msg
+    
     public fun u64_to_vec_u8(val : u64) : vector<u8> {
         let result = vector::empty<u8>();
         

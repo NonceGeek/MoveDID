@@ -85,7 +85,7 @@ Dorahack Aptos Grant DAO Prize 2nd:
 
 ## Compilation & Deployment Guide
 
-### Aptos
+### Aptos(TODO: Update)
 
 > Aptos CLI version >=1.0.0
 
