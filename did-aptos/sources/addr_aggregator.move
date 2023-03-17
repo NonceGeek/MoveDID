@@ -30,6 +30,7 @@ module my_addr::addr_aggregator {
         update_addr_signature_events: EventHandle<UpdateAddrSignatureEvent>,
         update_addr_events: EventHandle<UpdateAddrEvent>,
         delete_addr_events: EventHandle<DeleteAddrEvent>,
+        increase_id: u64, // increase id after any op
     }
     //<:!:resource
 
@@ -96,6 +97,7 @@ module my_addr::addr_aggregator {
             update_addr_signature_events: account::new_event_handle<UpdateAddrSignatureEvent>(acct),
             update_addr_events: account::new_event_handle<UpdateAddrEvent>(acct),
             delete_addr_events: account::new_event_handle<DeleteAddrEvent>(acct),
+            increase_id:0,
         };
 
         emit_create_addr_aggregator_event(signer::address_of(acct), type, description);
@@ -141,7 +143,8 @@ module my_addr::addr_aggregator {
         assert!(!exist_addr_by_map(&mut addr_aggr.addr_infos_map, addr), ERR_ADDR_ALREADY_EXSIT);
 
         addr_aggr.max_id = addr_aggr.max_id + 1;
-        let addr_info = addr_info::init_addr_info(send_addr, addr_aggr.max_id, addr_type, addr, pubkey, &chains, description, expired_at);
+        addr_aggr.increase_id = addr_aggr.increase_id + 1;
+        let addr_info = addr_info::init_addr_info(send_addr, addr_aggr.max_id, addr_type, addr, pubkey, &chains, description, expired_at, addr_aggr.increase_id);
         table::add(&mut addr_aggr.addr_infos_map, addr, addr_info);
         vector::push_back(&mut addr_aggr.addrs, addr);
 
@@ -203,6 +206,7 @@ module my_addr::addr_aggregator {
         let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
         let addr_info = table::borrow_mut(&mut addr_aggr.addr_infos_map, addr);
 
+        addr_aggr.increase_id = addr_aggr.increase_id + 1;
         addr_eth::update_addr(addr_info, &mut signature);
 
         event::emit_event(&mut addr_aggr.update_addr_signature_events, UpdateAddrSignatureEvent {
@@ -219,6 +223,7 @@ module my_addr::addr_aggregator {
         let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
         let addr_info = table::borrow_mut(&mut addr_aggr.addr_infos_map, addr);
 
+        addr_aggr.increase_id = addr_aggr.increase_id + 1;
         addr_aptos::update_addr(addr_info, &mut signature, msg);
 
         event::emit_event(&mut addr_aggr.update_addr_signature_events, UpdateAddrSignatureEvent {
@@ -235,7 +240,9 @@ module my_addr::addr_aggregator {
         let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
         let addr_info = table::borrow_mut(&mut addr_aggr.addr_infos_map, addr);
 
-        addr_info::update_addr_info_with_chains_and_description_and_expired_at(addr_info, chains, description, expired_at);
+        addr_aggr.increase_id = addr_aggr.increase_id + 1;
+        let send_addr = signer::address_of(acct);
+        addr_info::update_addr_info_with_chains_and_description_and_expired_at(addr_info, chains, description, expired_at, send_addr, addr_aggr.increase_id);
 
         event::emit_event(&mut addr_aggr.update_addr_events, UpdateAddrEvent {
             addr,
@@ -254,6 +261,7 @@ module my_addr::addr_aggregator {
         let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
         let addr_info = table::borrow_mut(&mut addr_aggr.addr_infos_map, addr);
 
+        addr_aggr.increase_id = addr_aggr.increase_id + 1;
         addr_info::update_addr_info_for_non_verification(addr_info, chains, description, expired_at);
 
         event::emit_event(&mut addr_aggr.update_addr_events, UpdateAddrEvent {
@@ -273,6 +281,7 @@ module my_addr::addr_aggregator {
 
         let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
         table::remove(&mut addr_aggr.addr_infos_map, addr);
+        addr_aggr.increase_id = addr_aggr.increase_id + 1;
 
         let length = vector::length(&addr_aggr.addrs);
         let i = 0;
@@ -423,6 +432,13 @@ module my_addr::addr_aggregator {
 
         update_addr_info_with_chains_and_description_and_expired_at(acct, string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"), vector[string::utf8(b"bsc")],
             string::utf8(b"evm bsc addr"), 0);
+
+        let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
+        let info = table::borrow_mut(&mut addr_aggr.addr_infos_map, string::utf8(b"0x14791697260E4c9A71f18484C9f997B308e59325"));
+        let msg = addr_info::get_msg(info);
+        debug::print(&msg);
+
+        assert!(msg == string::utf8(b"0.2.0000000000000000000000000000000000000000000000000000000000000123.3.nonce_geek"), 503);
     }
 
     #[test(aptos_framework = @0x1, acct = @0x123)]
