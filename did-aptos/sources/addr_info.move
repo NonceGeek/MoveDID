@@ -71,7 +71,7 @@ module my_addr::addr_info {
         chains: &vector<String>,
         description: String,
         expired_at : u64): AddrInfo {
-        // Gen msg; format=height.chain_id.send_addr.id.nonce_geek .
+        // TODO: Gen Msg Format = {{height.chain_id.send_addr.id_increased_after_any_op.nonce_geek}} .
         let height = block::get_current_block_height();
         let msg = utils::u64_to_vec_u8_string(height);
 
