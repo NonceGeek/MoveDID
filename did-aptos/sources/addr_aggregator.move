@@ -439,7 +439,7 @@ module my_addr::addr_aggregator {
         let msg = addr_info::get_msg(info);
         debug::print(&msg);
 
-        assert!(msg == string::utf8(b"0.2.0000000000000000000000000000000000000000000000000000000000000123.3.nonce_geek"), 503);
+        assert!(msg == string::utf8(b"0.2.0000000000000000000000000000000000000000000000000000000000000123.2.nonce_geek"), 503);
     }
 
     #[test(aptos_framework = @0x1, acct = @0x123)]
