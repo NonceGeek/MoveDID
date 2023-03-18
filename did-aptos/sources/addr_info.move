@@ -138,6 +138,7 @@ module my_addr::addr_info {
         // Check addr_info's signature has verified.
         assert!(vector::length(&addr_info.signature) != 0, ERR_ADDR_NO_FIRST_VERIFY);
 
+        // TODO: Gen Msg Format = {{height.chain_id.send_addr.id_increased_after_any_op.nonce_geek}} .
         // Msg format : block_height.chain_id.nonce_geek.chains.description.
         let height = block::get_current_block_height();
         let msg = utils::u64_to_vec_u8_string(height);
