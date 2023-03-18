@@ -146,6 +146,7 @@ module my_addr::addr_aggregator {
 
         // Update modified_counter after add_addr op.
         addr_aggr.modified_counter = addr_aggr.modified_counter + 1;
+        
         let addr_info = addr_info::init_addr_info(send_addr, addr_aggr.max_id, addr_type, addr, pubkey, &chains, description, expired_at, addr_aggr.modified_counter);
         table::add(&mut addr_aggr.addr_infos_map, addr, addr_info);
         vector::push_back(&mut addr_aggr.addrs, addr);
