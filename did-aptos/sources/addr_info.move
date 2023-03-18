@@ -71,8 +71,8 @@ module my_addr::addr_info {
         chains: &vector<String>,
         description: String,
         expired_at : u64,
-        increase_id: u64): AddrInfo {
-        // TODO: Gen Msg Format = {{height.chain_id.send_addr.id_increased_after_any_op.nonce_geek}} .
+        modified_counter: u64): AddrInfo {
+        // Gen Msg Format = {{height.chain_id.send_addr.id_increased_after_any_op.nonce_geek}} .
         let height = block::get_current_block_height();
         let msg = utils::u64_to_vec_u8_string(height);
 
@@ -86,13 +86,9 @@ module my_addr::addr_info {
         vector::append(&mut msg, b".");
         vector::append(&mut msg, send_addr_vec);
 
-        let increase_id_vec = utils::u64_to_vec_u8_string(increase_id);
+        let modified_counter_vec = utils::u64_to_vec_u8_string(modified_counter);
         vector::append(&mut msg, b".");
-        vector::append(&mut msg, increase_id_vec);
-
-        // let id_vec = utils::u64_to_vec_u8_string(id);
-        // vector::append(&mut msg, b".");
-        // vector::append(&mut msg, id_vec);
+        vector::append(&mut msg, modified_counter_vec);
 
         let msg_suffix = b".nonce_geek";
         vector::append(&mut msg, msg_suffix);
@@ -140,12 +136,12 @@ module my_addr::addr_info {
         description: String,
         expired_at: u64,
         send_addr: address,
-        increase_id: u64,
+        modified_counter: u64,
         ) {
         // Check addr_info's signature has verified.
         assert!(vector::length(&addr_info.signature) != 0, ERR_ADDR_NO_FIRST_VERIFY);
 
-        // TODO: Gen Msg Format = {{height.chain_id.send_addr.id_increased_after_any_op.nonce_geek}} .
+        // Gen Msg Format = {{height.chain_id.send_addr.id_increased_after_any_op.nonce_geek}} .
         // Msg format : block_height.chain_id.nonce_geek.chains.description.
         let height = block::get_current_block_height();
         let msg = utils::u64_to_vec_u8_string(height);
@@ -160,9 +156,9 @@ module my_addr::addr_info {
          vector::append(&mut msg, b".");
          vector::append(&mut msg, send_addr_vec);
 
-         let increase_id_vec = utils::u64_to_vec_u8_string(increase_id);
+         let modified_counter_vec = utils::u64_to_vec_u8_string(modified_counter);
          vector::append(&mut msg, b".");
-         vector::append(&mut msg, increase_id_vec);
+         vector::append(&mut msg, modified_counter_vec);
 
         let msg_suffix = b".nonce_geek";
         vector::append(&mut msg, msg_suffix);
