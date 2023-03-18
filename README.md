@@ -56,7 +56,7 @@ Mainnet:
 
 Testnet for Dev: 
 
-> [19afc8c042ab84ba0db94bc73bdf06e20b13884187d6e69b4dec641c8b58634d](https://explorer.aptoslabs.com/account/19afc8c042ab84ba0db94bc73bdf06e20b13884187d6e69b4dec641c8b58634d/modules)
+> [dea79e568e00066f60fbfe6ac6d8a9ef2fabbeadc6aae1ec9158d50f6efe4ac8](https://explorer.aptoslabs.com/account/dea79e568e00066f60fbfe6ac6d8a9ef2fabbeadc6aae1ec9158d50f6efe4ac8/modules)
 
 ## 🏆 Prizes
 
@@ -148,6 +148,14 @@ aptos move run --function-id 1f9aa0aa17a3c8b02546df9353cdbee47f14bcaf25f5524492a
 aptos move run --function-id 1f9aa0aa17a3c8b02546df9353cdbee47f14bcaf25f5524492a17a8ab8c906ee::addr_aggregator::add_addr --args u64:0 --args String:a5928A4b811b6F850e633Dfb9f9c4B50247565a9 --args String:Ethereum --args String:Test --profile
 ```
 * step 0x09: update addr for add new type 
+
+## Test
+
+Run Test in Contract: 
+
+```
+aptos move test  --package-dir did-aptos  --named-addresses my_addr=0x123
+```
 
 ## Guide of New Module Addition
 
