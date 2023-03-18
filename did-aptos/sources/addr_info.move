@@ -70,7 +70,8 @@ module my_addr::addr_info {
         pubkey: String,
         chains: &vector<String>,
         description: String,
-        expired_at : u64): AddrInfo {
+        expired_at : u64,
+        increase_id: u64): AddrInfo {
         // TODO: Gen Msg Format = {{height.chain_id.send_addr.id_increased_after_any_op.nonce_geek}} .
         let height = block::get_current_block_height();
         let msg = utils::u64_to_vec_u8_string(height);
@@ -85,9 +86,13 @@ module my_addr::addr_info {
         vector::append(&mut msg, b".");
         vector::append(&mut msg, send_addr_vec);
 
-        let id_vec = utils::u64_to_vec_u8_string(id);
+        let increase_id_vec = utils::u64_to_vec_u8_string(increase_id);
         vector::append(&mut msg, b".");
-        vector::append(&mut msg, id_vec);
+        vector::append(&mut msg, increase_id_vec);
+
+        // let id_vec = utils::u64_to_vec_u8_string(id);
+        // vector::append(&mut msg, b".");
+        // vector::append(&mut msg, id_vec);
 
         let msg_suffix = b".nonce_geek";
         vector::append(&mut msg, msg_suffix);
@@ -133,7 +138,9 @@ module my_addr::addr_info {
         addr_info: &mut AddrInfo, 
         chains: vector<String>, 
         description: String,
-        expired_at: u64
+        expired_at: u64,
+        send_addr: address,
+        increase_id: u64,
         ) {
         // Check addr_info's signature has verified.
         assert!(vector::length(&addr_info.signature) != 0, ERR_ADDR_NO_FIRST_VERIFY);
@@ -148,24 +155,16 @@ module my_addr::addr_info {
         vector::append(&mut msg, b".");
         vector::append(&mut msg, chain_id_vec);
 
+         let send_addr_vec = utils::address_to_ascii_u8_vec(send_addr);
+         vector::append(&mut msg, b".");
+         vector::append(&mut msg, send_addr_vec);
+
+         let increase_id_vec = utils::u64_to_vec_u8_string(increase_id);
+         vector::append(&mut msg, b".");
+         vector::append(&mut msg, increase_id_vec);
+
         let msg_suffix = b".nonce_geek";
         vector::append(&mut msg, msg_suffix);
-        vector::append(&mut msg, b".");
-        // Add chains.
-        let chains_length = vector::length(&chains);
-        let i = 0;
-        while (i < chains_length) {
-            let chain = vector::borrow<String>(&mut chains, i);
-            vector::append(&mut msg, *string::bytes(chain));
-            if (i != chains_length - 1) {
-                vector::append(&mut msg, b"_");
-            };
-            i = i + 1
-        };
-
-        vector::append(&mut msg, b".");
-        // Add description.
-        vector::append(&mut msg, *string::bytes(&description));
 
         addr_info.msg = string::utf8(msg);
         addr_info.chains = chains;
