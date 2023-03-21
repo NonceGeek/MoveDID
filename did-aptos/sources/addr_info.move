@@ -20,17 +20,18 @@ module my_addr::addr_info {
 
     //:!:>resource
     struct AddrInfo has store, copy, drop {
+        id: u64,
+        addr_type: u64,
         addr: String,
+        pubkey: String,
         description: String,
         chains: vector<String>,
         msg: String,
         signature: vector<u8>,
+        spec_fields: String, // for the expand. 
         created_at: u64,
         updated_at: u64,
-        id: u64,
-        addr_type: u64,
-        expired_at: u64,
-        pubkey: String,
+        expired_at: u64
     }
     //<:!:resource
 
@@ -55,11 +56,6 @@ module my_addr::addr_info {
     public fun get_updated_at(addr_info: &AddrInfo): u64 { addr_info.updated_at }
    
     public fun get_pubkey(addr_info: &AddrInfo): String { addr_info.pubkey }
-   
-    public fun get_chains(addr_info: &AddrInfo): vector<String> { addr_info.chains }
-   
-    public fun get_description(addr_info: &AddrInfo): String { addr_info.description }
-
 
     // Init.
     public(friend) fun init_addr_info(
@@ -70,9 +66,10 @@ module my_addr::addr_info {
         pubkey: String,
         chains: &vector<String>,
         description: String,
+        spec_fields: String,
         expired_at : u64,
         modified_counter: u64): AddrInfo {
-        // Gen Msg Format = {{height.chain_id.send_addr.id_increased_after_any_op.nonce_geek}} .
+        // Gen Msg Format = {{height.chain_id.send_addr.id_increased_after_modified_op.nonce_geek}} .
         let height = block::get_current_block_height();
         let msg = utils::u64_to_vec_u8_string(height);
 
@@ -96,17 +93,18 @@ module my_addr::addr_info {
         let now = timestamp::now_seconds();
 
         AddrInfo {
-            addr,
+            id: id,
+            addr_type: addr_type,
+            addr: addr,
+            pubkey: pubkey,
+            description: description,
             chains: *chains,
-            description,
-            signature: b"",
             msg: string::utf8(msg),
+            signature: b"",
+            spec_fields: spec_fields,
             created_at: now,
             updated_at: 0,
-            id,
-            addr_type,
-            expired_at,
-            pubkey,
+            expired_at: expired_at
         }
     }
 
@@ -130,10 +128,11 @@ module my_addr::addr_info {
     }
 
      // Update addr info for addr that verficated, you should resign after you update info.
-     public(friend) fun update_addr_info_with_chains_and_description_and_expired_at(
+     public(friend) fun update_addr_info(
         addr_info: &mut AddrInfo, 
         chains: vector<String>, 
         description: String,
+        spec_fields: String,
         expired_at: u64,
         send_addr: address,
         modified_counter: u64,
@@ -141,7 +140,7 @@ module my_addr::addr_info {
         // Check addr_info's signature has verified.
         assert!(vector::length(&addr_info.signature) != 0, ERR_ADDR_NO_FIRST_VERIFY);
 
-        // Gen Msg Format = {{height.chain_id.send_addr.id_increased_after_any_op.nonce_geek}} .
+        // Gen Msg Format = {{height.chain_id.send_addr.id_increased_after_modified_op.nonce_geek}} .
         // Msg format : block_height.chain_id.nonce_geek.chains.description.
         let height = block::get_current_block_height();
         let msg = utils::u64_to_vec_u8_string(height);
@@ -166,6 +165,7 @@ module my_addr::addr_info {
         addr_info.msg = string::utf8(msg);
         addr_info.chains = chains;
         addr_info.description = description;
+        addr_info.spec_fields = spec_fields;
         addr_info.expired_at = expired_at;
         addr_info.updated_at = timestamp::now_seconds();
         // reset the signature.
@@ -177,6 +177,7 @@ module my_addr::addr_info {
         addr_info: &mut AddrInfo, 
         chains: vector<String>, 
         description: String,
+        spec_fields: String,
         expired_at: u64
         ) {
         // Check addr_info's signature must no verified.
@@ -184,6 +185,7 @@ module my_addr::addr_info {
 
         addr_info.chains = chains;
         addr_info.description = description;
+        addr_info.spec_fields = spec_fields;
         addr_info.expired_at = expired_at;
         addr_info.updated_at = timestamp::now_seconds();
     }
@@ -194,11 +196,13 @@ module my_addr::addr_info {
         addr: String,
         pubkey: String,
         chains: vector<String>,
-        description: String) : AddrInfo{
+        description: String,
+        spec_fields: String) : AddrInfo{
         AddrInfo{
             addr,
             chains,
             description,
+            spec_fields,
             signature: b"",
             msg: string::utf8(b""),
             created_at: 0,
