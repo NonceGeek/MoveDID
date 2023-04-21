@@ -33,7 +33,7 @@ module my_addr::service_aggregator {
     }
 
     struct CreateServiceAggregatorEventSet has key, store {
-        create_service_aggregator_event: EventHandle<CreateServiceAggregatorEvent>
+        create_service_aggregator_events: EventHandle<CreateServiceAggregatorEvent>
     }
 
     struct AddrServiceEvent has drop, store {
@@ -62,15 +62,15 @@ module my_addr::service_aggregator {
     // This is only callable during publishing.
     fun init_module(account: &signer) {
         move_to(account, CreateServiceAggregatorEventSet {
-            create_service_aggregator_event: account::new_event_handle<CreateServiceAggregatorEvent>(account),
+            create_service_aggregator_events: account::new_event_handle<CreateServiceAggregatorEvent>(account),
         });
     }
 
-    fun emit_create_service_aggregator_event(key_addr: address) acquires CreateServiceAggregatorEventSet {
+    fun emit_create_service_aggregator_events(key_addr: address) acquires CreateServiceAggregatorEventSet {
         let event = CreateServiceAggregatorEvent {
             key_addr,
         };
-        event::emit_event(&mut borrow_global_mut<CreateServiceAggregatorEventSet>(@my_addr).create_service_aggregator_event, event);
+        event::emit_event(&mut borrow_global_mut<CreateServiceAggregatorEventSet>(@my_addr).create_service_aggregator_events, event);
     }
 
     public entry fun create_service_aggregator(acct: &signer) acquires CreateServiceAggregatorEventSet {
@@ -83,7 +83,7 @@ module my_addr::service_aggregator {
             delete_service_events: account::new_event_handle<DeleteServiceEvent>(acct),
         };
 
-        emit_create_service_aggregator_event(signer::address_of(acct));
+        emit_create_service_aggregator_events(signer::address_of(acct));
 
         move_to<ServiceAggregator>(acct, service_aggr);
     }
@@ -164,6 +164,39 @@ module my_addr::service_aggregator {
         };
     }
 
+    public entry fun batch_update_services(
+        acct: &signer,
+        names: vector<String>,
+        descriptions: vector<String>,
+        urls: vector<String>,
+        verification_urls: vector<String>,
+        spec_fieldss: vector<String>,
+        expired_ats: vector<u64>
+    ) acquires ServiceAggregator {
+        let names_length = vector::length(&names);
+
+        let length_match = names_length == vector::length(&urls) && names_length == vector::length(&descriptions)
+            && names_length == vector::length(&verification_urls) && names_length == vector::length(&expired_ats)
+            && names_length == vector::length(&spec_fieldss);
+
+        assert!(length_match, ERR_SERVICE_PARAM_VECTOR_LENGHT_MISMATCH);
+
+        let service_aggr = borrow_global_mut<ServiceAggregator>(signer::address_of(acct));
+
+        let i = 0;
+        while (i < names_length) {
+            let name = vector::borrow<String>(&names, i);
+            let url = vector::borrow<String>(&urls, i);
+            let description = vector::borrow<String>(&descriptions, i);
+            let verification_url = vector::borrow<String>(&verification_urls, i);
+            let spec_fields = vector::borrow<String>(&spec_fieldss, i);
+            let expired_at = vector::borrow<u64>(&expired_ats, i);
+            do_update_service(service_aggr, *name, *description, *url, *verification_url, *spec_fields, *expired_at);
+
+            i = i + 1;
+        };
+    }
+
     // Public entry fun update service with params.
     public entry fun update_service(
         acct: &signer,
@@ -172,16 +205,28 @@ module my_addr::service_aggregator {
         new_url: String,
         new_verification_url: String,
         new_spec_fields: String,
-        expired_at: u64
+        new_expired_at: u64
     ) acquires ServiceAggregator {
         let service_aggr = borrow_global_mut<ServiceAggregator>(signer::address_of(acct));
+        do_update_service(service_aggr, name, new_description, new_url, new_verification_url, new_spec_fields, new_expired_at);
+    }
+
+    fun do_update_service(
+        service_aggr: &mut ServiceAggregator,
+        name: String,
+        new_description: String,
+        new_url: String,
+        new_verification_url: String,
+        new_spec_fields: String,
+        new_expired_at: u64
+    ) {
         let service = table::borrow_mut(&mut service_aggr.services_map, name);
 
         service.description = new_description;
         service.verification_url = new_verification_url;
         service.url = new_url;
         service.spec_fields = new_spec_fields;
-        service.expired_at = expired_at;
+        service.expired_at = new_expired_at;
 
         event::emit_event(&mut service_aggr.update_service_events, UpdateServiceEvent {
             name,
@@ -189,9 +234,11 @@ module my_addr::service_aggregator {
             url: new_url,
             verification_url: new_verification_url,
             spec_fields: new_spec_fields,
-            expired_at: expired_at
+            expired_at: new_expired_at
         })
     }
+
+
 
     // Public entry fun delete service.
     public entry fun delete_service(

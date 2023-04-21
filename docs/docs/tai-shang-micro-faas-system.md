@@ -19,7 +19,7 @@ See More Introduction in:
 
 > https://github.com/NonceGeek/tai_shang_micro_faas_system/blob/main/README.md
 
-![FaaS System](https://tva1.sinaimg.cn/large/008vxvgGgy1h9gxyxrpvaj31fn0k7ju8.jpg)
+![](images/faas_structure.jpeg)
 
 ## 0x02 Snippets for MoveDID
 

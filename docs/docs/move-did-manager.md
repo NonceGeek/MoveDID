@@ -13,4 +13,4 @@ The Manager dApp for MoveDID!
 
 Technology Architecture:
 
-![MoveDID-Manager](https://p.ipic.vip/6136p8.png)
+![MoveDID-Manager](images/did_manager.png)

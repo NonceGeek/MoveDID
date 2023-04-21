@@ -5,7 +5,7 @@ sidebar_position: 1
 hidden: true
 hide_table_of_contents: false
 ---
-# MoveDID Contract
+# MoveDID Contract(TODO: update)
 
 See Source Files in:
 
