@@ -47,7 +47,7 @@ Then click `Coin Airdropper` to issue airdrops for the list:
 
 ![](images/airdrop_to_aptos_wallets.png)
 
-## 0x02 future function
+## 0x02 Future Function
 
 The v1 version is currently online, and there are still many functions to be improved:
 
