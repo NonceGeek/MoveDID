@@ -1,6 +1,5 @@
 ---
 title: "Guides for the Scenarios of MoveDID"
-slug: "guides-for-scenarios"
 hide_table_of_contents: false
 ---
 

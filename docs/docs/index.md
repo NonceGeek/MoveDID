@@ -34,6 +34,10 @@ Docs Directory for MoveDID:
   
   Whitepaper for MoveDID.
 
-- [Guides for the Scenarios of MoveDID](/guides_for_scenarios)
+- [Guides for the Scenarios of MoveDID](/guides-for-the-scenarios-of-move-did)
 
   Guide for the multi scenarios of MoveDID.
+  
+- [MoveDID Network](/move-did-network)
+
+  The dApps in MoveDID Network.

@@ -1,6 +1,5 @@
 ---
 title: "MoveDID Network"
-slug: "move-did-network"
 hide_table_of_contents: false
 ---
 
