@@ -205,3 +205,7 @@ public entry fun update_eth_addr(acct: &signer,
 ## Money History
 
 > TODO
+
+## Distributed Rules
+
+> TODO
