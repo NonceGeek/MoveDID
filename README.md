@@ -197,3 +197,7 @@ public entry fun update_eth_addr(acct: &signer,
       ...
 }  
 ```
+
+## Contributors
+
+> https://github.com/NonceGeek/MoveDID/graphs/contributors
