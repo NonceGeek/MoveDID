@@ -206,6 +206,6 @@ public entry fun update_eth_addr(acct: &signer,
 
 > TODO
 
-## Distributed Rules
+## Distributed Rules
 
 > TODO
