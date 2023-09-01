@@ -9,6 +9,6 @@ hide_table_of_contents: false
 
 Bind your Github account with MoveDID, to experience cool Web3 related features on Github!
 
-[How can I bind my Github Account with MoveDID?](bind-github-and-movedid)
+* [How can I bind my Github Account with MoveDID?](./bind-github-and-movedid)
 
-[How can I bind my Github Repo with MoveDID, and link it with related Repo?](bind-github-repo-and-movedid)
+* How can I bind my Github Repo with MoveDID, and link it with related Repo?
