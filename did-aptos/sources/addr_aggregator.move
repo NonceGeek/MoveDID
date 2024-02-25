@@ -9,6 +9,8 @@ module my_addr::addr_aggregator {
     use my_addr::addr_eth;
     use my_addr::addr_aptos;
 
+    use my_addr::addr_bitcoin_verificated_offline;
+
     // Define addr aggregator type.
     const ADDR_AGGREGATOR_TYPE_HUMAN: u64 = 0;
     const ADDR_AGGREGATOR_TYPE_ORG: u64 = 1;
@@ -115,6 +117,59 @@ module my_addr::addr_aggregator {
         addr_aggr.description = description;
     }
 
+    // Add addr without "0x" as prefix.
+     public entry fun add_addr_without_0x(
+        acct: &signer,
+        addr_type: u64,
+        addr: String,
+        pubkey: String,
+        chains: vector<String>,
+        description: String,
+        spec_fields: String,
+        expired_at: u64
+    ) acquires AddrAggregator {
+        let send_addr = signer::address_of(acct);
+        let addr_aggr = borrow_global_mut<AddrAggregator>(send_addr);
+
+        do_add_addr_without_0x(addr_aggr, send_addr, addr_type, addr, pubkey, chains, description, spec_fields, expired_at);
+    }
+
+
+    fun do_add_addr_without_0x(
+        addr_aggr: &mut AddrAggregator,
+        send_addr: address,
+        addr_type: u64,
+        addr: String,
+        pubkey: String,
+        chains: vector<String>,
+        description: String,
+        spec_fields: String,
+        expired_at: u64) {
+
+        // Check addr is already exist.
+        assert!(!exist_addr_by_map(&mut addr_aggr.addr_infos_map, addr), ERR_ADDR_ALREADY_EXSIT);
+
+        addr_aggr.max_id = addr_aggr.max_id + 1;
+
+        // Update modified_counter after add_addr op.
+        addr_aggr.modified_counter = addr_aggr.modified_counter + 1;
+
+        let addr_info = addr_info::init_addr_info(send_addr, addr_aggr.max_id, addr_type, addr, pubkey, &chains, description, spec_fields, expired_at, addr_aggr.modified_counter);
+        table::add(&mut addr_aggr.addr_infos_map, addr, addr_info);
+        vector::push_back(&mut addr_aggr.addrs, addr);
+
+
+        event::emit_event(&mut addr_aggr.add_addr_events, AddAddrEvent {
+            addr_type,
+            addr,
+            pubkey,
+            chains,
+            description,
+            spec_fields,
+            expired_at
+        })
+    }
+
     // Add addr.
     public entry fun add_addr(
         acct: &signer,
@@ -169,6 +224,42 @@ module my_addr::addr_aggregator {
         })
     }
 
+    // Batch add addrs without 0x.
+    public entry fun batch_add_addrs_without_0x(
+        acct: &signer,
+        addrs: vector<String>,
+        addr_types: vector<u64>,
+        pubkeys: vector<String>,
+        chain_vecs: vector<vector<String>>,
+        descriptions: vector<String>,
+        spec_fieldss: vector<String>,
+        expired_ats: vector<u64>
+    ) acquires AddrAggregator {
+        let addrs_length = vector::length(&addrs);
+        let length_match = addrs_length == vector::length(&addr_types) && addrs_length == vector::length(&pubkeys)
+            && addrs_length == vector::length(&chain_vecs) && addrs_length == vector::length(&descriptions)
+            && addrs_length == vector::length(&expired_ats) && addrs_length == vector::length(&spec_fieldss);
+        assert!(length_match, ERR_ADDR_PARAM_VECTOR_LENGHT_MISMATCH);
+
+        let send_addr = signer::address_of(acct);
+        let addr_aggr = borrow_global_mut<AddrAggregator>(send_addr);
+
+        let i = 0;
+        while (i < addrs_length) {
+            let addr = vector::borrow<String>(&addrs, i);
+            let addr_type = vector::borrow<u64>(&addr_types, i);
+            let pubkey = vector::borrow<String>(&pubkeys, i);
+            let chains = vector::borrow<vector<String>>(&chain_vecs, i);
+            let description = vector::borrow<String>(&descriptions, i);
+            let spec_fields = vector::borrow<String>(&spec_fieldss, i);
+            let expired_at = vector::borrow<u64>(&expired_ats, i);
+
+            do_add_addr_without_0x(addr_aggr, send_addr, *addr_type, *addr, *pubkey, *chains, *description, *spec_fields, *expired_at);
+
+            i = i + 1;
+        };
+    }
+
     // Batch add addrs.
     public entry fun batch_add_addrs(
         acct: &signer,
@@ -207,6 +298,19 @@ module my_addr::addr_aggregator {
 
     fun exist_addr_by_map(addr_infos_map: &mut Table<String, AddrInfo>, addr: String): bool {
         table::contains(addr_infos_map, addr)
+    }
+
+    // Update btc addr with signature.
+    public entry fun update_btc_addr(acct: &signer,
+                                     addr: String, signature: String) acquires AddrAggregator {
+        let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
+        let addr_info = table::borrow_mut(&mut addr_aggr.addr_infos_map, addr);
+
+        addr_bitcoin_verificated_offline::update_addr(addr_info, &mut signature);
+
+        event::emit_event(&mut addr_aggr.update_addr_signature_events, UpdateAddrSignatureEvent {
+            addr
+        });
     }
 
     // Update eth addr with signature.

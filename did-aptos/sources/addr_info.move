@@ -8,6 +8,7 @@ module my_addr::addr_info {
     friend my_addr::addr_aggregator;
     friend my_addr::addr_aptos;
     friend my_addr::addr_eth;
+    friend my_addr::addr_bitcoin_verificated_offline;
 
     // Err enum.
     const ERR_ADDR_INFO_MSG_EMPTY: u64 = 1001;

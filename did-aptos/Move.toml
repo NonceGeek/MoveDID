@@ -8,11 +8,23 @@ upgrade_policy = "compatible"
 my_addr = "_"
 std = "0x1"
 aptos_framework = "0x1"
-chain_id = "0x1" # for mainnet
-# chain_id = "0x2" # for testnet
+# chain_id = "0x1" # for mainnet
+chain_id = "0x2" # for testnet
+# chain_id = "0x46" # for randomnet
 
-[dependencies]
-MoveStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", subdir="aptos-move/framework/move-stdlib/", rev="aptos-cli-v1.0.4" }
-AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", subdir="aptos-move/framework/aptos-framework/", rev="aptos-cli-v1.0.4" }
+[dependencies.AptosFramework]
+git = "https://github.com/aptos-labs/aptos-core.git"
+rev = "mainnet"
+subdir = "aptos-move/framework/aptos-framework"
+
+
+[dependencies.MoveStdlib]
+git = "https://github.com/aptos-labs/aptos-core.git"
+rev = "mainnet"
+subdir = "aptos-move/framework/move-stdlib"
+
+# [dependencies]
+# MoveStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", subdir="aptos-move/framework/move-stdlib/"}
+# AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", subdir="aptos-move/framework/aptos-framework/" }
 # MoveStdlib = { local = "~/aptos-core/aptos-move/framework/move-stdlib" }
 # AptosFramework = { local = "~/aptos-core/aptos-move/framework/aptos-framework" }
