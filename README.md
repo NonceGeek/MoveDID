@@ -57,9 +57,11 @@ Testnet for Dev:
 
 > [0xc71124a51e0d63cfc6eb04e690c39a4ea36774ed4df77c00f7cbcbc9d0505b2c](https://explorer.aptoslabs.com/account/0xc71124a51e0d63cfc6eb04e690c39a4ea36774ed4df77c00f7cbcbc9d0505b2c/modules?network=testnet)
 
-## 🏆 Prizes
+## 🏆 Grants & Prizes
 
-Dorahack Aptos Grant DAO Prize 2nd: 
+* Grant from Aptos Foundation
+
+* Dorahack Aptos Grant DAO Prize 2nd:
 
 > https://dorahacks.io/zh/aptos/2/top
 
