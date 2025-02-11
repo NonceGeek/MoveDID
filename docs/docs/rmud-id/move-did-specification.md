@@ -1,12 +1,12 @@
 ---
-title: "MoveDID Specification"
-slug: "/move-did-specification"
+title: "RMUD Identity Specification"
+slug: "/rmud-id/rmud-id-specification"
 hidden: false
 sidebar_position: 4
 hide_table_of_contents: true
 ---
 
-# MoveDID Specification
+# RMUD ID Specification/MoveDID Specification
 
 ## 1 W3C 与 DID 规范
 

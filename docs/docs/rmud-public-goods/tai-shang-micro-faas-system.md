@@ -1,13 +1,13 @@
 ---
 title: "TaiShang Micro FaaS System"
-slug: "tai-shang-micro-faas-system"
+slug: "rmud-public-goods/tai-shang-micro-faas-system"
 hide_table_of_contents: false
 sidebar_position: 5
 ---
 
 # TaiShang Micro FaaS System
 
-> Online Server: https://faas.noncegeek.com
+> Online Server: https://faas.movespace.xyz
 > 
 > Repo: https://github.com/NonceGeek/tai_shang_micro_faas_system
 
@@ -19,9 +19,9 @@ See More Introduction in:
 
 > https://github.com/NonceGeek/tai_shang_micro_faas_system/blob/main/README.md
 
-![](images/faas_structure.jpeg)
+![](../images/faas_structure.jpeg)
 
-## 0x02 Snippets for MoveDID
+<!--## 0x02 Snippets for MoveDID
 
 ### 2.1 DID Renderer
 
@@ -30,4 +30,4 @@ It's be used in MoveDID Manager as a light backend.
 
 Source Code:
 
-> https://gist.github.com/leeduckgo/54ebc2646b6a5d8d298a7e910ae55bec
+> https://gist.github.com/leeduckgo/54ebc2646b6a5d8d298a7e910ae55bec-->

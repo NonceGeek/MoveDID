@@ -1,6 +1,6 @@
 ---
-title: "MoveDID Manager"
-slug: "/move-did-manager"
+title: "RMUD ID Manager"
+slug: "/rmud-id/rmud-id-manager"
 hidden: true
 hide_table_of_contents: false
 sidebar_position: 3
@@ -13,4 +13,4 @@ The Manager dApp for MoveDID!
 
 Technology Architecture:
 
-![MoveDID-Manager](images/did_manager.png)
+![MoveDID-Manager](../images/did_manager.png)

@@ -14,13 +14,13 @@ chain_id = "0x2" # for testnet
 
 [dependencies.AptosFramework]
 git = "https://github.com/aptos-labs/aptos-core.git"
-rev = "mainnet"
+rev = "release-v.1.14"
 subdir = "aptos-move/framework/aptos-framework"
 
 
 [dependencies.MoveStdlib]
 git = "https://github.com/aptos-labs/aptos-core.git"
-rev = "mainnet"
+rev = "release-v.1.14"
 subdir = "aptos-move/framework/move-stdlib"
 
 # [dependencies]

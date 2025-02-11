@@ -1,6 +1,6 @@
 ---
-title: "MoveDID Audit Report"
-slug: "move-did-audit-report"
+title: "RMUD ID Audit Report"
+slug: "/rmud-id/rmud-id-audit-report"
 hide_table_of_contents: false
 sidebar_position: 2
 ---

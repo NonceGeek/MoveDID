@@ -1,0 +1,17 @@
+{
+  "deploy": {
+    "project": "c62b42ab-5ba0-442e-8ba2-9caff9733e21",
+    "exclude": [
+      "**/node_modules"
+    ],
+    "include": []
+  },
+  "imports": {
+    "@deno/gfm": "jsr:@deno/gfm@^0.9.0"
+  },
+  "tasks": {
+    "did_movement": "deno run --allow-all did_movement.tsx",
+    "img_agent": "deno run --allow-all img_agent.tsx",
+    "llm_agent": "deno run --allow-all llm_agent.tsx"
+  }
+}

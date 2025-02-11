@@ -1,6 +1,6 @@
 ---
-title: "MoveDID Contract"
-slug: "/move-did-contract"
+title: "RMUD ID Contract"
+slug: "/rmud-id/rmud-id-contract"
 sidebar_position: 1
 hidden: true
 hide_table_of_contents: false

@@ -12,15 +12,15 @@ const katex = require("rehype-katex");
 
 /** @type {import("@docusaurus/types").Config} */
 const config = {
-  title: "MoveDID Docs",
-  tagline: "MoveDID Documentation",
-  url: "https://noncegeek.com",
+  title: "RMUD Docs",
+  tagline: "RMUD Documentation",
+  url: "https://rootmud.xyz",
   baseUrl: "/",
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "throw",
-  favicon: "img/move-did.png",
-  organizationName: "noncegeek", // Usually your GitHub org/user name.
-  projectName: "move-did", // Usually your repo name.
+  favicon: "img/rmud_logo.png",
+  organizationName: "rootmud", // Usually your GitHub org/user name.
+  projectName: "root_mud", // Usually your repo name.
 
   presets: [
     [
@@ -31,7 +31,7 @@ const config = {
           routeBasePath: "/",
           sidebarPath: require.resolve("./sidebars.js"),
           sidebarCollapsible: false,
-          editUrl: "https://github.com/NonceGeek/MoveDID/",
+          editUrl: "https://github.com/rootmud",
           remarkPlugins: [codeInjector, math],
           path: "docs",
           rehypePlugins: [katex],
@@ -76,21 +76,21 @@ const config = {
       },
       navbar: {
         logo: {
-          alt: "Aptos Labs Logo",
-          src: "img/move-did.png",
-          srcDark: "img/move-did-dark.png",
+          alt: "RMUD Logo",
+          src: "img/rmud_logo.png",
+          srcDark: "img/rmud_logo.png",
         },
         items: [
           {
-            href: "https://github.com/NonceGeek/MoveDID/",
+            href: "https://github.com/rootMUD/",
             label: "GitHub",
             position: "right",
           },
           {
             position: "left",
             type: "doc",
-            docId: "move-did-white-paper",
-            label: "Move DID White Paper",
+            docId: "rmud-white-paper",
+            label: "RMUD White Paper",
           },
         ],
       },
@@ -102,8 +102,8 @@ const config = {
             items: [
               {
                 html: `
-                  <a class="social-link" href="https://aptoslabs.com" target="_blank" rel="noopener noreferrer" title="Git">
-                     <img class="logo" src="/img/move-did-dark.png" alt="Move-DID Logo" />
+                  <a class="social-link" href="https://rootmud.xyz" target="_blank" rel="noopener noreferrer" title="Git">
+                     <img class="logo" src="img/rmud_logo.png" alt="Move-DID Logo" />
                   </a>
                 `,
               },
@@ -131,10 +131,10 @@ const config = {
                 html: `
                   <p class="right">
                     <nav class="social-links">
-                        <a class="social-link" href="https://github.com/noncegeek/MoveDID" target="_blank" rel="noopener noreferrer" title="Git">
+                        <a class="social-link" href="https://github.com/rootmud" target="_blank" rel="noopener noreferrer" title="Git">
                          <img class="icon" src="/img/socials/git.svg" alt="Git Icon" />
                         </a>
-                        <a class="social-link" href="https://twitter.com/Move_DID/" target="_blank" rel="noopener noreferrer" title="Twitter">
+                        <a class="social-link" href="https://twitter.com/root_mud/" target="_blank" rel="noopener noreferrer" title="Twitter">
                           <img class="icon" src="/img/socials/twitter.svg" alt="Twitter Icon" />
                         </a>
                     </nav>
