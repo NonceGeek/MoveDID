@@ -34,56 +34,79 @@ async function readTextFile(fileName: string): Promise<string> {
 }
 
 // TODO: the bug is here, the aptos is not working.
-const config = new AptosConfig({ network: Network.MAINNET });
-const aptos = new Aptos(config);
+// const config = new AptosConfig({ network: Network.MAINNET });
+// const aptos = new Aptos(config);
 
-const fund = await aptos.getAccountInfo({ accountAddress: "0x1" });
-console.log(fund);
+// const fund = await aptos.getAccountInfo({ accountAddress: "0x1" });
+// console.log(fund);
 
 router
     .get("/", async (context) => {
-
         context.response.body = "Hello from DID-Movement-SDK!";
-
+    })
+    .get("/acct_gen", async (context) => {
+        // TODO: generate a new account.
+        const acct: Account = Account.generate();
+        console.log("=== Addresses ===\n");
+        console.log(`address is: ${acct.accountAddress}`);
+        console.log(`private key is: ${acct.privateKey}`);
+        context.response.body = {
+            address: acct.accountAddress.toString(),
+            private_key: acct.privateKey.toString()
+        };
     })
     .get("/balance", async (context) => {
+        try {
+            // Fetch balance from Aptos testnet API
+            const response = await fetch(
+                "https://api.testnet.aptoslabs.com/v1/accounts/0x1/resource/0x1::coin::CoinStore<0x1::aptos_coin::AptosCoin>"
+            );
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch balance');
+            }
+
+            const data = await response.json();
+            
+            // Extract balance value and convert from octas to APT (1 APT = 100000000 octas)
+            const balanceInOctas = BigInt(data.data.coin.value);
+            const balanceInApt = Number(balanceInOctas) / 100000000;
+
+            context.response.body = {
+                balance_octas: data.data.coin.value,
+                balance_apt: balanceInApt,
+                frozen: data.data.frozen
+            };
+        } catch (error) {
+            context.response.status = 500;
+            context.response.body = {
+                error: "Failed to fetch balance",
+                details: error.message
+            };
+        }
+    })
+    .get("/did_init", async (context) => {
+        // TODO: init did for the aptos.
         context.response.body = "Hello from DID-Movement-SDK!";
     })
-    .get("/register", async (context) => {
-        // Register agent to the system before start working
-        const registerResponse = await fetch("https://ai-saas.deno.dev/add_agent", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                addr: agent_info.addr,
-                owner_addr: agent_info.owner_addr,
-                type: agent_info.type,
-                chat_url: agent_info.chat_url,
-                source_url: agent_info.source_url,
-                description: agent_info.description
-            })
-        });
-
-        if (!registerResponse.ok) {
-            context.response.status = 500;
-            context.response.body = { error: "Failed to register agent" };
-            return;
-        }
-
-        const result = await registerResponse.json();
-        // Save the first result object to a file named with its unique_id
-        if (result && result.length > 0) {
-            const fileName = `./img_agent.txt`;
-            await saveAsTextFile(fileName, JSON.stringify(result[0], null, 2));
-        }
-
-        context.response.status = 200;
-        context.response.body = { 
-            message: "Agent registered successfully",
-            data: result
-        };
+    .get("/did_init", async (context) => {
+        // TODO: init did for the aptos.
+        const queryParams = context.request.url.searchParams;
+        const type = queryParams.get("type");
+        const description = queryParams.get("description");
+        context.response.body = "Hello from DID-Movement-SDK!";
+    })
+    .get("/did_register_service", async (context) => {
+        // TODO: register new service for corr.ai.
+        context.response.body = "Hello from DID-Movement-SDK!";
+    })
+    .get("/record_insert", async (context) => {
+        // TODO: insert record based on the did.
+        context.response.body = "Hello from DID-Movement-SDK!";
+    })
+    .get("/records", async (context) => {
+        // TODO: get all the records based on the did.
+        context.response.body = "Hello from DID-Movement-SDK!";
     })
     .get("/solve_task", async (context) => {
         // TODO: solve task from the system.
