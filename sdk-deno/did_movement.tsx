@@ -11,34 +11,6 @@ console.log("Hello from DID-Movement-SDK!");
 
 const router = new Router();
 
-// Function to save data as text file
-async function saveAsTextFile(fileName: string, data: string): Promise<void> {
-  // const payload = await Deno.readFile("./9bfdbf2c-dd87-4028-bb96-4a17f1ecd038.txt");
-  // // Convert buffer to string using TextDecoder
-  // const payloadString = new TextDecoder().decode(payload);
-    const encoder = new TextEncoder();
-    const textData = encoder.encode(data);
-    await Deno.writeFile(fileName, textData);
-}
-
-async function saveAsImageFile(fileName: string, data: string): Promise<void> {
-  const image_data = data.split(',')[1];
-  // Convert base64 to Uint8Array
-  const binary_data = new Uint8Array(atob(image_data).split('').map(char => char.charCodeAt(0)));
-  await Deno.writeFile(fileName, binary_data);
-}
-
-async function readTextFile(fileName: string): Promise<string> {
-    const data = await Deno.readFile(fileName);
-    return new TextDecoder().decode(data);
-}
-
-// const config = new AptosConfig({ network: Network.MAINNET });
-// const aptos = new Aptos(config);
-
-// const fund = await aptos.getAccountInfo({ accountAddress: "0x1" });
-// console.log(fund);
-
 router
     .get("/", async (context) => {
         context.response.body = "Hello from DID-Movement-SDK!";
@@ -105,6 +77,29 @@ curl "https://did-movement.deno.dev/records?addr=0x123...abc"`;
             address: acct.accountAddress.toString(),
             // private_key: acct.privateKey.toString()
         };
+    })
+    .get("/acct_check", async (context) => {
+        const queryParams = context.request.url.searchParams;
+        const addr = queryParams.get("addr");
+        const kv = await Deno.openKv();
+        // 从KV中获取私钥
+        const acctInfo = await kv.get(["accts", addr]);
+        if (!acctInfo.value?.priv) {
+            context.response.status = 400;
+            context.response.body = "Account not found";
+            return;
+        }
+
+        console.log(acctInfo.value.priv);
+        const acct: Account = Account.generate();
+
+        // 创建Account实例
+        const account = Account.fromPrivateKey({
+            privateKey: acct.privateKey
+        });
+
+        console.log(account);
+        context.response.body = account;
     })
     .get("/acct_info", async (context) => {
         const queryParams = context.request.url.searchParams;
@@ -212,6 +207,8 @@ curl "https://did-movement.deno.dev/records?addr=0x123...abc"`;
             const account = Account.fromPrivateKey({
                 privateKey: acctInfo.value.priv
             });
+
+            console.log(account);
 
             // 使用fetch提交交易
             const response = await fetch("https://fullnode.testnet.aptoslabs.com/v1/transactions", {
