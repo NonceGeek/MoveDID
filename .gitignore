@@ -17,3 +17,6 @@ build/
 
 .idea/
 .aptos/
+
+.env
+.envrc
