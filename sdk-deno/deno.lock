@@ -13,6 +13,7 @@
     "jsr:@std/media-types@1": "1.0.3",
     "jsr:@std/path@1": "1.0.8",
     "npm:@aptos-labs/ts-sdk@*": "1.34.0",
+    "npm:@types/node@*": "22.5.4",
     "npm:path-to-regexp@6.2.1": "6.2.1"
   },
   "jsr": {
