@@ -33,7 +33,6 @@ async function readTextFile(fileName: string): Promise<string> {
     return new TextDecoder().decode(data);
 }
 
-// TODO: the bug is here, the aptos is not working.
 // const config = new AptosConfig({ network: Network.MAINNET });
 // const aptos = new Aptos(config);
 
@@ -134,53 +133,231 @@ router
         context.response.body = data;
     })
     .get("/did_init", async (context) => {
-        // TODO: init did for the aptos.
         const queryParams = context.request.url.searchParams;
         const addr = queryParams.get("addr");
         const type = queryParams.get("type");
         const description = queryParams.get("description");
 
-        const kv = await Deno.openKv();
-        
-        // Check if DID already exists for this address
-        const existing = await kv.get(["accts", "did", addr]);
-        console.log(existing);
-        if (existing.value) {
+        if (!addr || !type || !description) {
             context.response.status = 400;
-            context.response.body = "DID already exists for this address";
+            context.response.body = "Missing required parameters";
             return;
         }
 
-        // Set DID only if it doesn't exist
-        await kv.set(["accts", "did", addr], {
-            type: type,
-            description: description
-        });
+        try {
+            const kv = await Deno.openKv();
+            
+            // 检查DID是否已存在
+            const existing = await kv.get(["accts", "did", addr]);
+            if (existing.value) {
+                context.response.status = 400;
+                context.response.body = "DID already exists for this address";
+                return;
+            }
 
-        context.response.body = "Init did successfully";
+            // 构建交易payload
+            const payload = {
+                function: "0xc71124a51e0d63cfc6eb04e690c39a4ea36774ed4df77c00f7cbcbc9d0505b2c::did::init",
+                type_arguments: [],
+                arguments: [
+                    type,
+                    description
+                ]
+            };
+
+            // 从KV中获取私钥
+            const acctInfo = await kv.get(["accts", addr]);
+            if (!acctInfo.value?.priv) {
+                context.response.status = 400;
+                context.response.body = "Account not found";
+                return;
+            }
+
+            // 创建Account实例
+            const account = Account.fromPrivateKey({
+                privateKey: acctInfo.value.priv
+            });
+
+            // 使用fetch提交交易
+            const response = await fetch("https://fullnode.testnet.aptoslabs.com/v1/transactions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    sender: account.accountAddress.toString(),
+                    sequence_number: await getAccountSequenceNumber(account.accountAddress.toString()),
+                    max_gas_amount: "2000",
+                    gas_unit_price: "100",
+                    expiration_timestamp_secs: (Math.floor(Date.now() / 1000) + 600).toString(),
+                    payload: payload
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Transaction submission failed: ${await response.text()}`);
+            }
+
+            const txnData = await response.json();
+
+            // 等待交易完成
+            const txnHash = txnData.hash;
+            let txnResult;
+            for (let i = 0; i < 10; i++) {
+                const statusResponse = await fetch(
+                    `https://fullnode.testnet.aptoslabs.com/v1/transactions/by_hash/${txnHash}`
+                );
+                txnResult = await statusResponse.json();
+                if (txnResult.type === "user_transaction" && txnResult.success) {
+                    break;
+                }
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+
+            if (!txnResult?.success) {
+                throw new Error("Transaction failed or timeout");
+            }
+
+            // 交易成功后，将DID信息保存到KV中
+            await kv.set(["accts", "did", addr], {
+                type: type,
+                description: description,
+                hash: txnResult.hash,
+                version: txnResult.version
+            });
+
+            context.response.body = {
+                message: "DID initialized successfully",
+                hash: txnResult.hash,
+                version: txnResult.version
+            };
+
+        } catch (error) {
+            context.response.status = 500;
+            context.response.body = {
+                error: "Failed to initialize DID",
+                details: error instanceof Error ? error.message : String(error)
+            };
+        }
     })
     .get("/did_register_service", async (context) => {
-        // TODO: register new service on aptos.
         const queryParams = context.request.url.searchParams;
         const addr = queryParams.get("addr");
-        const description = queryParams.get("description");
         
-        const URL = Deno.env.get("URL");
-        
-        const kv = await Deno.openKv();
-        const services = await kv.get(["accts", "did", "services", addr]);
-        if (!services.value) {
-            await kv.set(["accts", "did", "services", addr], {
-                services: [{
-                    description: description,
-                    // !!REMEMBER TO SET THE URL AFTER DEPLOYED.
-                    url: `${URL}/records?addr=${addr}`,
-                    expired_at: 0 
-                    // 0 means the service is not expired.
-                }]
-            });
+        if (!addr || !name) {
+            context.response.status = 400;
+            context.response.body = "Missing required parameters";
+            return;
         }
-        context.response.body = "register service successfully";
+
+        try {
+            const URL = Deno.env.get("URL");
+            const serviceUrl = `${URL}/records?addr=${addr}`;
+            const kv = await Deno.openKv();
+            const name = "corr.ai";
+            const description = "the ai-agent for crypto trading.";
+            // 构建交易payload
+            const payload = {
+                function: "0xc71124a51e0d63cfc6eb04e690c39a4ea36774ed4df77c00f7cbcbc9d0505b2c::service_aggregator::add_service",
+                type_arguments: [],
+                arguments: [
+                    name,
+                    description,
+                    serviceUrl,
+                    "", //verification_url
+                    "", // spec_fields
+                    "0"  // expired_at
+                ]
+            };
+
+            // 从KV中获取私钥
+            const acctInfo = await kv.get(["accts", addr]);
+            if (!acctInfo.value?.priv) {
+                context.response.status = 400;
+                context.response.body = "Account not found";
+                return;
+            }
+
+            // 创建Account实例
+            const account = Account.fromPrivateKey({
+                privateKey: acctInfo.value.priv
+            });
+
+            // 提交交易
+            const response = await fetch("https://fullnode.testnet.aptoslabs.com/v1/transactions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    sender: account.accountAddress.toString(),
+                    sequence_number: await getAccountSequenceNumber(account.accountAddress.toString()),
+                    max_gas_amount: "2000",
+                    gas_unit_price: "100",
+                    expiration_timestamp_secs: (Math.floor(Date.now() / 1000) + 600).toString(),
+                    payload: payload
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Transaction submission failed: ${await response.text()}`);
+            }
+
+            const txnData = await response.json();
+
+            // 等待交易完成
+            const txnHash = txnData.hash;
+            let txnResult;
+            for (let i = 0; i < 10; i++) {
+                const statusResponse = await fetch(
+                    `https://fullnode.testnet.aptoslabs.com/v1/transactions/by_hash/${txnHash}`
+                );
+                txnResult = await statusResponse.json();
+                if (txnResult.type === "user_transaction" && txnResult.success) {
+                    break;
+                }
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+
+            if (!txnResult?.success) {
+                throw new Error("Transaction failed or timeout");
+            }
+
+            // 交易成功后，更新KV中的服务信息
+            const services = await kv.get(["accts", "did", "services", addr]);
+            const newService = {
+                name: name,
+                description: description,
+                url: serviceUrl,
+                verification_url: "",
+                spec_fields: "",
+                expired_at: 0,
+                hash: txnResult.hash,
+                version: txnResult.version
+            };
+
+            if (!services.value) {
+                await kv.set(["accts", "did", "services", addr], {
+                    services: [newService]
+                });
+            } else {
+                services.value.services.push(newService);
+                await kv.set(["accts", "did", "services", addr], services.value);
+            }
+
+            context.response.body = {
+                message: "Service registered successfully",
+                hash: txnResult.hash,
+                version: txnResult.version
+            };
+
+        } catch (error) {
+            context.response.status = 500;
+            context.response.body = {
+                error: "Failed to register service",
+                details: error instanceof Error ? error.message : String(error)
+            };
+        }
     })
     .get("/record_insert", async (context) => {
         // insert record based on the did.
@@ -214,3 +391,14 @@ app.use(router.routes());
 
 console.info("CORS-enabled web server listening on port 8000");
 await app.listen({ port: 8000 });
+
+async function getAccountSequenceNumber(address: string): Promise<string> {
+    const response = await fetch(
+        `https://fullnode.testnet.aptoslabs.com/v1/accounts/${address}`
+    );
+    if (!response.ok) {
+        throw new Error("Failed to fetch account sequence number");
+    }
+    const accountData = await response.json();
+    return accountData.sequence_number;
+}
