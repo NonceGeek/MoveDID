@@ -10,7 +10,7 @@
     "@deno/gfm": "jsr:@deno/gfm@^0.9.0"
   },
   "tasks": {
-    "did_movement": "deno run --allow-all did_movement.tsx",
+    "did_movement": "deno run --allow-all --unstable-kv  did_movement.tsx",
     "img_agent": "deno run --allow-all img_agent.tsx",
     "llm_agent": "deno run --allow-all llm_agent.tsx"
   }
