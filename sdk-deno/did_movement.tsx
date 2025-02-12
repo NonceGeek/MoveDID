@@ -43,6 +43,41 @@ router
     .get("/", async (context) => {
         context.response.body = "Hello from DID-Movement-SDK!";
     })
+    .get("/docs", async (context) => {
+        const docs = `# 1. Root endpoint
+curl https://did-movement.deno.dev/
+
+# 2. Network Set
+curl https://did-movement.deno.dev/network_set
+
+# 3. Network Info
+curl https://did-movement.deno.dev/network_info
+
+# 4. Generate Account
+curl https://did-movement.deno.dev/acct_gen
+
+# 5. Get Account Info (replace with actual Aptos address)
+curl "https://did-movement.deno.dev/acct_info?addr=0x123...abc"
+
+# 6. Get Balance (replace with actual Aptos address)
+curl "https://did-movement.deno.dev/balance?addr=0x1"
+
+# 7. Get Resources (replace with actual Aptos address)
+curl "https://did-movement.deno.dev/resources?addr=0x123...abc"
+
+# 8. Initialize DID
+curl "https://did-movement.deno.dev/did_init?addr=0x123...abc&type=2&description=my_identity"
+
+# 9. Register DID Service
+curl "https://did-movement.deno.dev/did_register_service?addr=0x123...abc&description=my_service"
+
+# 10. Insert Record
+curl "https://did-movement.deno.dev/record_insert?addr=0x123...abc&record=some_record_data"
+
+# 11. Get Records
+curl "https://did-movement.deno.dev/records?addr=0x123...abc"`;
+        context.response.body = docs;
+    })
     .get("/network_set", async (context) => {
         // TODO: set the network for the deno sdk.
         context.response.body = "network set successfully";
