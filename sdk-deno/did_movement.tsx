@@ -206,6 +206,20 @@ curl "https://did-movement.deno.dev/records?addr=0x123...abc"`;
                 // 获取账户序列号
                 const sequenceNumber = await getAccountSequenceNumber(account.accountAddress.toString());
                 
+                const config = new AptosConfig({ network: Network.TESTNET });
+                const aptos = new Aptos(config);
+                const APTOS_COIN = "0x1::aptos_coin::AptosCoin";
+                const simpleTransaction = await aptos.transaction.build.simple({
+                    sender: account,
+                    data: {
+                      function: "0x1::coin::transfer",
+                      typeArguments: [APTOS_COIN],
+                      functionArguments: ["0x1", 1],
+                    },
+                  });
+                console.log(simpleTransaction);
+                // https://github.com/aptos-labs/aptos-ts-sdk/blob/main/examples/typescript/external_signing.ts
+                
                 // 手动构建交易
                 const transaction = {
                     sender: account.accountAddress.toString(),
@@ -215,9 +229,10 @@ curl "https://did-movement.deno.dev/records?addr=0x123...abc"`;
                     expiration_timestamp_secs: (Math.floor(Date.now() / 1000) + 600).toString(),
                     payload: {
                         type: "entry_function_payload",
-                        function: "0xc71124a51e0d63cfc6eb04e690c39a4ea36774ed4df77c00f7cbcbc9d0505b2c::did::init",
+                        function: "0x1::aptos_coin::transfer",
+                        // function: "0xc71124a51e0d63cfc6eb04e690c39a4ea36774ed4df77c00f7cbcbc9d0505b2c::did::init",
                         type_arguments: [],
-                        arguments: [type, description]
+                        arguments: [1]
                     }
                 };
 
