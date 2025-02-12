@@ -209,17 +209,17 @@ curl "https://did-movement.deno.dev/records?addr=0x123...abc"`;
                 const config = new AptosConfig({ network: Network.TESTNET });
                 const aptos = new Aptos(config);
                 const APTOS_COIN = "0x1::aptos_coin::AptosCoin";
-                const simpleTransaction = await aptos.transaction.build.simple({
-                    sender: account,
-                    data: {
-                      function: "0x1::coin::transfer",
-                      typeArguments: [APTOS_COIN],
-                      functionArguments: ["0x1", 1],
-                    },
-                  });
-                console.log(simpleTransaction);
+                // const simpleTransaction = await aptos.transaction.build.simple({
+                //     sender: account,
+                //     data: {
+                //       function: "0x1::coin::transfer",
+                //       typeArguments: [APTOS_COIN],
+                //       functionArguments: ["0x1", 1],
+                //     },
+                //   });
+                // console.log(simpleTransaction);
                 // https://github.com/aptos-labs/aptos-ts-sdk/blob/main/examples/typescript/external_signing.ts
-                
+
                 // 手动构建交易
                 const transaction = {
                     sender: account.accountAddress.toString(),
@@ -229,13 +229,13 @@ curl "https://did-movement.deno.dev/records?addr=0x123...abc"`;
                     expiration_timestamp_secs: (Math.floor(Date.now() / 1000) + 600).toString(),
                     payload: {
                         type: "entry_function_payload",
-                        function: "0x1::aptos_coin::transfer",
+                        function: "0x1::coin::transfer",
                         // function: "0xc71124a51e0d63cfc6eb04e690c39a4ea36774ed4df77c00f7cbcbc9d0505b2c::did::init",
-                        type_arguments: [],
-                        arguments: [1]
+                        type_arguments: [APTOS_COIN],
+                        arguments: ["0x2df41622c0c1baabaa73b2c24360d205e23e803959ebbcb0e5b80462165893ed", "1"]
                     }
                 };
-
+                console.log(transaction);
                 // 序列化交易
                 const serializedTx = Buffer.from(JSON.stringify(transaction)).toString('hex');
                 
