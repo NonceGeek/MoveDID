@@ -4,7 +4,8 @@ import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import { oakCors } from "https://deno.land/x/cors/mod.ts";
 
 // import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { Account, Aptos, AptosConfig, Network } from "npm:@aptos-labs/ts-sdk";
+import { Account, Aptos, AptosConfig, Network, Ed25519PrivateKey } from "npm:@aptos-labs/ts-sdk";
+import { Buffer } from "node:buffer";
 
 // Add ts sdk
 console.log("Hello from DID-Movement-SDK!");
@@ -66,16 +67,18 @@ curl "https://did-movement.deno.dev/records?addr=0x123...abc"`;
         const acct: Account = Account.generate();
         console.log("=== Addresses ===\n");
         console.log(`address is: ${acct.accountAddress}`);
-        // console.log(`private key is: ${acct.privateKey}`);
+        console.log(`private key is: ${acct.privateKey}`);
         const kv = await Deno.openKv();
         const info = {
-            priv: acct.privateKey.toString(),
+            // 确保存储的私钥带有 0x 前缀
+            priv: acct.privateKey.toString().startsWith('0x') 
+                ? acct.privateKey.toString() 
+                : `0x${acct.privateKey.toString()}`,
             data_count: 0
         };
         await kv.set(["accts", acct.accountAddress.toString()], info);
         context.response.body = {
             address: acct.accountAddress.toString(),
-            // private_key: acct.privateKey.toString()
         };
     })
     .get("/acct_check", async (context) => {
@@ -185,16 +188,6 @@ curl "https://did-movement.deno.dev/records?addr=0x123...abc"`;
                 return;
             }
 
-            // 构建交易payload
-            const payload = {
-                function: "0xc71124a51e0d63cfc6eb04e690c39a4ea36774ed4df77c00f7cbcbc9d0505b2c::did::init",
-                type_arguments: [],
-                arguments: [
-                    type,
-                    description
-                ]
-            };
-
             // 从KV中获取私钥
             const acctInfo = await kv.get(["accts", addr]);
             if (!acctInfo.value?.priv) {
@@ -203,66 +196,96 @@ curl "https://did-movement.deno.dev/records?addr=0x123...abc"`;
                 return;
             }
 
-            // 创建Account实例
-            const account = Account.fromPrivateKey({
-                privateKey: acctInfo.value.priv
-            });
+            try {
+                console.log(acctInfo);
+                const privateKeyHex = acctInfo.value.priv.replace('0x', '');
+                const privateKey = new Ed25519PrivateKey(privateKeyHex);
+                const account = Account.fromPrivateKey({ privateKey });
+                console.log(account);
 
-            console.log(account);
-
-            // 使用fetch提交交易
-            const response = await fetch("https://fullnode.testnet.aptoslabs.com/v1/transactions", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
+                // 获取账户序列号
+                const sequenceNumber = await getAccountSequenceNumber(account.accountAddress.toString());
+                
+                // 手动构建交易
+                const transaction = {
                     sender: account.accountAddress.toString(),
-                    sequence_number: await getAccountSequenceNumber(account.accountAddress.toString()),
+                    sequence_number: sequenceNumber,
                     max_gas_amount: "2000",
                     gas_unit_price: "100",
                     expiration_timestamp_secs: (Math.floor(Date.now() / 1000) + 600).toString(),
-                    payload: payload
-                })
-            });
+                    payload: {
+                        type: "entry_function_payload",
+                        function: "0xc71124a51e0d63cfc6eb04e690c39a4ea36774ed4df77c00f7cbcbc9d0505b2c::did::init",
+                        type_arguments: [],
+                        arguments: [type, description]
+                    }
+                };
 
-            if (!response.ok) {
-                throw new Error(`Transaction submission failed: ${await response.text()}`);
-            }
+                // 序列化交易
+                const serializedTx = Buffer.from(JSON.stringify(transaction)).toString('hex');
+                
+                // 签名序列化后的交易
+                const signature = account.sign(serializedTx);
+                
+                const signedTxn = {
+                    ...transaction,
+                    signature: {
+                        type: "ed25519_signature",
+                        public_key: account.publicKey.toString(),
+                        signature: signature.toString()
+                    }
+                };
 
-            const txnData = await response.json();
+                // 提交交易
+                const response = await fetch("https://fullnode.testnet.aptoslabs.com/v1/transactions", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(signedTxn)
+                });
 
-            // 等待交易完成
-            const txnHash = txnData.hash;
-            let txnResult;
-            for (let i = 0; i < 10; i++) {
-                const statusResponse = await fetch(
-                    `https://fullnode.testnet.aptoslabs.com/v1/transactions/by_hash/${txnHash}`
-                );
-                txnResult = await statusResponse.json();
-                if (txnResult.type === "user_transaction" && txnResult.success) {
-                    break;
+                if (!response.ok) {
+                    throw new Error(`Transaction submission failed: ${await response.text()}`);
                 }
-                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                const txnData = await response.json();
+
+                // 等待交易完成
+                const txnHash = txnData.hash;
+                let txnResult;
+                for (let i = 0; i < 10; i++) {
+                    const statusResponse = await fetch(
+                        `https://fullnode.testnet.aptoslabs.com/v1/transactions/by_hash/${txnHash}`
+                    );
+                    txnResult = await statusResponse.json();
+                    if (txnResult.type === "user_transaction" && txnResult.success) {
+                        break;
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+
+                if (!txnResult?.success) {
+                    throw new Error("Transaction failed or timeout");
+                }
+
+                // 保存DID信息到KV
+                await kv.set(["accts", "did", addr], {
+                    type: type,
+                    description: description,
+                    hash: txnResult.hash,
+                    version: txnResult.version
+                });
+
+                context.response.body = {
+                    message: "DID initialized successfully",
+                    hash: txnResult.hash,
+                    version: txnResult.version
+                };
+
+            } catch (error) {
+                throw new Error(`Transaction failed: ${error.message}`);
             }
-
-            if (!txnResult?.success) {
-                throw new Error("Transaction failed or timeout");
-            }
-
-            // 交易成功后，将DID信息保存到KV中
-            await kv.set(["accts", "did", addr], {
-                type: type,
-                description: description,
-                hash: txnResult.hash,
-                version: txnResult.version
-            });
-
-            context.response.body = {
-                message: "DID initialized successfully",
-                hash: txnResult.hash,
-                version: txnResult.version
-            };
 
         } catch (error) {
             context.response.status = 500;
