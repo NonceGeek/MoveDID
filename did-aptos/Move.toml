@@ -13,21 +13,18 @@ aptos_framework = "0x1"
 chain_id = "0x7e" # for movement mainnet, 126 = 7e
 
 
-[dependencies.AptosFramework]
-git = "https://github.com/aptos-labs/aptos-core.git"
-rev = "mainnet"
-subdir = "aptos-move/framework/aptos-framework"
-
+[dependencies]
+  AptosFramework = { git = "https://github.com/aptos-labs/aptos-framework.git", subdir = "aptos-framework/", rev = "mainnet" }
 
 [dependencies.MoveStdlib]
-git = "https://github.com/aptos-labs/aptos-core.git"
+git = "https://github.com/aptos-labs/aptos-framework.git"
 rev = "mainnet"
-subdir = "aptos-move/framework/move-stdlib"
+subdir = "move-stdlib"
 
 [dependencies.AptosTokenObjects]
-git = "https://github.com/aptos-labs/aptos-core.git"
+git = "https://github.com/aptos-labs/aptos-framework.git"
 rev = "mainnet"
-subdir = "aptos-move/framework/aptos-token-objects"
+subdir = "aptos-token-objects"
 
 # [dependencies]
 # MoveStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", subdir="aptos-move/framework/move-stdlib/"}

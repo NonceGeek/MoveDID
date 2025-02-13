@@ -90,9 +90,9 @@ module my_addr::init {
         );
 
         let global_state = borrow_global_mut<GlobalState>(@my_addr);
-
-        // Create a new Verifiable Credential
-        mint_vc(acct, global_state.count, type);
+        let resource_signer = account::create_signer_with_capability(&global_state.signer_cap);
+        let vc_obj = mint_vc(&resource_signer, global_state.count, type);
+        object::transfer(&resource_signer, vc_obj, signer::address_of(acct));
 
         global_state.count = global_state.count + 1;
     }
