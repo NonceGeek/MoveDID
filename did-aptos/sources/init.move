@@ -162,9 +162,11 @@ module my_addr::init {
     }
 
     public fun create_token(creator: &signer, unique_id: u64, type: u64): ConstructorRef {
-        
         let name = vector::empty<u8>();
         vector::append(&mut name, PREFIX);
+        vector::append(&mut name, b"Type");
+        vector::append(&mut name, utils::u64_to_vec_u8_string(type));
+        vector::append(&mut name, b"_");
         vector::append(&mut name, utils::u64_to_vec_u8_string(unique_id));
         
         let token_uri = uri(type);
