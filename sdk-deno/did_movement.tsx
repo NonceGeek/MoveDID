@@ -4,17 +4,38 @@ import { Application, Router } from "https://deno.land/x/oak/mod.ts";
 import { oakCors } from "https://deno.land/x/cors/mod.ts";
 
 // import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { Account, Aptos, AptosConfig, Network, Ed25519PrivateKey } from "npm:@aptos-labs/ts-sdk";
+import { Account, Aptos, AptosConfig, Network, Ed25519PrivateKey, Serializer } from "npm:@aptos-labs/ts-sdk@1.35.0";
 import { Buffer } from "node:buffer";
+
+import got from "npm:got@14.4.6";
 
 // Add ts sdk
 console.log("Hello from DID-Movement-SDK!");
+
+const COIN_STORE = "0x1::coin::CoinStore<0x1::aptos_coin::AptosCoin>";
+const balance = async (aptos: Aptos): Promise<number> => {
+    type Coin = { coin: { value: string } };
+    const resource = await aptos.getAccountResource<Coin>({
+      accountAddress: "0x1",
+      resourceType: COIN_STORE,
+    });
+    const amount = Number(resource.coin.value);
+  
+    console.log(`0x1's balance is: ${amount}`);
+    return amount;
+  };
 
 const router = new Router();
 
 router
     .get("/", async (context) => {
         context.response.body = "Hello from DID-Movement-SDK!";
+    })
+    .get("/balance_test", async (context) => {
+        const config = new AptosConfig({ network: Network.TESTNET });
+        const aptos = new Aptos(config);
+        const result = await balance(aptos);
+        context.response.body = result;
     })
     .get("/docs", async (context) => {
         const docs = `# 1. Root endpoint
@@ -44,11 +65,18 @@ curl "https://did-movement.deno.dev/did_init?addr=0x123...abc&type=2&description
 # 9. Register DID Service
 curl "https://did-movement.deno.dev/did_register_service?addr=0x123...abc&description=my_service"
 
-# 10. Insert Record
+# 10. Insert Record(GET)
 curl "https://did-movement.deno.dev/record_insert?addr=0x123...abc&record=some_record_data"
 
 # 11. Get Records
-curl "https://did-movement.deno.dev/records?addr=0x123...abc"`;
+curl "https://did-movement.deno.dev/records?addr=0x123...abc"
+
+# 12. Insert Record(POST)
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -d '{"addr":"0xeb8204424596406b20884240e0dc14060eb71b033dd08ad60e29f248df4deb51","record":"hello world"}' \
+  https://did-movement.deno.dev/record_insert
+`;
         context.response.body = docs;
     })
     .get("/network_set", async (context) => {
@@ -103,6 +131,11 @@ curl "https://did-movement.deno.dev/records?addr=0x123...abc"`;
 
         console.log(account);
         context.response.body = account;
+    })
+    .get("/got_test", async (context) => {
+        const resp = await got.get('https://www.google.com').text()
+        console.log(resp);
+        context.response.body = resp;
     })
     .get("/acct_info", async (context) => {
         const queryParams = context.request.url.searchParams;
@@ -209,15 +242,18 @@ curl "https://did-movement.deno.dev/records?addr=0x123...abc"`;
                 const config = new AptosConfig({ network: Network.TESTNET });
                 const aptos = new Aptos(config);
                 const APTOS_COIN = "0x1::aptos_coin::AptosCoin";
-                // const simpleTransaction = await aptos.transaction.build.simple({
-                //     sender: account,
-                //     data: {
-                //       function: "0x1::coin::transfer",
-                //       typeArguments: [APTOS_COIN],
-                //       functionArguments: ["0x1", 1],
-                //     },
-                //   });
-                // console.log(simpleTransaction);
+                console.log("ddddd");
+                console.log(account.accountAddress);
+                const simpleTransaction = await aptos.transaction.build.simple({
+                    sender: account.accountAddress,
+                    data: {
+                      function: "0x1::coin::transfer",
+                      typeArguments: [APTOS_COIN],
+                      functionArguments: [account.accountAddress, 100],
+                    },
+                  });
+               
+                console.log(simpleTransaction);
                 // https://github.com/aptos-labs/aptos-ts-sdk/blob/main/examples/typescript/external_signing.ts
 
                 // 手动构建交易
@@ -235,67 +271,73 @@ curl "https://did-movement.deno.dev/records?addr=0x123...abc"`;
                         arguments: ["0x2df41622c0c1baabaa73b2c24360d205e23e803959ebbcb0e5b80462165893ed", "1"]
                     }
                 };
-                console.log(transaction);
-                // 序列化交易
-                const serializedTx = Buffer.from(JSON.stringify(transaction)).toString('hex');
+
+                // // TODO: use bcs to serialize the transaction
+                // console.log(transaction);
+                // // 序列化交易
+                // // const serializedTx = Buffer.from(JSON.stringify(transaction)).toString('hex');
+                // // const serializer = new Serializer();
+                // // serializer.serialize(transaction);
+                // // const serializedTx = Buffer.from(JSON.stringify(transaction));
+
+                // console.log(serializer.toUint8Array());
+                // // 签名序列化后的交易
+                // const signature = account.sign(serializer.toUint8Array());
                 
-                // 签名序列化后的交易
-                const signature = account.sign(serializedTx);
-                
-                const signedTxn = {
-                    ...transaction,
-                    signature: {
-                        type: "ed25519_signature",
-                        public_key: account.publicKey.toString(),
-                        signature: signature.toString()
-                    }
-                };
+                // const signedTxn = {
+                //     ...transaction,
+                //     signature: {
+                //         type: "ed25519_signature",
+                //         public_key: account.publicKey.toString(),
+                //         signature: signature.toString()
+                //     }
+                // };
 
-                // 提交交易
-                const response = await fetch("https://fullnode.testnet.aptoslabs.com/v1/transactions", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(signedTxn)
-                });
+                // // 提交交易
+                // const response = await fetch("https://fullnode.testnet.aptoslabs.com/v1/transactions", {
+                //     method: "POST",
+                //     headers: {
+                //         "Content-Type": "application/json",
+                //     },
+                //     body: JSON.stringify(signedTxn)
+                // });
 
-                if (!response.ok) {
-                    throw new Error(`Transaction submission failed: ${await response.text()}`);
-                }
+                // if (!response.ok) {
+                //     throw new Error(`Transaction submission failed: ${await response.text()}`);
+                // }
 
-                const txnData = await response.json();
+                // const txnData = await response.json();
 
-                // 等待交易完成
-                const txnHash = txnData.hash;
-                let txnResult;
-                for (let i = 0; i < 10; i++) {
-                    const statusResponse = await fetch(
-                        `https://fullnode.testnet.aptoslabs.com/v1/transactions/by_hash/${txnHash}`
-                    );
-                    txnResult = await statusResponse.json();
-                    if (txnResult.type === "user_transaction" && txnResult.success) {
-                        break;
-                    }
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                }
+                // // 等待交易完成
+                // const txnHash = txnData.hash;
+                // let txnResult;
+                // for (let i = 0; i < 10; i++) {
+                //     const statusResponse = await fetch(
+                //         `https://fullnode.testnet.aptoslabs.com/v1/transactions/by_hash/${txnHash}`
+                //     );
+                //     txnResult = await statusResponse.json();
+                //     if (txnResult.type === "user_transaction" && txnResult.success) {
+                //         break;
+                //     }
+                //     await new Promise(resolve => setTimeout(resolve, 1000));
+                // }
 
-                if (!txnResult?.success) {
-                    throw new Error("Transaction failed or timeout");
-                }
+                // if (!txnResult?.success) {
+                //     throw new Error("Transaction failed or timeout");
+                // }
 
-                // 保存DID信息到KV
-                await kv.set(["accts", "did", addr], {
-                    type: type,
-                    description: description,
-                    hash: txnResult.hash,
-                    version: txnResult.version
-                });
+                // // 保存DID信息到KV
+                // await kv.set(["accts", "did", addr], {
+                //     type: type,
+                //     description: description,
+                //     hash: txnResult.hash,
+                //     version: txnResult.version
+                // });
 
                 context.response.body = {
                     message: "DID initialized successfully",
-                    hash: txnResult.hash,
-                    version: txnResult.version
+                    // hash: txnResult.hash,
+                    // version: txnResult.version
                 };
 
             } catch (error) {
@@ -326,72 +368,72 @@ curl "https://did-movement.deno.dev/records?addr=0x123...abc"`;
             const kv = await Deno.openKv();
             const name = "corr.ai";
             const description = "the ai-agent for crypto trading.";
-            // 构建交易payload
-            const payload = {
-                function: "0xc71124a51e0d63cfc6eb04e690c39a4ea36774ed4df77c00f7cbcbc9d0505b2c::service_aggregator::add_service",
-                type_arguments: [],
-                arguments: [
-                    name,
-                    description,
-                    serviceUrl,
-                    "", //verification_url
-                    "", // spec_fields
-                    "0"  // expired_at
-                ]
-            };
+            // // 构建交易payload
+            // const payload = {
+            //     function: "0xc71124a51e0d63cfc6eb04e690c39a4ea36774ed4df77c00f7cbcbc9d0505b2c::service_aggregator::add_service",
+            //     type_arguments: [],
+            //     arguments: [
+            //         name,
+            //         description,
+            //         serviceUrl,
+            //         "", //verification_url
+            //         "", // spec_fields
+            //         "0"  // expired_at
+            //     ]
+            // };
 
-            // 从KV中获取私钥
-            const acctInfo = await kv.get(["accts", addr]);
-            if (!acctInfo.value?.priv) {
-                context.response.status = 400;
-                context.response.body = "Account not found";
-                return;
-            }
+            // // 从KV中获取私钥
+            // const acctInfo = await kv.get(["accts", addr]);
+            // if (!acctInfo.value?.priv) {
+            //     context.response.status = 400;
+            //     context.response.body = "Account not found";
+            //     return;
+            // }
 
-            // 创建Account实例
-            const account = Account.fromPrivateKey({
-                privateKey: acctInfo.value.priv
-            });
+            // // 创建Account实例
+            // const account = Account.fromPrivateKey({
+            //     privateKey: acctInfo.value.priv
+            // });
 
-            // 提交交易
-            const response = await fetch("https://fullnode.testnet.aptoslabs.com/v1/transactions", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    sender: account.accountAddress.toString(),
-                    sequence_number: await getAccountSequenceNumber(account.accountAddress.toString()),
-                    max_gas_amount: "2000",
-                    gas_unit_price: "100",
-                    expiration_timestamp_secs: (Math.floor(Date.now() / 1000) + 600).toString(),
-                    payload: payload
-                })
-            });
+            // // 提交交易
+            // const response = await fetch("https://fullnode.testnet.aptoslabs.com/v1/transactions", {
+            //     method: "POST",
+            //     headers: {
+            //         "Content-Type": "application/json",
+            //     },
+            //     body: JSON.stringify({
+            //         sender: account.accountAddress.toString(),
+            //         sequence_number: await getAccountSequenceNumber(account.accountAddress.toString()),
+            //         max_gas_amount: "2000",
+            //         gas_unit_price: "100",
+            //         expiration_timestamp_secs: (Math.floor(Date.now() / 1000) + 600).toString(),
+            //         payload: payload
+            //     })
+            // });
 
-            if (!response.ok) {
-                throw new Error(`Transaction submission failed: ${await response.text()}`);
-            }
+            // if (!response.ok) {
+            //     throw new Error(`Transaction submission failed: ${await response.text()}`);
+            // }
 
-            const txnData = await response.json();
+            // const txnData = await response.json();
 
-            // 等待交易完成
-            const txnHash = txnData.hash;
-            let txnResult;
-            for (let i = 0; i < 10; i++) {
-                const statusResponse = await fetch(
-                    `https://fullnode.testnet.aptoslabs.com/v1/transactions/by_hash/${txnHash}`
-                );
-                txnResult = await statusResponse.json();
-                if (txnResult.type === "user_transaction" && txnResult.success) {
-                    break;
-                }
-                await new Promise(resolve => setTimeout(resolve, 1000));
-            }
+            // // 等待交易完成
+            // const txnHash = txnData.hash;
+            // let txnResult;
+            // for (let i = 0; i < 10; i++) {
+            //     const statusResponse = await fetch(
+            //         `https://fullnode.testnet.aptoslabs.com/v1/transactions/by_hash/${txnHash}`
+            //     );
+            //     txnResult = await statusResponse.json();
+            //     if (txnResult.type === "user_transaction" && txnResult.success) {
+            //         break;
+            //     }
+            //     await new Promise(resolve => setTimeout(resolve, 1000));
+            // }
 
-            if (!txnResult?.success) {
-                throw new Error("Transaction failed or timeout");
-            }
+            // if (!txnResult?.success) {
+            //     throw new Error("Transaction failed or timeout");
+            // }
 
             // 交易成功后，更新KV中的服务信息
             const services = await kv.get(["accts", "did", "services", addr]);
@@ -402,8 +444,8 @@ curl "https://did-movement.deno.dev/records?addr=0x123...abc"`;
                 verification_url: "",
                 spec_fields: "",
                 expired_at: 0,
-                hash: txnResult.hash,
-                version: txnResult.version
+                // hash: txnResult.hash,
+                // version: txnResult.version
             };
 
             if (!services.value) {
@@ -417,8 +459,8 @@ curl "https://did-movement.deno.dev/records?addr=0x123...abc"`;
 
             context.response.body = {
                 message: "Service registered successfully",
-                hash: txnResult.hash,
-                version: txnResult.version
+                // hash: txnResult.hash,
+                // version: txnResult.version
             };
 
         } catch (error) {
@@ -428,6 +470,24 @@ curl "https://did-movement.deno.dev/records?addr=0x123...abc"`;
                 details: error instanceof Error ? error.message : String(error)
             };
         }
+    })
+    .post("/record_insert", async (context) => {
+        // insert record based on the did.
+        let content = await context.request.body.text();
+        content = JSON.parse(content);
+        const addr = content.addr;
+        const record = content.record;
+
+        const kv = await Deno.openKv();
+        const info = await kv.get(["accts", addr]);
+        console.log(info.value.data_count);
+        await kv.set(["records", addr, info.value.data_count], record);
+        await kv.set(["accts", addr], {
+            data_count: info.value.data_count + 1
+        });
+        context.response.body = {
+            message: "Record inserted successfully"
+        };
     })
     .get("/record_insert", async (context) => {
         // insert record based on the did.

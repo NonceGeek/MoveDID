@@ -9,12 +9,13 @@ module my_addr::addr_aggregator {
     use my_addr::addr_eth;
     use my_addr::addr_aptos;
 
-    use my_addr::addr_bitcoin_verificated_offline;
+    // use my_addr::addr_bitcoin_verificated_offline;
 
     // Define addr aggregator type.
     const ADDR_AGGREGATOR_TYPE_HUMAN: u64 = 0;
     const ADDR_AGGREGATOR_TYPE_ORG: u64 = 1;
-    const ADDR_AGGREGATOR_TYPE_ROBOT: u64 = 2;
+    const ADDR_AGGREGATOR_TYPE_AGENT: u64 = 2;
+    const ADDR_AGGREGATOR_TYPE_SMART_CONTRACT: u64 = 3;
 
     // Err enum.
     const ERR_ADDR_ALREADY_EXSIT: u64 = 1000;
@@ -301,17 +302,17 @@ module my_addr::addr_aggregator {
     }
 
     // Update btc addr with signature.
-    public entry fun update_btc_addr(acct: &signer,
-                                     addr: String, signature: String) acquires AddrAggregator {
-        let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
-        let addr_info = table::borrow_mut(&mut addr_aggr.addr_infos_map, addr);
+    // public entry fun update_btc_addr(acct: &signer,
+    //                                  addr: String, signature: String) acquires AddrAggregator {
+    //     let addr_aggr = borrow_global_mut<AddrAggregator>(signer::address_of(acct));
+    //     let addr_info = table::borrow_mut(&mut addr_aggr.addr_infos_map, addr);
 
-        addr_bitcoin_verificated_offline::update_addr(addr_info, &mut signature);
+    //     addr_bitcoin_verificated_offline::update_addr(addr_info, &mut signature);
 
-        event::emit_event(&mut addr_aggr.update_addr_signature_events, UpdateAddrSignatureEvent {
-            addr
-        });
-    }
+    //     event::emit_event(&mut addr_aggr.update_addr_signature_events, UpdateAddrSignatureEvent {
+    //         addr
+    //     });
+    // }
 
     // Update eth addr with signature.
     public entry fun update_eth_addr(acct: &signer,

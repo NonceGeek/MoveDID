@@ -23,6 +23,11 @@ git = "https://github.com/aptos-labs/aptos-core.git"
 rev = "release-v.1.14"
 subdir = "aptos-move/framework/move-stdlib"
 
+[dependencies.AptosTokenObjects]
+git = "https://github.com/aptos-labs/aptos-core.git"
+rev = "release-v.1.14"
+subdir = "aptos-move/framework/aptos-token-objects"
+
 # [dependencies]
 # MoveStdlib = { git = "https://github.com/aptos-labs/aptos-core.git", subdir="aptos-move/framework/move-stdlib/"}
 # AptosFramework = { git = "https://github.com/aptos-labs/aptos-core.git", subdir="aptos-move/framework/aptos-framework/" }

@@ -7,7 +7,9 @@
     "include": []
   },
   "imports": {
-    "@deno/gfm": "jsr:@deno/gfm@^0.9.0"
+    "@deno/gfm": "jsr:@deno/gfm@^0.9.0",
+    "got": "npm:got@^14.4.6",
+    "aptos": "npm:@aptos-labs/aptos-client@^1.0.0"
   },
   "tasks": {
     "did_movement": "deno run --allow-all --unstable-kv  did_movement.tsx",
