@@ -172,7 +172,7 @@ module my_addr::init {
             vector::append(&mut name, b"AI Agent");
         }else if(type == 3){
             vector::append(&mut name, b"Smart Contract");
-        }
+        };
         vector::append(&mut name, b" #");
         vector::append(&mut name, utils::u64_to_vec_u8_string(unique_id));
         
