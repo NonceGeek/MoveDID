@@ -1,6 +1,6 @@
 [package]
 name = "did"
-version = "0.1.0"
+version = "1.0.0"
 # https://aptos.dev/guides/move-guides/upgrading-move-code/
 upgrade_policy = "compatible"
 
@@ -9,8 +9,8 @@ my_addr = "_"
 std = "0x1"
 aptos_framework = "0x1"
 # chain_id = "0x1" # for mainnet
-chain_id = "0x2" # for testnet
-# chain_id = "0x46" # for randomnet
+# chain_id = "0x2" # for testnet
+chain_id = "0x7e" # for movement mainnet, 126 = 7e
 
 [dependencies.AptosFramework]
 git = "https://github.com/aptos-labs/aptos-core.git"
