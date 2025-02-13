@@ -28,7 +28,7 @@ module my_addr::init {
     const TOKEN_URI_2: vector<u8> = b"eW9C2_JBIz_ZgYT53ck3dII-hGP5RetZR8LDckdRwGk";
     const TOKEN_URI_3: vector<u8> = b"Jn-4GulYbugg6Dr96FRbz813dY3B1hhMuSvylmvJKkA";
 
-    const PREFIX: vector<u8> = b"MoveDID #";
+    const PREFIX: vector<u8> = b"MoveDID ";
 
     const ENOT_VALID_TYPE: u64 = 0;
     
@@ -164,9 +164,16 @@ module my_addr::init {
     public fun create_token(creator: &signer, unique_id: u64, type: u64): ConstructorRef {
         let name = vector::empty<u8>();
         vector::append(&mut name, PREFIX);
-        vector::append(&mut name, b"Type");
-        vector::append(&mut name, utils::u64_to_vec_u8_string(type));
-        vector::append(&mut name, b"_");
+        if(type == 0){
+            vector::append(&mut name, b"Human");
+        }else if(type == 1){
+            vector::append(&mut name, b"Org");
+        }else if(type == 2){
+            vector::append(&mut name, b"AI Agent");
+        }else if(type == 3){
+            vector::append(&mut name, b"Smart Contract");
+        }
+        vector::append(&mut name, b" #");
         vector::append(&mut name, utils::u64_to_vec_u8_string(unique_id));
         
         let token_uri = uri(type);
