@@ -99,13 +99,6 @@ module my_addr::init {
         addr_aggregator::create_addr_aggregator(acct, type, description);
         service_aggregator::create_service_aggregator(acct);
 
-        // let create_did_event = CreateDIDEvent {
-        //     key_addr: signer::address_of(acct),
-        //     type, 
-        //     count: borrow_global<GlobalState>(@my_addr).count,
-        // };
-  
-
         let global_state = borrow_global_mut<GlobalState>(@my_addr);
         let resource_signer = account::create_signer_with_capability(&global_state.signer_cap);
 
