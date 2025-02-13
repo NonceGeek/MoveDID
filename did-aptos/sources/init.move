@@ -20,13 +20,24 @@ module my_addr::init {
     const COLLECTION_NAME: vector<u8> = b"MoveDID";
     const COLLECTION_DESCRIPTION: vector<u8> = b"Verifiable Credential Collection for MoveDID Owner!";
     const TOKEN_DESCRIPTION: vector<u8> = b"MoveDID Verifiable Credential";
-    const COLLECTION_URI: vector<u8> = b"https://rootmud.xyz";
-    const TOKEN_URI: vector<u8> = b"https://arweave.net/7xopmyHOuhNtH2UXomaCt8m3FK42EzJ8Fb8MuGtXU58";
+    const COLLECTION_URI: vector<u8> = b"18FHdw2SH3ihFeqIQMIAJVkHwOsZkF23rRM7-Fk2yKw";
+
+    const BASE_URI: vector<u8> = b"https://arweave.net/";
+    const TOKEN_URI_0: vector<u8> = b"ZLH6DsQn-dzjdB-j9xE6Pf9WskH3AUvUejMkQQdLiqY";
+    const TOKEN_URI_1: vector<u8> = b"nrYdR5UThi2_nMb0rNPfGKyb6rF4RV0ffs1saY6TUGg";
+    const TOKEN_URI_2: vector<u8> = b"eW9C2_JBIz_ZgYT53ck3dII-hGP5RetZR8LDckdRwGk";
+    const TOKEN_URI_3: vector<u8> = b"Jn-4GulYbugg6Dr96FRbz813dY3B1hhMuSvylmvJKkA";
+
     const PREFIX: vector<u8> = b"MoveDID #";
+
+    const ENOT_VALID_TYPE: u64 = 0;
     
     //:!:>resource
     struct GlobalState has key, store {
-        count: u64,
+        count_0: u64,
+        count_1: u64,
+        count_2: u64,
+        count_3: u64,
         signer_cap: SignerCapability,
     }
 
@@ -42,6 +53,7 @@ module my_addr::init {
     //:!:>events
     struct CreateDIDEvent has drop, store {
         key_addr: address,
+        type: u64,
         count: u64,
     }
 
@@ -60,9 +72,16 @@ module my_addr::init {
         let (resource_account, signer_cap) = account::create_resource_account(account, STATE_SEED);
 
         move_to(account, GlobalState {
-            count: 0,
+            count_0: 0,
+            count_1: 0,
+            count_2: 0,
+            count_3: 0,
             signer_cap
         });
+
+        let collection_uri = vector::empty<u8>();
+        vector::append(&mut collection_uri, BASE_URI);
+        vector::append(&mut collection_uri, COLLECTION_URI);
 
         // Create log and plank collection to the resource account
         collection::create_unlimited_collection(
@@ -70,7 +89,7 @@ module my_addr::init {
             string::utf8(COLLECTION_DESCRIPTION),
             string::utf8(COLLECTION_NAME),
             option::none(),
-            string::utf8(COLLECTION_URI),
+            string::utf8(collection_uri),
         );
 
     }
@@ -80,36 +99,90 @@ module my_addr::init {
         addr_aggregator::create_addr_aggregator(acct, type, description);
         service_aggregator::create_service_aggregator(acct);
 
+        // let create_did_event = CreateDIDEvent {
+        //     key_addr: signer::address_of(acct),
+        //     type, 
+        //     count: borrow_global<GlobalState>(@my_addr).count,
+        // };
+  
+
+        let global_state = borrow_global_mut<GlobalState>(@my_addr);
+        let resource_signer = account::create_signer_with_capability(&global_state.signer_cap);
+
+        let vc_obj: Object<VerifiableCredential>;
+ 
+        let count: u64;
+        if(type == 0){
+            vc_obj = mint_vc(&resource_signer, global_state.count_0, type);
+            count = global_state.count_0;
+            global_state.count_0 = global_state.count_0 + 1;
+        }else if(type == 1){
+            vc_obj = mint_vc(&resource_signer, global_state.count_1, type);
+            count = global_state.count_1;
+            global_state.count_1 = global_state.count_1 + 1;
+        }else if(type == 2){
+            vc_obj = mint_vc(&resource_signer, global_state.count_2, type);
+            count = global_state.count_2;
+            global_state.count_2 = global_state.count_2 + 1;
+        }else if(type == 3){
+            vc_obj = mint_vc(&resource_signer, global_state.count_3, type);
+            count = global_state.count_3;
+            global_state.count_3 = global_state.count_3 + 1;
+        }else{
+            abort ENOT_VALID_TYPE
+        };
+
         let create_did_event = CreateDIDEvent {
             key_addr: signer::address_of(acct),
-            count: borrow_global<GlobalState>(@my_addr).count,
+            type, 
+            count,
         };
+
         event::emit_event<CreateDIDEvent>(
             &mut borrow_global_mut<CreateDIDEventSet>(@my_addr).create_did_events,
             create_did_event,
         );
 
-        let global_state = borrow_global_mut<GlobalState>(@my_addr);
-        let resource_signer = account::create_signer_with_capability(&global_state.signer_cap);
-        let vc_obj = mint_vc(&resource_signer, global_state.count, type);
         object::transfer(&resource_signer, vc_obj, signer::address_of(acct));
-
-        global_state.count = global_state.count + 1;
     }
 
-    public fun create_token(creator: &signer, unique_id: u64): ConstructorRef {
+    public fun uri(type: u64): vector<u8>{
+
+        let uri = vector::empty<u8>();
+        vector::append(&mut uri, BASE_URI);
+        if(type == 0){
+            vector::append(&mut uri, TOKEN_URI_0);
+            uri
+        }else if(type == 1){
+            vector::append(&mut uri, TOKEN_URI_1);
+            uri
+        }else if(type == 2){
+            vector::append(&mut uri, TOKEN_URI_2);
+            uri
+        }else if(type == 3){
+            vector::append(&mut uri, TOKEN_URI_3);
+            uri
+        }else{
+            abort ENOT_VALID_TYPE
+        }
+
+    }
+
+    public fun create_token(creator: &signer, unique_id: u64, type: u64): ConstructorRef {
         
-        let origin = vector::empty<u8>();
-        vector::append(&mut origin, PREFIX);
-        vector::append(&mut origin, utils::u64_to_vec_u8_string(unique_id));
+        let name = vector::empty<u8>();
+        vector::append(&mut name, PREFIX);
+        vector::append(&mut name, utils::u64_to_vec_u8_string(unique_id));
         
+        let token_uri = uri(type);
+
         token::create_named_token(
             creator,
             string::utf8(COLLECTION_NAME),
             string::utf8(TOKEN_DESCRIPTION),
-            string::utf8(origin),
+            string::utf8(name),
             option::none(),
-            string::utf8(TOKEN_URI),
+            string::utf8(token_uri),
         )
     }
 
@@ -119,7 +192,7 @@ module my_addr::init {
         type: u64,
     ): Object<VerifiableCredential> {
 
-        let constructor_ref = create_token(creator, unique_id);
+        let constructor_ref = create_token(creator, unique_id, type);
         let token_signer = object::generate_signer(&constructor_ref);
 
         // <-- create properties
@@ -139,6 +212,12 @@ module my_addr::init {
             string::utf8(b"type"),
             type,
         );
+
+        property_map::add_typed(
+            &property_mutator_ref,
+            string::utf8(b"creator"),
+            signer::address_of(creator),
+        );
         // create properties -->
 
         let vc = VerifiableCredential {
@@ -154,8 +233,18 @@ module my_addr::init {
     }
 
     #[view]
-    public fun get_count(): u64 acquires GlobalState {
-        borrow_global<GlobalState>(@my_addr).count
+    public fun get_count(type: u64): u64 acquires GlobalState {
+        if(type == 0){
+            borrow_global<GlobalState>(@my_addr).count_0
+        }else if(type == 1){
+            borrow_global<GlobalState>(@my_addr).count_1
+        }else if(type == 2){
+            borrow_global<GlobalState>(@my_addr).count_2
+        }else if(type == 3){
+            borrow_global<GlobalState>(@my_addr).count_3
+        }else{
+            abort ENOT_VALID_TYPE
+        }
     }
 }
 

@@ -14,7 +14,7 @@ chain_id = "0x7e" # for movement mainnet, 126 = 7e
 
 
 [dependencies]
-  AptosFramework = { git = "https://github.com/aptos-labs/aptos-framework.git", subdir = "aptos-framework/", rev = "mainnet" }
+AptosFramework = { git = "https://github.com/aptos-labs/aptos-framework.git", subdir = "aptos-framework/", rev = "mainnet" }
 
 [dependencies.MoveStdlib]
 git = "https://github.com/aptos-labs/aptos-framework.git"
