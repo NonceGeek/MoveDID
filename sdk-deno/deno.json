@@ -12,8 +12,6 @@
     "aptos": "npm:@aptos-labs/aptos-client@^1.0.0"
   },
   "tasks": {
-    "did_movement": "deno run --allow-all --unstable-kv  did_movement.tsx",
-    "img_agent": "deno run --allow-all img_agent.tsx",
-    "llm_agent": "deno run --allow-all llm_agent.tsx"
+    "did_movement": "deno run --allow-all --unstable-kv  did_movement.tsx"
   }
 }

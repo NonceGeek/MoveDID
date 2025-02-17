@@ -237,40 +237,40 @@ curl -X POST \
                 console.log(account);
 
                 // 获取账户序列号
-                const sequenceNumber = await getAccountSequenceNumber(account.accountAddress.toString());
+                // const sequenceNumber = await getAccountSequenceNumber(account.accountAddress.toString());
                 
-                const config = new AptosConfig({ network: Network.TESTNET });
-                const aptos = new Aptos(config);
-                const APTOS_COIN = "0x1::aptos_coin::AptosCoin";
-                console.log("ddddd");
-                console.log(account.accountAddress);
-                const simpleTransaction = await aptos.transaction.build.simple({
-                    sender: account.accountAddress,
-                    data: {
-                      function: "0x1::coin::transfer",
-                      typeArguments: [APTOS_COIN],
-                      functionArguments: [account.accountAddress, 100],
-                    },
-                  });
+                // const config = new AptosConfig({ network: Network.TESTNET });
+                // const aptos = new Aptos(config);
+                // const APTOS_COIN = "0x1::aptos_coin::AptosCoin";
+                // console.log("ddddd");
+                // console.log(account.accountAddress);
+                // const simpleTransaction = await aptos.transaction.build.simple({
+                //     sender: account.accountAddress,
+                //     data: {
+                //       function: "0x1::coin::transfer",
+                //       typeArguments: [APTOS_COIN],
+                //       functionArguments: [account.accountAddress, 100],
+                //     },
+                //   });
                
-                console.log(simpleTransaction);
-                // https://github.com/aptos-labs/aptos-ts-sdk/blob/main/examples/typescript/external_signing.ts
+                // console.log(simpleTransaction);
+                // // https://github.com/aptos-labs/aptos-ts-sdk/blob/main/examples/typescript/external_signing.ts
 
-                // 手动构建交易
-                const transaction = {
-                    sender: account.accountAddress.toString(),
-                    sequence_number: sequenceNumber,
-                    max_gas_amount: "2000",
-                    gas_unit_price: "100",
-                    expiration_timestamp_secs: (Math.floor(Date.now() / 1000) + 600).toString(),
-                    payload: {
-                        type: "entry_function_payload",
-                        function: "0x1::coin::transfer",
-                        // function: "0xc71124a51e0d63cfc6eb04e690c39a4ea36774ed4df77c00f7cbcbc9d0505b2c::did::init",
-                        type_arguments: [APTOS_COIN],
-                        arguments: ["0x2df41622c0c1baabaa73b2c24360d205e23e803959ebbcb0e5b80462165893ed", "1"]
-                    }
-                };
+                // // 手动构建交易
+                // const transaction = {
+                //     sender: account.accountAddress.toString(),
+                //     sequence_number: sequenceNumber,
+                //     max_gas_amount: "2000",
+                //     gas_unit_price: "100",
+                //     expiration_timestamp_secs: (Math.floor(Date.now() / 1000) + 600).toString(),
+                //     payload: {
+                //         type: "entry_function_payload",
+                //         function: "0x1::coin::transfer",
+                //         // function: "0xc71124a51e0d63cfc6eb04e690c39a4ea36774ed4df77c00f7cbcbc9d0505b2c::did::init",
+                //         type_arguments: [APTOS_COIN],
+                //         arguments: ["0x2df41622c0c1baabaa73b2c24360d205e23e803959ebbcb0e5b80462165893ed", "1"]
+                //     }
+                // };
 
                 // // TODO: use bcs to serialize the transaction
                 // console.log(transaction);
@@ -352,11 +352,12 @@ curl -X POST \
             };
         }
     })
+    
     .get("/did_register_service", async (context) => {
         const queryParams = context.request.url.searchParams;
         const addr = queryParams.get("addr");
         
-        if (!addr || !name) {
+        if (!addr) {
             context.response.status = 400;
             context.response.body = "Missing required parameters";
             return;
