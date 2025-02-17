@@ -23,7 +23,7 @@ The implementation follows the [did@w3c](https://www.w3.org/TR/did-core/).
 > https://docs.rootmud.xyz
 >
 > Twitter:
-> https://twitter.com/root)mud
+> https://twitter.com/root_mud
 >
 > Deck:
 >
