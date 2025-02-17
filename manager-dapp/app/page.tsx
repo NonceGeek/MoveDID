@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
+
 "use client";
 
 import { useAptosWallet } from "@razorlabs/wallet-kit";
@@ -78,31 +81,47 @@ export default function Home() {
   } | null>(null);
   const [loading, setLoading] = useState(false);
   const [fetchingInfo, setFetchingInfo] = useState(false);
-  const [styleVariant] = useState(() => 
-    TITLE_STYLES[Math.floor(Math.random() * TITLE_STYLES.length)]
-  );
+  const [styleVariant, setStyleVariant] = useState(TITLE_STYLES[0]);
   const { success, error } = useToast();
 
+  const [address, setAddress] = useState<string | null>(null);
+
   useEffect(() => {
-    if (connected && account?.address) {
+    setStyleVariant(TITLE_STYLES[Math.floor(Math.random() * TITLE_STYLES.length)]);
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const addrParam = params.get('addr');
+    setAddress(addrParam);
+  }, []);
+
+  useEffect(() => {
+    if (address) {
       setDidInfo(null);
       setFetchingInfo(true);
-      fetchDidInfo().finally(() => {
+      fetchDidInfo(address).finally(() => {
+        setFetchingInfo(false);
+      });
+    } else if (connected && account?.address) {
+      setDidInfo(null);
+      setFetchingInfo(true);
+      fetchDidInfo(account.address).finally(() => {
         setFetchingInfo(false);
       });
     } else {
       setDidInfo(null);
     }
-  }, [connected, account]);
+  }, [connected, account, address]);
 
-  const fetchDidInfo = async () => {
+  const fetchDidInfo = async (addressToFetch: string) => {
     try {
       // 调用合约获取DID信息
-      const type = await getType();
-      const desc = await getDescription();
+      const type = await getType(addressToFetch);
+      const desc = await getDescription(addressToFetch);
       if (type !== null && desc) {
         setDidInfo({ type: DID_TYPES[type].label, description: desc });
-      }else{
+      } else {
         setDidInfo(null);
       }
     } catch (error) {
@@ -110,14 +129,14 @@ export default function Home() {
     }
   };
 
-  const getType = async (): Promise<number | null> => {
-    if (!account?.address) return null;
+  const getType = async (address: string): Promise<number | null> => {
+    if (!address) return null;
     
     try {
       const payload: InputViewFunctionData = {
         function: `${MODULE_ADDRESS}::addr_aggregator::get_type`,
         typeArguments: [],
-        functionArguments: [account.address],
+        functionArguments: [address],
       };
       
       const response = await client.view({ payload });
@@ -128,14 +147,14 @@ export default function Home() {
     }
   };
 
-  const getDescription = async (): Promise<string | null> => {
-    if (!account?.address) return null;
+  const getDescription = async (address: string): Promise<string | null> => {
+    if (!address) return null;
     
     try {
       const payload: InputViewFunctionData = {
         function: `${MODULE_ADDRESS}::addr_aggregator::get_description`,
         typeArguments: [],
-        functionArguments: [account.address],
+        functionArguments: [address],
       };
       
       const response = await client.view({ payload });
@@ -171,7 +190,7 @@ export default function Home() {
         console.log("Transaction confirmed:", pendingTransaction);
         
         // 交易确认后再获取DID信息
-        await fetchDidInfo();
+        await fetchDidInfo(account.address);
         success("DID created successfully!");
       } catch (err) {
         console.error("Error waiting for transaction:", err);
@@ -203,55 +222,60 @@ export default function Home() {
               follow us
             </a>
           </div>
-
-          {!connected ? (
-            <div className="text-center">
-              <p className="mb-4 pixel-text text-[var(--pixel-accent)]">
-                Please connect your wallet to continue
-              </p>
-            </div>
-          ) : fetchingInfo ? (
+          
+          {fetchingInfo ? (
             <div className="max-w-md mx-auto bg-[var(--pixel-card)] p-6 rounded-lg pixel-border">
               <h2 className="text-xl mb-4 pixel-text text-center">Loading DID Information...</h2>
               <div className="pixel-loading"></div>
             </div>
-          ) : didInfo ? (
-            <div className="max-w-md mx-auto bg-[var(--pixel-card)] p-6 rounded-lg pixel-border">
-              <h2 className="text-xl mb-4 pixel-text">Your DID Information</h2>
-              <p className="mb-2">Type: {didInfo.type}</p>
-              <p>Description: {didInfo.description}</p>
-            </div>
           ) : (
-            <div className="max-w-md mx-auto bg-[var(--pixel-card)] p-6 rounded-lg pixel-border">
-              <h2 className="text-xl mb-4 pixel-text">Create DID</h2>
-              <div className="space-y-4">
-                <Select onValueChange={setDidType}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select DID Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {DID_TYPES.map((type) => (
-                      <SelectItem key={type.value} value={type.value}>
-                        {type.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            <div className="space-y-6">
+              {didInfo && (
+                <div className="max-w-md mx-auto bg-[var(--pixel-card)] p-6 rounded-lg pixel-border">
+                  <h2 className="text-xl mb-4 pixel-text">Your DID Information</h2>
+                  <p className="mb-2">Type: {didInfo.type}</p>
+                  <p>Description: {didInfo.description}</p>
+                </div>
+              )}
+            </div>
+            )}
+          
 
-                <Input
-                  placeholder="Enter description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="pixel-input"
-                />
+          {!connected && (
+            <div className="max-w-md mx-auto">
+              <div className="text-center mb-6">
+                <p className="mb-4 pixel-text text-[var(--pixel-accent)]">
+                  <br></br>
+                  Please Connect your wallet to create DID
+                </p>
+              </div>
+            </div>
+          )}
 
-                <Button
-                  onClick={handleCreateDid}
-                  disabled={!didType || !description || loading}
-                  className="w-full pixel-button"
-                >
-                  {loading ? "Creating..." : "Create DID"}
-                </Button>
+          {connected && (
+            <div className="max-w-md mx-auto">
+              <div className="bg-[var(--pixel-card)] p-6 rounded-lg pixel-border opacity-50">
+                <h2 className="text-xl mb-4 pixel-text">Create DID</h2>
+                <div className="space-y-4">
+                  <Select disabled>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select DID Type" />
+                    </SelectTrigger>
+                  </Select>
+
+                  <Input
+                    placeholder="Enter description"
+                    disabled
+                    className="pixel-input"
+                  />
+
+                  <Button
+                    disabled
+                    className="w-full pixel-button"
+                  >
+                    Create DID
+                  </Button>
+                </div>
               </div>
             </div>
           )}

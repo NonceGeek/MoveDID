@@ -15,15 +15,18 @@
     "@radix-ui/react-toast": "^1.2.6",
     "@razorlabs/wallet-kit": "^0.5.0",
     "@shadcn/ui": "^0.0.4",
+    "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "got": "^14.4.6",
     "lucide-react": "^0.475.0",
     "next": "15.1.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "sonner": "^1.7.4",
     "tailwind-merge": "^3.0.1",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "vercel": "^41.1.4"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
