@@ -10,6 +10,11 @@ The implementation follows the [did@w3c](https://www.w3.org/TR/did-core/).
 
 ! Important Links:
 
+> Smart Contract on Movement Testnet: https://explorer.movementlabs.xyz/account/0x61b96051f553d767d7e6dfcc04b04c28d793c8af3d07d3a43b4e2f8f4ca04c9f?network=bardock+testnet
+>
+> Smart Contract on Movement Mainnet: https://explorer.movementlabs.xyz/account/0x61b96051f553d767d7e6dfcc04b04c28d793c8af3d07d3a43b4e2f8f4ca04c9f?network=mainnet
+>
+>
 > Homepage:
 >
 > https://home.did.rootmud.xyz
