@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { Header } from "@/components/header";
 import { useToast } from "@/hooks/use-toast";
+import { AptosConnectButton } from "@razorlabs/wallet-kit";
 
 const DID_TYPES = [
   { value: "0", label: "Human" },
@@ -195,110 +196,157 @@ export default function Home() {
         console.log("Transaction confirmed:", pendingTransaction);
         
         await fetchDidInfo(account.address);
-        success("DID created successfully!");
+        success({
+          title: "DID created successfully!",
+          description: "Your digital identity has been created successfully!",
+          duration: 5000,
+        });
       } catch (err) {
         console.error("Error waiting for transaction:", err);
-        error("Transaction failed to confirm. Please try again.");
+        error({
+          title: "Transaction failed to confirm",
+          description: "Please try again.",
+          duration: 5000,
+        });
       }
     } catch (err) {
       console.error("Error creating DID:", err);
-      error("Failed to create DID. Please try again.");
+      error({
+        title: "Failed to create DID",
+        description: "Please try again.",
+        duration: 5000,
+      });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen pixel-font bg-[var(--pixel-background)] text-[var(--pixel-text)]">
+    <div className="min-h-screen bg-[var(--pixel-background)] text-[var(--pixel-text)]">
       <Header />
-      <div className="container mx-auto px-4 py-8">
-        <div className="pt-20">
-          <div className="text-center mb-8">
-            <h1 className={`text-3xl mb-4 pixel-text ${styleVariant.title} ${styleVariant.color}`}>
-              Generate the Identity on the Movement!
+      <main className="container mx-auto px-4 py-8">
+        <div className="pt-24 max-w-4xl mx-auto">
+          {/* Enhanced Hero Section */}
+          <div className="text-center mb-16">
+            <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-[var(--pixel-primary)] via-[var(--pixel-accent)] to-[var(--pixel-success)] bg-clip-text text-transparent">
+              Your Digital Identity on Movement
             </h1>
-            <a
-              href="https://x.com/intent/follow?screen_name=root_mud"
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`inline-block text-sm transition-colors underline pixel-text ${styleVariant.link} ${styleVariant.color}`}
-            >
-              follow us
-            </a>
+            <p className="text-xl text-[var(--pixel-text-secondary)] mb-8 max-w-2xl mx-auto">
+              Create and manage your decentralized identity in a few simple steps
+            </p>
+            <div className="flex items-center justify-center gap-6">
+              <a
+                href="https://x.com/intent/follow?screen_name=root_mud"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-[var(--pixel-surface)] hover:bg-[var(--pixel-surface)/80] transition-all duration-300"
+              >
+                <span className="text-[var(--pixel-text-primary)]">Follow us on X</span>
+                <svg className="w-5 h-5" /* Add X/Twitter icon SVG here */ />
+              </a>
+            </div>
           </div>
-          
-          {fetchingInfo ? (
-            <div className="max-w-md mx-auto bg-[var(--pixel-card)] p-6 rounded-lg pixel-border">
-              <h2 className="text-xl mb-4 pixel-text text-center">Loading DID Information...</h2>
-              <div className="pixel-loading"></div>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {didInfo && (
-                <div className="max-w-md mx-auto bg-[var(--pixel-card)] p-6 rounded-lg pixel-border">
-                  <h2 className="text-xl mb-4 pixel-text">Your DID Information</h2>
-                  <p className="mb-2">Type: {didInfo.type}</p>
-                  <p>Description: {didInfo.description}</p>
-                </div>
-              )}
-            </div>
-            )}
-          
 
+          {/* Enhanced Loading State */}
+          {fetchingInfo ? (
+            <div className="bg-[var(--pixel-card)] p-8 rounded-2xl shadow-lg mb-8 text-center border border-[var(--pixel-surface)]">
+              <h2 className="text-xl font-semibold mb-6">Loading Your Identity...</h2>
+              <div className="flex justify-center">
+                <div className="pixel-loading"></div>
+              </div>
+            </div>
+          ) : didInfo ? (
+            <div className="bg-[var(--pixel-card)] p-8 rounded-2xl shadow-lg mb-8 border border-[var(--pixel-surface)]">
+              <h2 className="text-2xl font-semibold mb-6 bg-gradient-to-r from-[var(--pixel-primary)] to-[var(--pixel-accent)] bg-clip-text text-transparent">
+                Your Digital Identity
+              </h2>
+              <div className="space-y-6">
+                <div className="flex items-center gap-4 p-4 rounded-lg bg-[var(--pixel-surface)]">
+                  <span className="text-[var(--pixel-text-secondary)] min-w-[100px]">Type:</span>
+                  <span className="font-medium text-[var(--pixel-text-primary)]">{didInfo.type}</span>
+                </div>
+                <div className="flex items-center gap-4 p-4 rounded-lg bg-[var(--pixel-surface)]">
+                  <span className="text-[var(--pixel-text-secondary)] min-w-[100px]">Description:</span>
+                  <span className="font-medium text-[var(--pixel-text-primary)]">{didInfo.description}</span>
+                </div>
+              </div>
+            </div>
+          ) : null}
+
+          {/* Enhanced Connection Status */}
           {!connected && (
-            <div className="max-w-md mx-auto">
-              <div className="text-center mb-6">
-                <p className="mb-4 pixel-text text-[var(--pixel-accent)]">
-                  <br></br>
-                  Please Connect your wallet to create DID
+            <div className="bg-[var(--pixel-card)] p-12 rounded-2xl shadow-lg text-center mb-8 border border-[var(--pixel-surface)]">
+              <div className="max-w-md mx-auto">
+                <h2 className="text-3xl font-semibold mb-6 bg-gradient-to-r from-[var(--pixel-primary)] to-[var(--pixel-accent)] bg-clip-text text-transparent">
+                  Get Started
+                </h2>
+                <p className="text-lg text-[var(--pixel-text-secondary)] mb-8">
+                  Connect your wallet to create and manage your digital identity
                 </p>
+                <div className="inline-block">
+                  <AptosConnectButton 
+                    className="px-8 py-4 text-lg font-semibold rounded-xl bg-gradient-to-r from-[var(--pixel-primary)] to-[var(--pixel-accent)] text-white hover:opacity-90 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                  />
+                </div>
               </div>
             </div>
           )}
-          {connected && (
 
-            <div className="max-w-md mx-auto">
-              <div className="bg-[var(--pixel-card)] p-6 rounded-lg pixel-border opacity-50">
-                <h2 className="text-xl mb-4 pixel-text">Create DID</h2>
-                <div className="space-y-4">
+          {/* Enhanced Create DID Form */}
+          {connected && (
+            <div className="bg-[var(--pixel-card)] p-8 rounded-2xl shadow-lg border border-[var(--pixel-surface)]">
+              <h2 className="text-2xl font-semibold mb-8 bg-gradient-to-r from-[var(--pixel-primary)] to-[var(--pixel-accent)] bg-clip-text text-transparent">
+                Create Your Identity
+              </h2>
+              <div className="max-w-md mx-auto space-y-8">
+                <div className="space-y-3">
+                  <label className="block text-base font-medium text-[var(--pixel-text-secondary)]">
+                    Identity Type
+                  </label>
                   <SelectWrapper
-                    onValueChange={(value) => {
-                      // Handle the selected value here
-                      console.log("Selected value:", value);
-                      setDidType(value);
-                    }}
+                    onValueChange={(value) => setDidType(value)}
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select DID Type" />
+                    <SelectTrigger className="w-full h-12 text-base bg-[var(--pixel-surface)] border-2 border-[var(--pixel-text-muted)] hover:border-[var(--pixel-accent)] transition-all duration-300">
+                      <SelectValue placeholder="Choose your identity type" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-[var(--pixel-card)] border-2 border-[var(--pixel-surface)]">
                       {DID_TYPES.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
+                        <SelectItem 
+                          key={type.value} 
+                          value={type.value}
+                          className="hover:bg-[var(--pixel-surface)] cursor-pointer py-3"
+                        >
                           {type.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </SelectWrapper>
+                </div>
 
+                <div className="space-y-3">
+                  <label className="block text-base font-medium text-[var(--pixel-text-secondary)]">
+                    Description
+                  </label>
                   <Input
-                    placeholder="Enter description"
-                    className="pixel-input"
+                    placeholder="Tell us about yourself or your organization"
+                    className="h-12 text-base bg-[var(--pixel-surface)] border-2 border-[var(--pixel-text-muted)] hover:border-[var(--pixel-accent)] transition-all duration-300"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                   />
-
-                  <Button
-                    // className="w-full pixel-button"
-                    onClick={handleCreateDid}
-                  >
-                    Create DID
-                  </Button>
                 </div>
+
+                <Button
+                  className="w-full h-12 text-base font-semibold bg-gradient-to-r from-[var(--pixel-primary)] to-[var(--pixel-accent)] hover:opacity-90 transition-all duration-300 transform hover:-translate-y-1"
+                  onClick={handleCreateDid}
+                  disabled={loading}
+                >
+                  {loading ? 'Creating...' : 'Create Digital Identity'}
+                </Button>
               </div>
             </div>
           )}
         </div>
-      </div>
+      </main>
     </div>
   );
 }
