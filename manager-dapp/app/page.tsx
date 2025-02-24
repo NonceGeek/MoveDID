@@ -19,6 +19,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectWrapper,
 } from "@/components/ui/select";
 import { Header } from "@/components/header";
 import { useToast } from "@/hooks/use-toast";
@@ -112,11 +113,10 @@ export default function Home() {
     } else {
       setDidInfo(null);
     }
-  }, [connected, account, address]);
+  }, [connected, account, address, setFetchingInfo]);
 
   const fetchDidInfo = async (addressToFetch: string) => {
     try {
-      // 调用合约获取DID信息
       const type = await getType(addressToFetch);
       const desc = await getDescription(addressToFetch);
       if (type !== null && desc) {
@@ -166,8 +166,14 @@ export default function Home() {
   };
 
   const handleCreateDid = async () => {
+    console.log("handleCreateDid");
     if (!connected || !account?.address) {
       error("Please connect wallet first");
+      return;
+    }
+
+    if (!didType || !description) {
+      error("Please select DID type and enter description");
       return;
     }
 
@@ -182,14 +188,12 @@ export default function Home() {
       const response = await signAndSubmitTransaction({ payload }) as unknown as { hash: string };
       console.log("Transaction hash:", response);
       
-      // 等待交易确认
       try {
         const pendingTransaction = await client.waitForTransaction({
           transactionHash: response.hash ,
         });
         console.log("Transaction confirmed:", pendingTransaction);
         
-        // 交易确认后再获取DID信息
         await fetchDidInfo(account.address);
         success("DID created successfully!");
       } catch (err) {
@@ -251,27 +255,41 @@ export default function Home() {
               </div>
             </div>
           )}
-
           {connected && (
+
             <div className="max-w-md mx-auto">
               <div className="bg-[var(--pixel-card)] p-6 rounded-lg pixel-border opacity-50">
                 <h2 className="text-xl mb-4 pixel-text">Create DID</h2>
                 <div className="space-y-4">
-                  <Select disabled>
+                  <SelectWrapper
+                    onValueChange={(value) => {
+                      // Handle the selected value here
+                      console.log("Selected value:", value);
+                      setDidType(value);
+                    }}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select DID Type" />
                     </SelectTrigger>
-                  </Select>
+                    <SelectContent>
+                      {DID_TYPES.map((type) => (
+                        <SelectItem key={type.value} value={type.value}>
+                          {type.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </SelectWrapper>
 
                   <Input
                     placeholder="Enter description"
-                    disabled
                     className="pixel-input"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
                   />
 
                   <Button
-                    disabled
-                    className="w-full pixel-button"
+                    // className="w-full pixel-button"
+                    onClick={handleCreateDid}
                   >
                     Create DID
                   </Button>
