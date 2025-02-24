@@ -169,12 +169,20 @@ export default function Home() {
   const handleCreateDid = async () => {
     console.log("handleCreateDid");
     if (!connected || !account?.address) {
-      error("Please connect wallet first");
+      error({
+        title: "Please connect wallet first",
+        description: "Please try again.",
+        duration: 5000,
+      });
       return;
     }
 
     if (!didType || !description) {
-      error("Please select DID type and enter description");
+      error({
+        title: "Please select DID type and enter description",
+        description: "Please try again.",
+        duration: 5000,
+      });
       return;
     }
 
@@ -258,7 +266,7 @@ export default function Home() {
           ) : didInfo ? (
             <div className="bg-[var(--pixel-card)] p-8 rounded-2xl shadow-lg mb-8 border border-[var(--pixel-surface)]">
               <h2 className="text-2xl font-semibold mb-6 bg-gradient-to-r from-[var(--pixel-primary)] to-[var(--pixel-accent)] bg-clip-text text-transparent">
-                Your Digital Identity
+                Existing DID Found for Your Wallet
               </h2>
               <div className="space-y-6">
                 <div className="flex items-center gap-4 p-4 rounded-lg bg-[var(--pixel-surface)]">
@@ -293,7 +301,7 @@ export default function Home() {
           )}
 
           {/* Enhanced Create DID Form */}
-          {connected && (
+          {connected && !didInfo && (
             <div className="bg-[var(--pixel-card)] p-8 rounded-2xl shadow-lg border border-[var(--pixel-surface)]">
               <h2 className="text-2xl font-semibold mb-8 bg-gradient-to-r from-[var(--pixel-primary)] to-[var(--pixel-accent)] bg-clip-text text-transparent">
                 Create Your Identity
