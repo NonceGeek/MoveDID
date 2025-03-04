@@ -7,7 +7,7 @@ export function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-[var(--pixel-accent)] bg-[var(--pixel-background)] shadow-lg">
       <div className="container flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-2 font-pixel">
-          <span className="text-xl text-[var(--pixel-accent)] pixel-text">MoveDID</span>
+          <span className="text-xl text-[var(--pixel-accent)] pixel-text">&lt; MoveDID &gt;</span>
         </div>
         <div className="flex items-center gap-4">
           <AptosConnectButton 

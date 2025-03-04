@@ -30,10 +30,13 @@ const DID_TYPES = [
   { value: "3", label: "Smart Contract" },
 ];
 
-const MODULE_ADDRESS = "0x61b96051f553d767d7e6dfcc04b04c28d793c8af3d07d3a43b4e2f8f4ca04c9f";
+const MODULE_ADDRESS = process.env.NEXT_PUBLIC_SMART_CONTRACT || "0x61b96051f553d767d7e6dfcc04b04c28d793c8af3d07d3a43b4e2f8f4ca04c9f";
 
+// Use environment variable with fallback for the fullnode URL
+const FULLNODE_URL = process.env.NEXT_PUBLIC_APTOS_FULLNODE_URL || "https://aptos.testnet.bardock.movementlabs.xyz/v1";
+console.log("FULLNODE_URL:", FULLNODE_URL);
 const config = new AptosConfig({
-  fullnode: "https://aptos.testnet.bardock.movementlabs.xyz/v1",
+  fullnode: FULLNODE_URL,
 });
 const client = new Aptos(config);
 
@@ -224,17 +227,17 @@ export default function Home() {
           </div>
           
           {fetchingInfo ? (
-            <div className="max-w-md mx-auto bg-[var(--pixel-card)] p-6 rounded-lg pixel-border">
+            <div className="max-w-2xl mx-auto bg-[var(--pixel-card)] p-6 rounded-lg pixel-border">
               <h2 className="text-xl mb-4 pixel-text text-center">Loading DID Information...</h2>
               <div className="pixel-loading"></div>
             </div>
           ) : (
             <div className="space-y-6">
               {didInfo && (
-                <div className="max-w-md mx-auto bg-[var(--pixel-card)] p-6 rounded-lg pixel-border">
-                  <h2 className="text-xl mb-4 pixel-text">Your DID Information</h2>
-                  <p className="mb-2">Type: {didInfo.type}</p>
-                  <p>Description: {didInfo.description}</p>
+                <div className="max-w-2xl mx-auto bg-[var(--pixel-card)] p-6 rounded-lg pixel-border">
+                  <center><h2 className="text-xl mb-4 pixel-text">Your DID Information</h2></center>
+                  <center><p className="mb-2"><b>TYPE: </b><br></br> {didInfo.type}</p></center>
+                  <center><p><b>DESCRIPTION: </b><br></br> {didInfo.description}</p></center>
                 </div>
               )}
             </div>
@@ -242,7 +245,7 @@ export default function Home() {
           
 
           {!connected && (
-            <div className="max-w-md mx-auto">
+            <div className="max-w-2xl mx-auto">
               <div className="text-center mb-6">
                 <p className="mb-4 pixel-text text-[var(--pixel-accent)]">
                   <br></br>
@@ -252,28 +255,40 @@ export default function Home() {
             </div>
           )}
 
-          {connected && (
-            <div className="max-w-md mx-auto">
-              <div className="bg-[var(--pixel-card)] p-6 rounded-lg pixel-border opacity-50">
-                <h2 className="text-xl mb-4 pixel-text">Create DID</h2>
+          {connected && !didInfo && (
+            <div className="max-w-2xl mx-auto">
+              <div className="bg-[var(--pixel-card)] p-6 rounded-lg pixel-border">
+                <center><h2 className="text-xl mb-4 pixel-text">Create DID</h2></center>
                 <div className="space-y-4">
-                  <Select disabled>
+                  <Select
+                    value={didType}
+                    onValueChange={setDidType}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select DID Type" />
                     </SelectTrigger>
+                    <SelectContent>
+                      {DID_TYPES.map((type) => (
+                        <SelectItem key={type.value} value={type.value}>
+                          {type.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
                   </Select>
 
                   <Input
                     placeholder="Enter description"
-                    disabled
                     className="pixel-input"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
                   />
 
                   <Button
-                    disabled
                     className="w-full pixel-button"
+                    onClick={handleCreateDid}
+                    disabled={!didType || !description || loading}
                   >
-                    Create DID
+                    {loading ? "Creating..." : "Create DID"}
                   </Button>
                 </div>
               </div>
