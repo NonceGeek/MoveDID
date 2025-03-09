@@ -3,7 +3,7 @@
 
 "use client";
 
-import { useAptosWallet } from "@razorlabs/wallet-kit";
+import { useWallet } from "@razorlabs/razorkit";
 import { useState, useEffect } from "react";
 import {
   InputEntryFunctionData,
@@ -75,7 +75,7 @@ const TITLE_STYLES = [
 ];
 
 export default function Home() {
-  const { account, connected, signAndSubmitTransaction } = useAptosWallet();
+  const { account, connected, signAndSubmitTransaction } = useWallet();
   const [didType, setDidType] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [didInfo, setDidInfo] = useState<{
@@ -182,13 +182,13 @@ export default function Home() {
         functionArguments: [parseInt(didType), description],
       };
 
-      const response = await signAndSubmitTransaction({ payload }) as unknown as { hash: string };
+      const response = await signAndSubmitTransaction({ payload }) as unknown as { args: { hash: string } };
       console.log("Transaction hash:", response);
       
       // 等待交易确认
       try {
         const pendingTransaction = await client.waitForTransaction({
-          transactionHash: response.hash ,
+          transactionHash: response.args.hash ,
         });
         console.log("Transaction confirmed:", pendingTransaction);
         
