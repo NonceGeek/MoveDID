@@ -5,7 +5,7 @@
 ![move-did (1)](https://p.ipic.vip/azpoeq.png)
 
 MoveDID is a DID protocol that is based on Movement.The vision of MoveDID is to be the foundation for the next generation of large-scale Web3 finance and Web3 society. MoveDID could be used for diff types of subjects, such as human, organization(DAO), bot... especially AI agents.
- 
+
 The implementation follows the [did@w3c](https://www.w3.org/TR/did-core/).
 
 ! Important Links:
@@ -72,22 +72,22 @@ Testnet for Dev:
 
 ## Parts
 
-* did contracts:
+* **did contracts**
   The did contracts in MOVE Lang.
 
   * [x] Aptos (Audited)
 
-* SBT as Verifiable Credential
+* **SBT as Verifiable Credential**
 
-  The VC implementation by SBT.
+  [ing] The VC implementation by SBT.
 
-* did sdks
+* **did sdks**
 
-  The sdks for did & vc impl by diff languages.
+  [ing] The sdks for did & vc impl by diff languages.
   
-* did dApp example
+* **did dApp example**
   
-  The dApp example show how the contract works.
+  [ing] The dApp example show how the contract works.
 
 ## Contributors
 
