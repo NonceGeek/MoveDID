@@ -1,6 +1,6 @@
 "use client";
 
-import { AptosConnectButton } from "@razorlabs/wallet-kit";
+import { ConnectButton } from "@razorlabs/razorkit";
 
 export function Header() {
   return (
@@ -10,13 +10,14 @@ export function Header() {
           <span className="text-xl text-[var(--pixel-accent)] pixel-text">&lt; MoveDID &gt;</span>
         </div>
         <div className="flex items-center gap-4">
-          <AptosConnectButton 
-            className="pixel-button !bg-[var(--pixel-accent)] !text-black font-pixel text-sm px-4 py-2 !rounded-none"
+          <ConnectButton 
+            className="w-[22rem] pixel-button !bg-[var(--pixel-accent)] !text-black font-pixel text-sm px-4 py-2 !rounded-none"
             style={{
               border: 'var(--pixel-border) solid #b39700',
               textShadow: '1px 1px 0 rgba(255,255,255,0.4)',
               boxShadow: 'var(--pixel-border) var(--pixel-border) 0 rgba(0,0,0,0.5)'
             }}
+            label="Connect"
           />
         </div>
       </div>

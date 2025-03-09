@@ -1,7 +1,7 @@
 'use client'
 
-import { AptosWalletProvider } from '@razorlabs/wallet-kit';
-import '@razorlabs/wallet-kit/style.css';
+import { WalletProvider } from '@razorlabs/razorkit';
+import '@razorlabs/razorkit/style.css';
 import { Toaster } from "sonner";
 import "./globals.css";
 
@@ -13,10 +13,10 @@ export default function RootLayout({
   return (
     <html lang="zh">
       <body>
-        <AptosWalletProvider>
+        <WalletProvider>
           {children}
           <Toaster />
-        </AptosWalletProvider>
+        </WalletProvider>
       </body>
     </html>
   );
