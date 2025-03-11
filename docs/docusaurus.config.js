@@ -90,7 +90,7 @@ const config = {
             position: "left",
             type: "doc",
             docId: "rmud-white-paper",
-            label: "RMUD White Paper",
+            label: "RMUD Docs",
           },
         ],
       },

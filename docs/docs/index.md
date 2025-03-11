@@ -10,8 +10,8 @@ hide_table_of_contents: true
 
 * [RMUD Community](https://github.com/rootmud)
 * RMUD Protocols
-  * RMUD Identity Protocol
-  * Aptosraft Protocol
+  * [MoveDID Protocol](/movedid)
+  * Movecraft Protocol
 * Autonomous Agent Network
 * RMUD DAO System
 * rootMUD System
@@ -20,7 +20,7 @@ hide_table_of_contents: true
   * RMUD Partners
   * RMUD Game Ecosystem
 * RMUD Public Goods
-  * Scaffold-Aptos
+  * Scaffold-Move
   * TaiShang Micro FaaS System
 
 * Bodhi THings
